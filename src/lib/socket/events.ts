@@ -12,7 +12,7 @@ export type StartResult =
 
 // クライアント -> サーバー
 export interface ClientToServerEvents {
-  "room:create": (payload: { playerName: string }, cb: (res: JoinResult) => void) => void;
+  "room:create": (payload: { playerName: string; code?: string }, cb: (res: JoinResult) => void) => void;
   "room:join": (payload: { code: string; playerName: string }, cb: (res: JoinResult) => void) => void;
   "room:rejoin": (
     payload: { code: string; playerId: string; token: string },
@@ -20,6 +20,7 @@ export interface ClientToServerEvents {
   ) => void;
   "room:leave": (payload: Record<string, never>, cb?: (res: { ok: boolean }) => void) => void;
   "room:kick": (payload: { targetId: string }) => void;
+  "room:transferHost": (payload: { targetId: string }) => void;
   "room:updateSettings": (payload: { settings: Partial<RoomSettings> }) => void;
   "room:updateComposition": (payload: { roleCounts: RoleCounts }) => void;
   "room:start": (payload: Record<string, never>, cb?: (res: StartResult) => void) => void;

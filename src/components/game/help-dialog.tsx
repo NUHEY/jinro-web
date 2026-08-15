@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen } from "lucide-react";
+import { BookOpen, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,11 +11,20 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { ROLE_ORDER, ROLES } from "@/lib/game/roles";
+import { ROLE_ORDER, ROLES, type Team } from "@/lib/game/roles";
 import { ICONS, styleOf } from "@/lib/game/role-style";
 import { cn } from "@/lib/utils";
+
+const WIN_TEAM_ORDER: Array<{ key: "winVillage" | "winWerewolf" | "winFox" | "winGod" | "winLover"; team: Team }> = [
+  { key: "winVillage", team: "village" },
+  { key: "winWerewolf", team: "werewolf" },
+  { key: "winFox", team: "fox" },
+  { key: "winGod", team: "god" },
+  { key: "winLover", team: "lover" },
+];
 
 export function HelpDialog({
   trigger,
@@ -32,64 +41,88 @@ export function HelpDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-md overflow-y-auto">
+      <DialogContent className="flex max-h-[85vh] max-w-md flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">{t.help.title}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-5 py-1 text-sm">
-          <p className="leading-relaxed text-muted-foreground">{t.help.intro}</p>
 
-          <div className="space-y-2">
-            <p className="text-xs font-bold text-muted-foreground">{t.help.flowTitle}</p>
-            <ol className="space-y-1.5">
-              {t.help.flowSteps.map((step, i) => (
-                <li key={i} className="leading-relaxed">
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
+        <p className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium leading-relaxed text-primary-foreground/90">
+          {t.help.tldr}
+        </p>
 
-          <div className="space-y-1.5">
-            <p className="text-xs font-bold text-muted-foreground">{t.help.winTitle}</p>
-            <ul className="space-y-1 leading-relaxed">
-              <li>{t.help.winVillage}</li>
-              <li>{t.help.winWerewolf}</li>
-              <li>{t.help.winFox}</li>
-              <li>{t.help.winGod}</li>
-              <li>{t.help.winLover}</li>
-            </ul>
-          </div>
+        <Tabs defaultValue="flow" className="flex min-h-0 flex-1 flex-col">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="flow">{t.help.tabFlow}</TabsTrigger>
+            <TabsTrigger value="win">{t.help.tabWin}</TabsTrigger>
+            <TabsTrigger value="roles">{t.help.tabRoles}</TabsTrigger>
+          </TabsList>
 
-          <div className="space-y-1.5">
-            <p className="text-xs font-bold text-muted-foreground">{t.help.rolesTitle}</p>
-            <div className="space-y-1.5">
-              {ROLE_ORDER.map((roleId) => {
-                const def = ROLES[roleId];
-                const text = t.roles[roleId];
-                const style = styleOf(def.color);
-                const Icon = ICONS[def.icon] ?? ICONS.User;
-                return (
-                  <div
-                    key={roleId}
-                    className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2"
-                  >
-                    <div className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border", style.chip)}>
-                      <Icon className="size-3.5" />
+          <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
+            <TabsContent value="flow" className="mt-0 space-y-3">
+              <p className="text-sm leading-relaxed text-muted-foreground">{t.help.intro}</p>
+              <div className="space-y-2">
+                {t.help.flowSteps.map((step, i) => (
+                  <div key={i} className="flex gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2.5">
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                      {i + 1}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold">{text.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{text.short}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold">{step.title}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{step.desc}</p>
                     </div>
-                    <Badge variant="outline" className={cn("mt-0.5 shrink-0 text-[10px]", style.text)}>
-                      {t.team[def.team]}
-                    </Badge>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="win" className="mt-0 space-y-3">
+              <p className="text-sm leading-relaxed text-muted-foreground">{t.help.winIntro}</p>
+              <div className="space-y-2">
+                {WIN_TEAM_ORDER.map(({ key, team }) => {
+                  const style = styleOf(
+                    team === "village" ? "sky" : team === "werewolf" ? "red" : team === "fox" ? "orange" : team === "god" ? "yellow" : "pink"
+                  );
+                  return (
+                    <div key={key} className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2.5">
+                      <Trophy className={cn("mt-0.5 size-4 shrink-0", style.text)} />
+                      <p className="text-sm leading-relaxed">{t.help[key]}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="roles" className="mt-0 space-y-3">
+              <p className="text-xs text-muted-foreground">{t.help.rolesIntro}</p>
+              <div className="space-y-1.5">
+                {ROLE_ORDER.map((roleId) => {
+                  const def = ROLES[roleId];
+                  const text = t.roles[roleId];
+                  const style = styleOf(def.color);
+                  const Icon = ICONS[def.icon] ?? ICONS.User;
+                  return (
+                    <div
+                      key={roleId}
+                      className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2"
+                    >
+                      <div className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border", style.chip)}>
+                        <Icon className="size-3.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold">{text.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{text.short}</p>
+                      </div>
+                      <Badge variant="outline" className={cn("mt-0.5 shrink-0 text-[10px]", style.text)}>
+                        {t.team[def.team]}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
           </div>
-        </div>
+        </Tabs>
+
         <DialogFooter>
           <DialogClose asChild>
             <Button className="w-full">{t.help.close}</Button>

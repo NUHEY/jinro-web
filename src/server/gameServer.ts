@@ -50,6 +50,7 @@ const rooms = new Map<string, RoomRuntime>();
 const HUNTER_REVENGE_TIMEOUT_MS = 45_000;
 const MAX_NAME_LENGTH = 16;
 const DISCUSSION_EXTEND_SECONDS = 60; // ホストの「話し合いを延長する」1回あたりの追加秒数(回数無制限)
+const CUSTOM_CODE_PATTERN = /^[A-Z0-9]{5,8}$/;
 
 function sanitizeName(raw: string): string {
   const trimmed = (raw || "").trim().slice(0, MAX_NAME_LENGTH);
@@ -239,9 +240,21 @@ export function attachGameServer(io: IOServer) {
     let currentCode: string | null = null;
     let currentPlayerId: string | null = null;
 
-    socket.on("room:create", ({ playerName }, cb) => {
-      let code = newRoomCode();
-      while (rooms.has(code)) code = newRoomCode();
+    socket.on("room:create", ({ playerName, code: requestedCode }, cb) => {
+      let code: string;
+      const trimmedRequested = (requestedCode || "").trim().toUpperCase();
+      if (trimmedRequested.length > 0) {
+        if (!CUSTOM_CODE_PATTERN.test(trimmedRequested)) {
+          return cb({ ok: false, errorCode: "INVALID_ROOM_CODE" });
+        }
+        if (rooms.has(trimmedRequested)) {
+          return cb({ ok: false, errorCode: "ROOM_CODE_TAKEN" });
+        }
+        code = trimmedRequested;
+      } else {
+        code = newRoomCode();
+        while (rooms.has(code)) code = newRoomCode();
+      }
 
       const state = createLobbyState(code, { ...DEFAULT_SETTINGS });
       const playerId = newPlayerId();
@@ -375,6 +388,21 @@ export function attachGameServer(io: IOServer) {
       room.tokens.delete(targetId);
       room.socketOf.delete(targetId);
       refreshSuggestedComposition(room);
+      touch(room);
+      broadcast(room);
+    });
+
+    // ホスト権限を他の参加者に譲渡する(ロビー中に限らずいつでも可能)
+    socket.on("room:transferHost", ({ targetId }) => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || !ensureHost(room, currentPlayerId)) return;
+      if (targetId === currentPlayerId) return;
+      const target = getPlayer(room.state, targetId);
+      if (!target || !target.connected) return;
+      const current = getPlayer(room.state, currentPlayerId);
+      if (current) current.isHost = false;
+      target.isHost = true;
       touch(room);
       broadcast(room);
     });

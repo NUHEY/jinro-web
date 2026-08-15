@@ -27,7 +27,9 @@ export type ErrorCode =
   | "ALREADY_STARTED"
   | "NOT_IN_ROOM"
   | "MIN_PLAYERS"
-  | "KICKED";
+  | "KICKED"
+  | "INVALID_ROOM_CODE"
+  | "ROOM_CODE_TAKEN";
 
 interface Strings {
   meta: { title: string; description: string };
@@ -60,6 +62,9 @@ interface Strings {
     joinButton: string;
     footerNote: string;
     helpButton: string;
+    customCodeLabel: string;
+    customCodePlaceholder: string;
+    customCodeHint: string;
   };
   lobby: {
     codeLabel: string;
@@ -88,6 +93,10 @@ interface Strings {
     roleRevealSeconds: string;
     resultPauseSeconds: string;
     kick: string;
+    makeHost: string;
+    makeHostConfirmTitle: string;
+    makeHostConfirmDesc: (name: string) => string;
+    makeHostConfirmAction: string;
   };
   roleReveal: {
     label: string;
@@ -168,16 +177,22 @@ interface Strings {
   help: {
     button: string;
     title: string;
+    tldr: string;
+    tabFlow: string;
+    tabWin: string;
+    tabRoles: string;
     intro: string;
     flowTitle: string;
-    flowSteps: string[];
+    flowSteps: Array<{ title: string; desc: string }>;
     winTitle: string;
+    winIntro: string;
     winVillage: string;
     winWerewolf: string;
     winFox: string;
     winGod: string;
     winLover: string;
     rolesTitle: string;
+    rolesIntro: string;
     close: string;
   };
   team: Record<Team, string>;
@@ -221,6 +236,9 @@ const ja: Strings = {
     joinButton: "参加する",
     footerNote: "※このアプリにチャット機能はありません。実際に集まって(またはオンライン通話で)会話しながら遊ぶことを想定しています。",
     helpButton: "遊び方・ルールを見る",
+    customCodeLabel: "ルームコード(任意)",
+    customCodePlaceholder: "空欄なら自動生成されます",
+    customCodeHint: "半角英数字5〜8文字。指定しない場合は自動で発行されます。",
   },
   lobby: {
     codeLabel: "合言葉コード",
@@ -249,6 +267,10 @@ const ja: Strings = {
     roleRevealSeconds: "役職確認の自動進行までの時間",
     resultPauseSeconds: "結果発表の自動進行までの時間",
     kick: "退出させる",
+    makeHost: "ホストにする",
+    makeHostConfirmTitle: "ホストを交代しますか？",
+    makeHostConfirmDesc: (name) => `${name}さんを新しいホストにします。あなたはホスト権限を失い、進行操作などができなくなります。`,
+    makeHostConfirmAction: "交代する",
   },
   roleReveal: {
     label: "あなたの役職",
@@ -341,24 +363,30 @@ const ja: Strings = {
   help: {
     button: "遊び方",
     title: "遊び方・ルール",
+    tldr: "ひとことで言うと: 隠れている「人狼」を、市民たちが話し合いで見つけ出して追放するゲームです。",
+    tabFlow: "流れ",
+    tabWin: "勝利条件",
+    tabRoles: "役職",
     intro:
-      "人狼DXは、正体を隠した「人狼」を「市民」たちが会話と推理で見つけ出す心理ゲームです。実際に集まって(またはビデオ通話などで)話しながら、このアプリで役職確認・夜の行動・投票を行います。",
+      "人狼DXは、正体を隠した「人狼」を「市民」たちが会話と推理で見つけ出す心理ゲームです。実際に集まって(またはビデオ通話などで)話しながら、このアプリで役職確認・夜の行動・投票を行います。「昼(議論・投票)」と「夜(能力行動)」を繰り返し、どちらかの陣営が条件を満たすと決着します。",
     flowTitle: "ゲームの流れ",
     flowSteps: [
-      "① 役職確認: 全員が自分だけの役職をこっそり確認します。",
-      "② 夜: 能力を持つ役職(人狼・予言者・ボディーガードなど)がこっそり行動します。他の人は待機します。",
-      "③ 朝: 夜に何が起きたか(誰が犠牲になったか)が発表されます。",
-      "④ 議論: 実際に話し合って、誰が人狼か推理します(このアプリにチャット機能はありません)。",
-      "⑤ 投票: 追放する人をひとり選んで投票し、最多票の人が追放されます。",
-      "⑥ 上記②〜⑤を、決着がつくまで繰り返します。",
+      { title: "役職確認", desc: "全員が自分だけの役職をこっそり確認します。周りに見られないように注意しましょう。" },
+      { title: "夜", desc: "人狼・予言者・ボディーガードなど、能力を持つ役職だけがこっそり行動します。能力を持たない人は何もせず待機します。" },
+      { title: "朝(結果発表)", desc: "夜に何が起きたか(誰が犠牲になったか)が発表されます。" },
+      { title: "議論", desc: "実際に話し合って、誰が人狼か推理します(このアプリにチャット機能はないので、口頭やビデオ通話で話してください)。" },
+      { title: "投票", desc: "追放する人をひとり選んで投票します。最多票の人が追放され、同数の場合は決選投票になります。" },
+      { title: "くり返し", desc: "「夜→朝→議論→投票」を、どちらかの陣営が勝利するまでくり返します。" },
     ],
     winTitle: "勝利条件",
+    winIntro: "決着のつき方は陣営によって異なります。複数の陣営が同時に勝利することもあります。",
     winVillage: "市民陣営: 人狼をすべて追放すると勝利。",
     winWerewolf: "人狼陣営: 人狼の数が人狼以外の生存者数以上になると勝利。",
     winFox: "妖狐: ゲーム終了時に生きていれば、単独で勝利(村・人狼の勝敗とは別)。",
     winGod: "神様: ゲーム終了時に生きていれば、単独で勝利。",
     winLover: "恋人: ゲーム終了時に2人とも生きていれば、2人で勝利。",
     rolesTitle: "役職一覧(13種)",
+    rolesIntro: "自分の役職の説明は、ゲーム中の「あなたの役職」画面でも確認できます。",
     close: "閉じる",
   },
   team: {
@@ -463,6 +491,8 @@ const ja: Strings = {
     NOT_IN_ROOM: "部屋に参加していません。",
     MIN_PLAYERS: "参加人数が足りません。",
     KICKED: "ホストによって部屋から退出させられました。",
+    INVALID_ROOM_CODE: "ルームコードは半角英数字5〜8文字で入力してください。",
+    ROOM_CODE_TAKEN: "そのルームコードは既に使われています。別のコードを試してください。",
   },
   validation: (issue) => {
     switch (issue.code) {
@@ -515,6 +545,9 @@ const en: Strings = {
     joinButton: "Join",
     footerNote: "Note: this app has no chat feature. It's meant to be played while talking together in person (or on a call).",
     helpButton: "How to play / rules",
+    customCodeLabel: "Room code (optional)",
+    customCodePlaceholder: "Leave blank to auto-generate",
+    customCodeHint: "5-8 letters/numbers. If left blank, one will be generated for you.",
   },
   lobby: {
     codeLabel: "Room code",
@@ -543,6 +576,10 @@ const en: Strings = {
     roleRevealSeconds: "Time before role reveal auto-advances",
     resultPauseSeconds: "Time before results auto-advance",
     kick: "Remove",
+    makeHost: "Make host",
+    makeHostConfirmTitle: "Hand over host to this player?",
+    makeHostConfirmDesc: (name) => `${name} will become the new host. You'll lose host controls, including running the game.`,
+    makeHostConfirmAction: "Hand over",
   },
   roleReveal: {
     label: "Your role",
@@ -635,24 +672,30 @@ const en: Strings = {
   help: {
     button: "How to play",
     title: "How to play / Rules",
+    tldr: "In short: the Villagers talk it out to find and vote off the hidden Werewolves.",
+    tabFlow: "Flow",
+    tabWin: "Winning",
+    tabRoles: "Roles",
     intro:
-      "Jinro DX is a social deduction game: the hidden 'Werewolves' try to survive while the 'Villagers' try to find them through conversation and deduction. Talk together in person (or on a call) while using this app for role reveals, night actions, and voting.",
+      "Jinro DX is a social deduction game: the hidden 'Werewolves' try to survive while the 'Villagers' try to find them through conversation and deduction. Talk together in person (or on a call) while using this app for role reveals, night actions, and voting. 'Day' (discussion + vote) and 'Night' (secret actions) repeat until one side wins.",
     flowTitle: "Game flow",
     flowSteps: [
-      "① Role reveal: everyone privately checks their own role.",
-      "② Night: players with night abilities (Werewolf, Seer, Bodyguard, etc.) act in secret. Everyone else waits.",
-      "③ Morning: the results of the night (who fell victim, if anyone) are announced.",
-      "④ Discussion: talk it over and figure out who the werewolves are (no chat feature in this app — talk in person or on a call).",
-      "⑤ Vote: everyone votes for one player to execute; the top vote-getter is executed.",
-      "⑥ Repeat ②–⑤ until the game is decided.",
+      { title: "Role reveal", desc: "Everyone privately checks their own role. Make sure no one else can see your screen." },
+      { title: "Night", desc: "Only players with night abilities (Werewolf, Seer, Bodyguard, etc.) act in secret. Everyone else just waits." },
+      { title: "Morning (results)", desc: "The results of the night — who fell victim, if anyone — are announced." },
+      { title: "Discussion", desc: "Talk it over and figure out who the werewolves are (this app has no chat feature, so talk in person or on a call)." },
+      { title: "Vote", desc: "Everyone votes for one player to execute. The top vote-getter is executed; a tie triggers a runoff vote." },
+      { title: "Repeat", desc: "Night → morning → discussion → vote repeats until one side wins." },
     ],
     winTitle: "Win conditions",
+    winIntro: "How the game ends depends on the faction — more than one faction can win at once.",
     winVillage: "Village: wins once every Werewolf has been eliminated.",
     winWerewolf: "Werewolves: win once werewolves are at least as many as everyone else still alive.",
     winFox: "Fox: wins alone if still alive when the game ends (independent of Village/Werewolf outcome).",
     winGod: "God: wins alone if still alive when the game ends.",
     winLover: "Lovers: win together if both are still alive when the game ends.",
     rolesTitle: "All 13 roles",
+    rolesIntro: "You can also see your own role's description on the 'Your role' screen during the game.",
     close: "Close",
   },
   team: {
@@ -757,6 +800,8 @@ const en: Strings = {
     NOT_IN_ROOM: "You're not in a room.",
     MIN_PLAYERS: "Not enough players yet.",
     KICKED: "You were removed from the room by the host.",
+    INVALID_ROOM_CODE: "Room codes must be 5-8 letters/numbers.",
+    ROOM_CODE_TAKEN: "That room code is already in use. Try a different one.",
   },
   validation: (issue) => {
     switch (issue.code) {

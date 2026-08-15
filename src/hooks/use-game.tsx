@@ -24,10 +24,11 @@ interface GameContextValue {
   privateState: PrivateViewState | null;
   error: string | null;
   clearError: () => void;
-  createRoom: (name: string) => Promise<void>;
+  createRoom: (name: string, code?: string) => Promise<void>;
   joinRoom: (code: string, name: string) => Promise<void>;
   leaveRoom: () => void;
   kick: (targetId: string) => void;
+  transferHost: (targetId: string) => void;
   updateSettings: (settings: Partial<RoomSettings>) => void;
   updateComposition: (roleCounts: RoleCounts) => void;
   startGame: () => Promise<StartResult>;
@@ -117,11 +118,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const clearError = useCallback(() => setErrorCode(null), []);
 
   const createRoom = useCallback(
-    async (name: string) => {
+    async (name: string, code?: string) => {
       saveLastName(name);
       const socket = getSocket();
       await new Promise<void>((resolve) => {
-        socket.emit("room:create", { playerName: name }, (res) => {
+        socket.emit("room:create", { playerName: name, code }, (res) => {
           if (res.ok) {
             const s = { code: res.code, playerId: res.playerId, token: res.token, name };
             saveSession(s);
@@ -167,6 +168,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const kick = useCallback((targetId: string) => {
     getSocket().emit("room:kick", { targetId });
+  }, []);
+
+  const transferHost = useCallback((targetId: string) => {
+    getSocket().emit("room:transferHost", { targetId });
   }, []);
 
   const updateSettings = useCallback((settings: Partial<RoomSettings>) => {
@@ -227,6 +232,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     joinRoom,
     leaveRoom,
     kick,
+    transferHost,
     updateSettings,
     updateComposition,
     startGame,

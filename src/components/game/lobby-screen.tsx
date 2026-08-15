@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, LogOut, Settings2, Sparkles, UserX, Users } from "lucide-react";
+import { Copy, Crown, LogOut, Settings2, Sparkles, UserX, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,17 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { RoleCompositionEditor } from "@/components/game/role-composition-editor";
@@ -26,7 +37,7 @@ import { HelpDialog } from "@/components/game/help-dialog";
 import { suggestComposition, validateComposition, MIN_PLAYERS, MAX_PLAYERS } from "@/lib/game/composition";
 
 export function LobbyScreen() {
-  const { publicState, session, updateComposition, kick, startGame, leaveRoom } = useGame();
+  const { publicState, session, updateComposition, kick, transferHost, startGame, leaveRoom } = useGame();
   const { t } = useLocale();
   const [starting, setStarting] = useState(false);
   if (!publicState || !session) return null;
@@ -98,6 +109,27 @@ export function LobbyScreen() {
               <span className="flex-1 truncate text-sm font-medium">{p.name}</span>
               {p.isHost && <Badge variant="outline" className="text-[10px]">{t.common.host}</Badge>}
               {!p.connected && <Badge variant="destructive" className="text-[10px]">{t.common.disconnected}</Badge>}
+              {isHost && p.id !== session.playerId && p.connected && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-7 text-muted-foreground">
+                      <Crown className="size-3.5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t.lobby.makeHostConfirmTitle}</AlertDialogTitle>
+                      <AlertDialogDescription>{t.lobby.makeHostConfirmDesc(p.name)}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => transferHost(p.id)}>
+                        {t.lobby.makeHostConfirmAction}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
               {isHost && p.id !== session.playerId && (
                 <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => kick(p.id)}>
                   <UserX className="size-3.5" />

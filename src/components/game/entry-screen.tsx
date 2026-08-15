@@ -18,17 +18,18 @@ export function EntryScreen() {
   const { createRoom, joinRoom } = useGame();
   const { t } = useLocale();
   const searchParams = useSearchParams();
-  const prefillCode = (searchParams.get("code") ?? "").toUpperCase().slice(0, 5);
+  const prefillCode = (searchParams.get("code") ?? "").toUpperCase().slice(0, 8);
 
   const [name, setName] = useState(() => loadLastName());
   const [code, setCode] = useState(prefillCode);
+  const [customCode, setCustomCode] = useState("");
   const [tab, setTab] = useState(prefillCode ? "join" : "create");
   const [busy, setBusy] = useState(false);
 
   const handleCreate = async () => {
     if (!name.trim()) return;
     setBusy(true);
-    await createRoom(name.trim());
+    await createRoom(name.trim(), customCode.trim() || undefined);
     setBusy(false);
   };
 
@@ -79,7 +80,28 @@ export function EntryScreen() {
               </div>
 
               <TabsContent value="create" className="mt-0 space-y-3">
-                <Button className="w-full" size="lg" disabled={!name.trim() || busy} onClick={handleCreate}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="custom-code">{t.entry.customCodeLabel}</Label>
+                  <Input
+                    id="custom-code"
+                    value={customCode}
+                    maxLength={8}
+                    placeholder={t.entry.customCodePlaceholder}
+                    className="text-center font-mono text-lg tracking-[0.3em] uppercase"
+                    onChange={(e) => setCustomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                  />
+                  <p className="text-xs text-muted-foreground">{t.entry.customCodeHint}</p>
+                </div>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  disabled={
+                    !name.trim() ||
+                    busy ||
+                    (customCode.length > 0 && (customCode.length < 5 || customCode.length > 8))
+                  }
+                  onClick={handleCreate}
+                >
                   {t.entry.createButton}
                 </Button>
               </TabsContent>
@@ -90,7 +112,7 @@ export function EntryScreen() {
                   <Input
                     id="code"
                     value={code}
-                    maxLength={5}
+                    maxLength={8}
                     placeholder={t.entry.codePlaceholder}
                     className="text-center font-mono text-lg tracking-[0.3em] uppercase"
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
