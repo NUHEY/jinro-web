@@ -1,6 +1,9 @@
 import { nanoid } from "nanoid";
 import { ROLES, judgeAsBlack, type RoleId } from "./roles";
 import type {
+  AppealChoice,
+  AppealVoteResult,
+  AppealVoteSubmission,
   DeathCause,
   DeathRecord,
   Phase,
@@ -64,9 +67,17 @@ export interface GameState {
   runoffCandidateIds: string[] | null; // 決選投票中: 投票対象をこのIDに限定する
   previousGuardTargets: Record<string, string>; // ボディーガードactorId -> 前回守った相手(連続ガード禁止用)
 
+  // 投票で追放先が決定した後、実際の追放前に行う「最後の一言」「生かすか殺すかの決選投票」用の状態
+  pendingExecution: { targetId: string } | null;
+  appealVotes: AppealVoteSubmission[];
+  appealVoteResult: AppealVoteResult | null;
+
+  // 仲間内だけで見える短いメモ(周りに悟られず意思疎通するための簡易な手段)
+  groupNotes: { wolf: string; mason: string; lover: string };
+
   roundDeaths: DeathRecord[];
   lastDeaths: DeathRecord[];
-  lastExecuted: { playerId: string; revealedRole?: RoleId } | null;
+  lastExecuted: { playerId: string; revealedRole?: RoleId; spared?: boolean } | null;
 
   resolution: ResolutionContext | null;
   awaitingHunterRevenge: { hunterId: string; cause: DeathCause } | null;
@@ -86,6 +97,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   revealRoleOnDeath: false,
   seerFirstNightDivine: false,
   allowFirstNightKill: true,
+  allowFirstVoteExecution: true,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -126,6 +138,10 @@ export function createLobbyState(code: string, settings: RoomSettings): GameStat
     voteTally: null,
     runoffCandidateIds: null,
     previousGuardTargets: {},
+    pendingExecution: null,
+    appealVotes: [],
+    appealVoteResult: null,
+    groupNotes: { wolf: "", mason: "", lover: "" },
     roundDeaths: [],
     lastDeaths: [],
     lastExecuted: null,
@@ -179,6 +195,10 @@ export function assignRolesAndStart(state: GameState, roleCounts: RoleCounts) {
   state.voteTally = null;
   state.runoffCandidateIds = null;
   state.previousGuardTargets = {};
+  state.pendingExecution = null;
+  state.appealVotes = [];
+  state.appealVoteResult = null;
+  state.groupNotes = { wolf: "", mason: "", lover: "" };
   state.roundDeaths = [];
   state.lastDeaths = [];
   state.lastExecuted = null;
@@ -217,6 +237,10 @@ export function resetToLobby(state: GameState) {
   state.voteTally = null;
   state.runoffCandidateIds = null;
   state.previousGuardTargets = {};
+  state.pendingExecution = null;
+  state.appealVotes = [];
+  state.appealVoteResult = null;
+  state.groupNotes = { wolf: "", mason: "", lover: "" };
   state.roundDeaths = [];
   state.lastDeaths = [];
   state.lastExecuted = null;
@@ -473,7 +497,21 @@ export function resolveVote(state: GameState) {
 
   const executedId = top.length > 0 ? pickRandom(top) : null;
   state.runoffCandidateIds = null;
-  executeTarget(state, executedId);
+
+  if (!executedId) {
+    executeTarget(state, null);
+    return;
+  }
+
+  // 発展ルール: 最初の投票(1日目)では設定がOFFの場合、実際には追放されない(生かされる)
+  const firstVoteExecutionBlocked = state.day === 1 && !state.settings.allowFirstVoteExecution;
+  if (firstVoteExecutionBlocked) {
+    executeTarget(state, executedId, true);
+    return;
+  }
+
+  // 通常はここで即座に処刑せず、「最後の一言」→「生かすか殺すかの決選投票」へ進む
+  startLastWords(state, executedId);
 }
 
 export function dictatorExecute(state: GameState, dictatorId: string, targetId: string) {
@@ -483,25 +521,91 @@ export function dictatorExecute(state: GameState, dictatorId: string, targetId: 
   state.voteTally = null;
   state.votes = [];
   state.runoffCandidateIds = null;
+  // 独裁者の強制処刑は議論・投票そのものを飛ばすのが役職の特性のため、
+  // 最後の一言・生存決選投票の対象にはならない(即座に処刑を実行する)
   executeTarget(state, targetId);
 }
 
-function executeTarget(state: GameState, targetId: string | null) {
+// 投票で追放先が決定した後、「最後の一言」フェーズへ進める(タイマーなし。
+// ホストまたは対象者自身が次に進めるボタンを押すまで待機する)
+export function startLastWords(state: GameState, targetId: string) {
+  state.pendingExecution = { targetId };
+  state.appealVotes = [];
+  state.appealVoteResult = null;
+  state.phase = "last_words";
+  state.phaseEndsAt = null;
+}
+
+// 「最後の一言」の後、生かすか殺すかの決選投票フェーズへ進める
+export function proceedToAppealVote(state: GameState) {
+  if (!state.pendingExecution) return;
+  state.appealVotes = [];
+  state.phase = "appeal_vote";
+  state.phaseEndsAt = null;
+}
+
+// 生存決選投票。対象者本人は投票できない(生存中の対象者以外の全員が対象)
+export function submitAppealVote(state: GameState, voterId: string, choice: AppealChoice) {
+  if (!state.pendingExecution) return;
+  if (voterId === state.pendingExecution.targetId) return;
+  state.appealVotes = state.appealVotes.filter((v) => v.voterId !== voterId);
+  state.appealVotes.push({ voterId, choice });
+}
+
+// 生存決選投票の集計。生かす(spare)には過半数(執行票より多い)が必要。
+// 同数の場合は最初の投票結果通り処刑される(タイは処刑側のデフォルト)。
+export function resolveAppealVote(state: GameState) {
+  if (!state.pendingExecution) return;
+  const targetId = state.pendingExecution.targetId;
+  const executeCount = state.appealVotes.filter((v) => v.choice === "execute").length;
+  const spareCount = state.appealVotes.filter((v) => v.choice === "spare").length;
+  const spared = spareCount > executeCount;
+
+  const result: AppealVoteResult = { targetId, executeCount, spareCount, spared };
+  state.appealVoteResult = result;
+
+  executeTarget(state, targetId, spared);
+}
+
+function executeTarget(state: GameState, targetId: string | null, spared: boolean = false) {
   state.roundDeaths = [];
   state.resolution = { kind: "execution", queue: [] };
+  state.pendingExecution = null;
+  state.appealVotes = [];
   if (targetId) {
     const target = getPlayer(state, targetId);
     state.lastExecuted = {
       playerId: targetId,
       revealedRole: state.settings.revealRoleOnDeath ? (target?.role ?? undefined) : undefined,
+      spared,
     };
-    pushDeath(state, targetId, "execution");
+    if (!spared) {
+      pushDeath(state, targetId, "execution");
+    }
   } else {
     state.lastExecuted = null;
   }
   pumpDeathQueue(state);
-  if (state.lastExecuted) {
+  if (state.lastExecuted && !spared) {
     recordMediumReading(state);
+  }
+}
+
+// 仲間内だけで見える短いメモを更新する(周りに悟られず意思疎通するための簡易な手段)。
+// グループは「人狼+内通者」「共有者」「恋人」の3種類。該当しないプレイヤーは何もしない。
+export function setGroupNote(state: GameState, playerId: string, text: string) {
+  const trimmed = text.slice(0, 200);
+  if (state.wolfIds.includes(playerId) || state.insiderIds.includes(playerId)) {
+    state.groupNotes.wolf = trimmed;
+    return;
+  }
+  if (state.masonIds.includes(playerId)) {
+    state.groupNotes.mason = trimmed;
+    return;
+  }
+  if (state.loverIds && state.loverIds.includes(playerId)) {
+    state.groupNotes.lover = trimmed;
+    return;
   }
 }
 

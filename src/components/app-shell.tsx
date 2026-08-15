@@ -2,9 +2,11 @@
 
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { Loader2, Moon, Wifi, WifiOff } from "lucide-react";
+import { Loader2, Moon, Wifi, WifiOff, BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { HelpDialog } from "@/components/game/help-dialog";
 import { EntryScreen } from "@/components/game/entry-screen";
 import { LobbyScreen } from "@/components/game/lobby-screen";
 import { RoleRevealScreen } from "@/components/game/role-reveal-screen";
@@ -13,6 +15,8 @@ import { HunterRevengeScreen } from "@/components/game/hunter-revenge-screen";
 import { DayResultScreen } from "@/components/game/day-result-screen";
 import { DiscussionScreen } from "@/components/game/discussion-screen";
 import { VoteScreen } from "@/components/game/vote-screen";
+import { LastWordsScreen } from "@/components/game/last-words-screen";
+import { AppealVoteScreen } from "@/components/game/appeal-vote-screen";
 import { ExecutionResultScreen } from "@/components/game/execution-result-screen";
 import { GameOverScreen } from "@/components/game/game-over-screen";
 import { LanguageSwitcher } from "@/components/game/language-switcher";
@@ -46,6 +50,13 @@ function TopBar() {
             <WifiOff className="size-4" /> {t.common.reconnecting}
           </span>
         )}
+        <HelpDialog
+          trigger={
+            <Button variant="ghost" size="icon" className="size-8" aria-label={t.help.button}>
+              <BookOpen className="size-4" />
+            </Button>
+          }
+        />
         <LanguageSwitcher />
       </div>
     </div>
@@ -95,6 +106,10 @@ function ScreenRouter({
       return <DiscussionScreen />;
     case "vote":
       return <VoteScreen />;
+    case "last_words":
+      return <LastWordsScreen />;
+    case "appeal_vote":
+      return <AppealVoteScreen />;
     case "execution_result":
       return <ExecutionResultScreen />;
     case "game_over":

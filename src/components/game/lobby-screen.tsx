@@ -33,7 +33,6 @@ import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { RoleCompositionEditor } from "@/components/game/role-composition-editor";
 import { PlayerAvatar } from "@/components/game/shared";
-import { HelpDialog } from "@/components/game/help-dialog";
 import { suggestComposition, validateComposition, MIN_PLAYERS, MAX_PLAYERS } from "@/lib/game/composition";
 
 export function LobbyScreen() {
@@ -77,10 +76,6 @@ export function LobbyScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-6 safe-top safe-bottom">
-      <div className="flex justify-end">
-        <HelpDialog />
-      </div>
-
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="flex flex-col items-center gap-2 py-4">
           <p className="text-xs text-muted-foreground">{t.lobby.codeLabel}</p>
@@ -253,6 +248,22 @@ function SettingsDialog() {
               />
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.allowFirstNightKillDesc}</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="first-vote-execution" className="flex-1">
+                {t.lobby.allowFirstVoteExecution}
+              </Label>
+              <Switch
+                id="first-vote-execution"
+                checked={s.allowFirstVoteExecution}
+                onCheckedChange={(v) => updateSettings({ allowFirstVoteExecution: v })}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.allowFirstVoteExecutionDesc}</p>
           </div>
 
           <Separator />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Gavel, Skull, Sparkles } from "lucide-react";
+import { Gavel, Skull, Sparkles, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
@@ -17,7 +17,13 @@ export function ExecutionResultScreen() {
   const executedName = publicState.lastExecuted
     ? publicState.players.find((p) => p.id === publicState.lastExecuted!.playerId)?.name
     : null;
+  const wasSpared = !!publicState.lastExecuted?.spared;
   const extraDeaths = publicState.lastDeaths.filter((d) => d.playerId !== publicState.lastExecuted?.playerId);
+  // 今回の処刑に対する霊媒結果のみ表示する(過去の古い霊媒結果を「今」の結果のように見せないため)
+  const freshMediumResult =
+    privateState?.mediumResult && privateState.mediumResult.day === publicState.day
+      ? privateState.mediumResult
+      : null;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-top safe-bottom">
@@ -30,7 +36,14 @@ export function ExecutionResultScreen() {
 
       <Card>
         <CardContent className="space-y-3 py-6">
-          {executedName ? (
+          {executedName && wasSpared ? (
+            <div className="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-3">
+              <HeartHandshake className="size-5 shrink-0 text-emerald-400" />
+              <div>
+                <p className="text-base font-bold">{t.executionResult.spared(executedName)}</p>
+              </div>
+            </div>
+          ) : executedName ? (
             <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-3">
               <Skull className="size-5 shrink-0 text-destructive" />
               <div>
@@ -62,18 +75,17 @@ export function ExecutionResultScreen() {
             );
           })}
 
-          {privateState?.mediumResult && (
+          {freshMediumResult && (
             <div className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-3 text-xs">
               <p className="flex items-center gap-1 font-semibold text-indigo-300">
                 <Sparkles className="size-3.5" /> {t.executionResult.mediumResult}
               </p>
               <p
                 className={
-                  "mt-0.5 " +
-                  (privateState.mediumResult.isBlack ? "font-bold text-red-400" : "font-bold text-sky-300")
+                  "mt-0.5 " + (freshMediumResult.isBlack ? "font-bold text-red-400" : "font-bold text-sky-300")
                 }
               >
-                {t.executionResult.mediumResultLine(privateState.mediumResult.targetName, privateState.mediumResult.isBlack)}
+                {t.executionResult.mediumResultLine(freshMediumResult.targetName, freshMediumResult.isBlack)}
               </p>
             </div>
           )}

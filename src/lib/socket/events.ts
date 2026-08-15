@@ -1,4 +1,10 @@
-import type { RoleCounts, RoomSettings, PublicGameState, PrivateViewState } from "@/lib/game/types";
+import type {
+  AppealChoice,
+  RoleCounts,
+  RoomSettings,
+  PublicGameState,
+  PrivateViewState,
+} from "@/lib/game/types";
 import type { ErrorCode, ValidationIssue } from "@/lib/i18n/strings";
 
 export type JoinResult =
@@ -27,6 +33,7 @@ export interface ClientToServerEvents {
   "host:advance": (payload: { to: "night" | "discussion" | "vote" }) => void;
   "host:forceResolveNight": (payload: Record<string, never>) => void;
   "host:forceResolveVote": (payload: Record<string, never>) => void;
+  "host:forceResolveAppealVote": (payload: Record<string, never>) => void;
   "host:skipHunterRevenge": (payload: Record<string, never>) => void;
   "role:ack": (payload: Record<string, never>) => void;
   "seer:earlyDivine": (payload: { targetId: string }) => void;
@@ -34,6 +41,9 @@ export interface ClientToServerEvents {
   "hunter:revenge": (payload: { targetId: string | null }) => void;
   "vote:submit": (payload: { targetId: string }) => void;
   "dictator:act": (payload: { targetId: string }) => void;
+  "lastWords:proceed": (payload: Record<string, never>) => void;
+  "appeal:submit": (payload: { choice: AppealChoice }) => void;
+  "ally:setNote": (payload: { text: string }) => void;
   "host:newGame": (payload: Record<string, never>) => void;
 }
 

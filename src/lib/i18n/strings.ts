@@ -89,6 +89,8 @@ interface Strings {
     revealOnDeath: string;
     allowFirstNightKill: string;
     allowFirstNightKillDesc: string;
+    allowFirstVoteExecution: string;
+    allowFirstVoteExecutionDesc: string;
     seerFirstNightDivine: string;
     seerFirstNightDivineDesc: string;
     settingsPacingNote: string;
@@ -126,6 +128,9 @@ interface Strings {
     actions: Record<Exclude<NightActionType, "none">, { title: string; desc: string; skip: string }>;
     firstNightKillDisabledNotice: string;
     forceAdvanceButton: string;
+    wolfSelectionsTitle: string;
+    wolfSelectionsEmpty: string;
+    wolfSelectionsLine: (name: string, targetName: string | null) => string;
   };
   hunterRevenge: {
     title: string;
@@ -139,6 +144,7 @@ interface Strings {
   dayResult: {
     tag: (day: number) => string;
     noDeaths: string;
+    seerResult: string;
     continueButton: string;
     waitingHost: string;
   };
@@ -171,11 +177,38 @@ interface Strings {
   executionResult: {
     tag: (day: number) => string;
     executed: (name: string) => string;
+    spared: (name: string) => string;
     noExecution: string;
     mediumResult: string;
     mediumResultLine: (name: string, isBlack: boolean) => string;
     continueButton: string;
     waitingHost: string;
+  };
+  lastWords: {
+    tag: (day: number) => string;
+    title: string;
+    waitingFor: (name: string) => string;
+    youAreTitle: string;
+    youAreDesc: string;
+    proceedButton: string;
+    waitingHost: string;
+  };
+  appealVote: {
+    tag: (day: number) => string;
+    instructions: (name: string) => string;
+    cannotVote: string;
+    executeOption: string;
+    spareOption: string;
+    submitButton: string;
+    submittedButton: string;
+    progress: (submitted: number, total: number) => string;
+    forceAdvanceButton: string;
+  };
+  allyNote: {
+    title: string;
+    placeholder: string;
+    hint: string;
+    groupSize: (n: number) => string;
   };
   gameOver: {
     primary: Record<"village" | "werewolf" | "draw", string>;
@@ -190,6 +223,7 @@ interface Strings {
     button: string;
     title: string;
     tldr: string;
+    tabMyRole: string;
     tabFlow: string;
     tabWin: string;
     tabRoles: string;
@@ -275,6 +309,8 @@ const ja: Strings = {
     revealOnDeath: "死亡時に役職を公開する",
     allowFirstNightKill: "最初の夜、人狼は襲撃できる",
     allowFirstNightKillDesc: "オフにすると、最初の夜(1日目の夜)だけ人狼が誰を襲撃しても死にません。人狼DXに慣れていないメンバーが多い場合におすすめの設定です。2日目以降の夜は通常通り襲撃が有効になります。",
+    allowFirstVoteExecution: "最初の投票で、実際に追放できる",
+    allowFirstVoteExecutionDesc: "オフにすると、最初の投票(1日目の投票)で誰が選ばれても実際には追放されず、生かされます。2日目以降の投票は通常通り追放が有効になります。",
     seerFirstNightDivine: "予言者は役職確認のときに1人占える(発展ルール)",
     seerFirstNightDivineDesc: "説明書11ページの発展ルールです。役職確認のタイミングで、予言者が1人を占うことができます(7人以上でのプレイ推奨)。占うかどうかは予言者が自由に選べます。",
     settingsPacingNote: "このアプリに自動タイマーはありません。それぞれの画面はホストの操作、または全員の行動がそろったタイミングで進みます。自分たちのペースでどうぞ。",
@@ -316,6 +352,9 @@ const ja: Strings = {
     },
     firstNightKillDisabledNotice: "設定により、最初の夜(1日目)は誰を襲撃しても死にません。2日目以降の夜は通常通り効果があります。",
     forceAdvanceButton: "全員の行動を待たずに進める(ホスト操作)",
+    wolfSelectionsTitle: "仲間の人狼が選んでいる相手(相談用)",
+    wolfSelectionsEmpty: "まだ誰も選んでいません",
+    wolfSelectionsLine: (name, targetName) => `${name}さん: ${targetName ?? "未選択"}`,
   },
   hunterRevenge: {
     title: "ハンターの正体が明らかに！",
@@ -329,6 +368,7 @@ const ja: Strings = {
   dayResult: {
     tag: (day) => `朝 ${day}日目`,
     noDeaths: "昨夜は誰も犠牲になりませんでした。平和な朝です。",
+    seerResult: "占いの結果",
     continueButton: "議論タイムへ進む",
     waitingHost: "ホストが議論タイムへ進めるのを待っています…",
   },
@@ -361,11 +401,38 @@ const ja: Strings = {
   executionResult: {
     tag: (day) => `追放結果 ${day}日目`,
     executed: (name) => `${name}さんが追放されました`,
+    spared: (name) => `決選投票の結果、${name}さんは生かされました`,
     noExecution: "投票の結果、誰も追放されませんでした。",
     mediumResult: "霊媒結果",
     mediumResultLine: (name, isBlack) => `${name}さんは${isBlack ? "【黒(人狼)】" : "【白】"}でした`,
     continueButton: "次の夜へ進む",
     waitingHost: "ホストが次の夜へ進めるのを待っています…",
+  },
+  lastWords: {
+    tag: (day) => `最後の一言 ${day}日目`,
+    title: "投票の結果、追放が決まりました",
+    waitingFor: (name) => `${name}さんの最後の一言を聞きましょう`,
+    youAreTitle: "あなたが追放先に選ばれました",
+    youAreDesc: "最後に伝えたいことがあれば、みんなに話してください。話し終えたら下のボタンで進めます。",
+    proceedButton: "話し終えた(決選投票へ進む)",
+    waitingHost: "本人またはホストが次へ進めるのを待っています…",
+  },
+  appealVote: {
+    tag: (day) => `生存決選投票 ${day}日目`,
+    instructions: (name) => `${name}さんを本当に追放しますか？それとも生かしますか？`,
+    cannotVote: "あなたはこの決選投票に参加できません(追放対象のため)。結果を見守りましょう。",
+    executeOption: "追放する",
+    spareOption: "生かす",
+    submitButton: "決定する",
+    submittedButton: "投票済み(変更する)",
+    progress: (s, t) => `投票完了: ${s} / ${t} 人`,
+    forceAdvanceButton: "全員の投票を待たずに締め切る(ホスト操作)",
+  },
+  allyNote: {
+    title: "仲間だけのメモ",
+    placeholder: "仲間だけに伝わる短いメモ(例: 3番の人を狙う)",
+    hint: "周りに気づかれないよう、短い言葉でそっと伝え合いましょう。チャットではなく1枚のメモとして共有されます。",
+    groupSize: (n) => `${n}人で共有中`,
   },
   gameOver: {
     primary: {
@@ -388,6 +455,7 @@ const ja: Strings = {
     button: "遊び方",
     title: "遊び方・ルール",
     tldr: "ひとことで言うと: 隠れている「人狼」を、市民たちが話し合いで見つけ出して追放するゲームです。",
+    tabMyRole: "自分の役職",
     tabFlow: "流れ",
     tabWin: "勝利条件",
     tabRoles: "役職",
@@ -411,7 +479,7 @@ const ja: Strings = {
     winGod: "神様: ゲーム終了時に生きていれば、単独で勝利。",
     winLover: "恋人: ゲーム終了時に2人とも生きていれば、2人で勝利。",
     rolesTitle: "役職一覧(13種)",
-    rolesIntro: "自分の役職の説明は、ゲーム中の「あなたの役職」画面でも確認できます。",
+    rolesIntro: "自分の役職の説明は、この画面の「自分の役職」タブからゲーム中いつでも確認できます。",
     close: "閉じる",
   },
   team: {
@@ -597,6 +665,8 @@ const en: Strings = {
     revealOnDeath: "Reveal role on death",
     allowFirstNightKill: "Werewolves can attack on the first night",
     allowFirstNightKillDesc: "Turn this off to make the first night (night 1) attack-proof — whoever the werewolves attack survives. From night 2 onward, attacks work normally. Recommended if most players are new to Jinro DX.",
+    allowFirstVoteExecution: "The first vote can result in a real execution",
+    allowFirstVoteExecutionDesc: "Turn this off to make the first vote (day 1) execution-proof — whoever is chosen is spared instead of executed. From day 2 onward, votes work normally.",
     seerFirstNightDivine: "Seer can investigate one player during role reveal (advanced rule)",
     seerFirstNightDivineDesc: "An advanced rule from the rulebook (p.11): the Seer may investigate one player right at role reveal. Recommended for 7+ players. Using it is optional.",
     settingsPacingNote: "There are no automatic timers in this app. Every screen advances only when the host acts, or once everyone has finished their action. Play at your own pace.",
@@ -638,6 +708,9 @@ const en: Strings = {
     },
     firstNightKillDisabledNotice: "House rule: on the first night, whoever the werewolves attack survives. Attacks work normally from night 2 onward.",
     forceAdvanceButton: "Close this night without waiting for everyone (host)",
+    wolfSelectionsTitle: "What your fellow werewolves are picking (for quiet coordination)",
+    wolfSelectionsEmpty: "No one has picked yet",
+    wolfSelectionsLine: (name, targetName) => `${name}: ${targetName ?? "not chosen yet"}`,
   },
   hunterRevenge: {
     title: "The Hunter's true identity is revealed!",
@@ -651,6 +724,7 @@ const en: Strings = {
   dayResult: {
     tag: (day) => `Morning ${day}`,
     noDeaths: "No one fell victim last night. A peaceful morning.",
+    seerResult: "Investigation result",
     continueButton: "Continue to discussion",
     waitingHost: "Waiting for the host to continue to discussion…",
   },
@@ -683,11 +757,38 @@ const en: Strings = {
   executionResult: {
     tag: (day) => `Execution result — Day ${day}`,
     executed: (name) => `${name} was executed`,
+    spared: (name) => `The appeal vote spared ${name} — they survive`,
     noExecution: "The vote resulted in no execution.",
     mediumResult: "Medium's reading",
     mediumResultLine: (name, isBlack) => `${name} was ${isBlack ? "【Black - Werewolf】" : "【White】"}`,
     continueButton: "Continue to next night",
     waitingHost: "Waiting for the host to continue to the next night…",
+  },
+  lastWords: {
+    tag: (day) => `Last words — Day ${day}`,
+    title: "The vote has decided on an execution",
+    waitingFor: (name) => `Let's hear ${name}'s last words`,
+    youAreTitle: "You've been chosen for execution",
+    youAreDesc: "If there's anything you want to say, now's the time. Tap the button below once you're done.",
+    proceedButton: "I'm done (continue to the appeal vote)",
+    waitingHost: "Waiting for the host or the chosen player to continue…",
+  },
+  appealVote: {
+    tag: (day) => `Appeal vote — Day ${day}`,
+    instructions: (name) => `Should ${name} really be executed, or spared?`,
+    cannotVote: "You can't take part in this vote (you're the one on trial). Watch the results unfold.",
+    executeOption: "Execute",
+    spareOption: "Spare",
+    submitButton: "Confirm",
+    submittedButton: "Voted (tap to change)",
+    progress: (s, t) => `Votes cast: ${s} / ${t}`,
+    forceAdvanceButton: "Close this vote without waiting for everyone (host)",
+  },
+  allyNote: {
+    title: "Private note for your allies",
+    placeholder: "A short note only your allies can see (e.g. \"target player 3\")",
+    hint: "Keep it short and quiet — this shares a single note, not a chat log, so it won't look suspicious.",
+    groupSize: (n) => `Shared with ${n} people`,
   },
   gameOver: {
     primary: {
@@ -710,6 +811,7 @@ const en: Strings = {
     button: "How to play",
     title: "How to play / Rules",
     tldr: "In short: the Villagers talk it out to find and vote off the hidden Werewolves.",
+    tabMyRole: "My role",
     tabFlow: "Flow",
     tabWin: "Winning",
     tabRoles: "Roles",
@@ -733,7 +835,7 @@ const en: Strings = {
     winGod: "God: wins alone if still alive when the game ends.",
     winLover: "Lovers: win together if both are still alive when the game ends.",
     rolesTitle: "All 13 roles",
-    rolesIntro: "You can also see your own role's description on the 'Your role' screen during the game.",
+    rolesIntro: "You can check your own role's description any time during the game from the \"My role\" tab on this screen.",
     close: "Close",
   },
   team: {
@@ -919,6 +1021,8 @@ const ko: Strings = {
     revealOnDeath: "사망 시 역할 공개",
     allowFirstNightKill: "첫날 밤에 인랑이 습격할 수 있다",
     allowFirstNightKillDesc: "꺼두면 첫날 밤(1일차 밤)에는 인랑이 누구를 습격해도 죽지 않습니다. 2일차 밤부터는 평소대로 습격이 유효해집니다. 인랑DX에 익숙하지 않은 멤버가 많을 때 추천하는 설정입니다.",
+    allowFirstVoteExecution: "첫 투표에서 실제로 추방할 수 있다",
+    allowFirstVoteExecutionDesc: "꺼두면 첫 투표(1일차 투표)에서 누가 선택되어도 실제로는 추방되지 않고 살아남습니다. 2일차 투표부터는 평소대로 추방이 유효해집니다.",
     seerFirstNightDivine: "예언자는 역할 확인 시 1명을 점칠 수 있다 (발전 규칙)",
     seerFirstNightDivineDesc: "설명서 11페이지의 발전 규칙입니다. 역할 확인 시점에 예언자가 1명을 점칠 수 있습니다 (7명 이상 플레이 권장). 점칠지 여부는 예언자가 자유롭게 선택할 수 있습니다.",
     settingsPacingNote: "이 앱에는 자동 타이머가 없습니다. 각 화면은 호스트의 조작이나 전원의 행동이 모두 끝났을 때만 다음으로 넘어갑니다. 여러분의 속도에 맞춰 진행하세요.",
@@ -960,6 +1064,9 @@ const ko: Strings = {
     },
     firstNightKillDisabledNotice: "설정에 따라 첫날 밤(1일차)에는 누구를 습격해도 죽지 않습니다. 2일차 밤부터는 평소대로 효과가 있습니다.",
     forceAdvanceButton: "전원을 기다리지 않고 진행하기 (호스트 조작)",
+    wolfSelectionsTitle: "동료 인랑들이 지금 선택하고 있는 대상 (상의용)",
+    wolfSelectionsEmpty: "아직 아무도 선택하지 않았습니다",
+    wolfSelectionsLine: (name, targetName) => `${name}님: ${targetName ?? "미선택"}`,
   },
   hunterRevenge: {
     title: "헌터의 정체가 드러났다!",
@@ -973,6 +1080,7 @@ const ko: Strings = {
   dayResult: {
     tag: (day) => `아침 ${day}일차`,
     noDeaths: "어젯밤에는 아무도 희생되지 않았습니다. 평화로운 아침입니다.",
+    seerResult: "점술 결과",
     continueButton: "토론 시간으로 진행",
     waitingHost: "호스트가 토론 시간으로 진행하기를 기다리는 중…",
   },
@@ -1005,11 +1113,38 @@ const ko: Strings = {
   executionResult: {
     tag: (day) => `추방 결과 ${day}일차`,
     executed: (name) => `${name}님이 추방되었습니다`,
+    spared: (name) => `결선 투표 결과, ${name}님은 살아남았습니다`,
     noExecution: "투표 결과, 아무도 추방되지 않았습니다.",
     mediumResult: "영매 결과",
     mediumResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
     continueButton: "다음 밤으로 진행",
     waitingHost: "호스트가 다음 밤으로 진행하기를 기다리는 중…",
+  },
+  lastWords: {
+    tag: (day) => `마지막 한마디 ${day}일차`,
+    title: "투표 결과 추방이 결정되었습니다",
+    waitingFor: (name) => `${name}님의 마지막 한마디를 들어봅시다`,
+    youAreTitle: "당신이 추방 대상으로 선택되었습니다",
+    youAreDesc: "마지막으로 하고 싶은 말이 있다면 모두에게 이야기하세요. 이야기를 마치면 아래 버튼으로 진행합니다.",
+    proceedButton: "이야기를 마쳤습니다 (결선 투표로 진행)",
+    waitingHost: "본인 또는 호스트가 다음으로 진행하기를 기다리는 중…",
+  },
+  appealVote: {
+    tag: (day) => `생존 결선 투표 ${day}일차`,
+    instructions: (name) => `${name}님을 정말로 추방할까요, 아니면 살릴까요?`,
+    cannotVote: "당신은 이 결선 투표에 참여할 수 없습니다 (추방 대상이기 때문입니다). 결과를 지켜봐 주세요.",
+    executeOption: "추방한다",
+    spareOption: "살린다",
+    submitButton: "결정하기",
+    submittedButton: "투표됨 (변경하기)",
+    progress: (s, t) => `투표 완료: ${s} / ${t}명`,
+    forceAdvanceButton: "전원의 투표를 기다리지 않고 마감하기 (호스트 조작)",
+  },
+  allyNote: {
+    title: "동료끼리만 보는 메모",
+    placeholder: "동료에게만 전달되는 짧은 메모 (예: 3번을 노린다)",
+    hint: "주변 사람이 눈치채지 않도록 짧은 말로 조용히 전달하세요. 채팅이 아닌 한 장의 메모로 공유됩니다.",
+    groupSize: (n) => `${n}명이 함께 보는 중`,
   },
   gameOver: {
     primary: {
@@ -1032,6 +1167,7 @@ const ko: Strings = {
     button: "게임 방법",
     title: "게임 방법 · 규칙",
     tldr: "한마디로: 숨어 있는 「인랑」을, 시민들이 대화를 통해 찾아내 추방하는 게임입니다.",
+    tabMyRole: "나의 역할",
     tabFlow: "진행 순서",
     tabWin: "승리 조건",
     tabRoles: "역할",
@@ -1055,7 +1191,7 @@ const ko: Strings = {
     winGod: "신: 게임 종료 시 살아 있으면 단독 승리.",
     winLover: "연인: 게임 종료 시 두 사람 모두 살아 있으면 함께 승리.",
     rolesTitle: "역할 목록 (13종)",
-    rolesIntro: "자신의 역할에 대한 설명은 게임 중 「나의 역할」 화면에서도 확인할 수 있습니다.",
+    rolesIntro: "자신의 역할에 대한 설명은 이 화면의 「나의 역할」 탭에서 게임 중 언제든지 확인할 수 있습니다.",
     close: "닫기",
   },
   team: {

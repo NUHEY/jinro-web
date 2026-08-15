@@ -19,6 +19,10 @@ import {
   startVote,
   submitVote,
   resolveVote,
+  proceedToAppealVote,
+  submitAppealVote,
+  resolveAppealVote,
+  setGroupNote,
   dictatorExecute,
   ackRole,
   allAliveAcked,
@@ -105,6 +109,17 @@ export function attachGameServer(io: IOServer) {
     if (alive.length > 0 && room.state.votes.length >= alive.length) {
       resolveVote(room.state);
       afterVoteResolution(room);
+    }
+  }
+
+  // 生存決選投票: 対象者本人を除く生存者全員が投票し終えたら自動的に集計する
+  function maybeAutoResolveAppealVote(room: RoomRuntime) {
+    if (room.state.phase !== "appeal_vote" || !room.state.pendingExecution) return;
+    const alive = alivePlayers(room.state);
+    const eligible = alive.filter((p) => p.id !== room.state.pendingExecution?.targetId);
+    if (eligible.length > 0 && room.state.appealVotes.length >= eligible.length) {
+      resolveAppealVote(room.state);
+      afterResolution(room);
     }
   }
 
@@ -392,6 +407,31 @@ export function attachGameServer(io: IOServer) {
       afterVoteResolution(room);
     });
 
+    // ホストが「全員の生存決選投票を待たずに締め切る」。未投票者はカウントされない。
+    socket.on("host:forceResolveAppealVote", () => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || !ensureHost(room, currentPlayerId)) return;
+      if (room.state.phase !== "appeal_vote" || !room.state.pendingExecution) return;
+      resolveAppealVote(room.state);
+      touch(room);
+      afterResolution(room);
+    });
+
+    // 「最後の一言」フェーズから生存決選投票フェーズへ進む。
+    // 対象者本人・ホストのどちらでも進められる(タイマーなし)。
+    socket.on("lastWords:proceed", () => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || room.state.phase !== "last_words" || !room.state.pendingExecution) return;
+      const isHost = ensureHost(room, currentPlayerId);
+      const isTarget = room.state.pendingExecution.targetId === currentPlayerId;
+      if (!isHost && !isTarget) return;
+      proceedToAppealVote(room.state);
+      touch(room);
+      broadcast(room);
+    });
+
     // ホストが、応答のないハンターの代わりに「道連れなし」を選ぶ。
     socket.on("host:skipHunterRevenge", () => {
       if (!currentCode || !currentPlayerId) return;
@@ -482,6 +522,34 @@ export function attachGameServer(io: IOServer) {
       touch(room);
       broadcast(room);
       maybeAutoResolveVote(room);
+    });
+
+    // 生存決選投票: 追放対象になっている本人は投票できない
+    socket.on("appeal:submit", ({ choice }) => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || room.state.phase !== "appeal_vote" || !room.state.pendingExecution) return;
+      const player = getPlayer(room.state, currentPlayerId);
+      if (!player || !player.alive) return;
+      if (room.state.pendingExecution.targetId === currentPlayerId) return;
+      if (choice !== "execute" && choice !== "spare") return;
+      submitAppealVote(room.state, currentPlayerId, choice);
+      touch(room);
+      broadcast(room);
+      maybeAutoResolveAppealVote(room);
+    });
+
+    // 仲間内だけで見える短いメモの更新(周りに悟られず意思疎通するための簡易な手段)。
+    // チャットログではなく1本のメモを都度上書きする方式(不自然な連続タイピングを避けるため)。
+    socket.on("ally:setNote", ({ text }) => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room) return;
+      const player = getPlayer(room.state, currentPlayerId);
+      if (!player || !player.alive) return;
+      setGroupNote(room.state, currentPlayerId, typeof text === "string" ? text : "");
+      touch(room);
+      broadcast(room);
     });
 
     socket.on("dictator:act", ({ targetId }) => {

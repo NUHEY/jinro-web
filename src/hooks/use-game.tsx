@@ -11,7 +11,13 @@ import {
 } from "react";
 import { getSocket } from "@/lib/socket/client";
 import { clearSession, loadSession, saveLastName, saveSession, type StoredSession } from "@/lib/session";
-import type { PrivateViewState, PublicGameState, RoleCounts, RoomSettings } from "@/lib/game/types";
+import type {
+  AppealChoice,
+  PrivateViewState,
+  PublicGameState,
+  RoleCounts,
+  RoomSettings,
+} from "@/lib/game/types";
 import type { StartResult } from "@/lib/socket/events";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { ErrorCode } from "@/lib/i18n/strings";
@@ -35,6 +41,7 @@ interface GameContextValue {
   advance: (to: "night" | "discussion" | "vote") => void;
   forceResolveNight: () => void;
   forceResolveVote: () => void;
+  forceResolveAppealVote: () => void;
   skipHunterRevenge: () => void;
   ackRole: () => void;
   earlyDivine: (targetId: string) => void;
@@ -42,6 +49,9 @@ interface GameContextValue {
   hunterRevenge: (targetId: string | null) => void;
   vote: (targetId: string) => void;
   dictatorAct: (targetId: string) => void;
+  proceedFromLastWords: () => void;
+  submitAppeal: (choice: AppealChoice) => void;
+  setAllyNote: (text: string) => void;
   newGame: () => void;
 }
 
@@ -203,6 +213,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     getSocket().emit("host:forceResolveVote", {});
   }, []);
 
+  const forceResolveAppealVote = useCallback(() => {
+    getSocket().emit("host:forceResolveAppealVote", {});
+  }, []);
+
   const skipHunterRevenge = useCallback(() => {
     getSocket().emit("host:skipHunterRevenge", {});
   }, []);
@@ -231,6 +245,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     getSocket().emit("dictator:act", { targetId });
   }, []);
 
+  const proceedFromLastWords = useCallback(() => {
+    getSocket().emit("lastWords:proceed", {});
+  }, []);
+
+  const submitAppeal = useCallback((choice: AppealChoice) => {
+    getSocket().emit("appeal:submit", { choice });
+  }, []);
+
+  const setAllyNote = useCallback((text: string) => {
+    getSocket().emit("ally:setNote", { text });
+  }, []);
+
   const newGame = useCallback(() => {
     getSocket().emit("host:newGame", {});
   }, []);
@@ -254,6 +280,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     advance,
     forceResolveNight,
     forceResolveVote,
+    forceResolveAppealVote,
     skipHunterRevenge,
     ackRole,
     earlyDivine,
@@ -261,6 +288,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     hunterRevenge,
     vote,
     dictatorAct,
+    proceedFromLastWords,
+    submitAppeal,
+    setAllyNote,
     newGame,
   };
 

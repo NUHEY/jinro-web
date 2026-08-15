@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Moon, CheckCircle2, FastForward } from "lucide-react";
+import { Moon, CheckCircle2, FastForward, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { PhaseTag } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
+import { AllyNote } from "@/components/game/ally-note";
 import type { NightActionType } from "@/lib/game/roles";
 
 export function NightScreen() {
@@ -22,10 +23,22 @@ export function NightScreen() {
   const actionCopy = pending ? t.night.actions[pending.type as Exclude<NightActionType, "none">] : null;
   const me = publicState.players.find((p) => p.id === session.playerId);
   const isHost = !!me?.isHost;
+  const isAttack = pending?.type === "attack";
 
   const handleSubmit = () => {
     submitNight(pick ?? null);
     setConfirmed(true);
+  };
+
+  // 人狼の襲撃選択のみ、タップした瞬間に自動送信する。
+  // これにより仲間の人狼への選択状況の共有(相談用)が即座に反映される。
+  const handlePick = (id: string | null) => {
+    setPick(id);
+    setConfirmed(false);
+    if (isAttack) {
+      submitNight(id);
+      setConfirmed(true);
+    }
   };
 
   return (
@@ -36,6 +49,8 @@ export function NightScreen() {
         </div>
         <PhaseTag>{t.night.tag(publicState.day)}</PhaseTag>
       </div>
+
+      {alive && <AllyNote />}
 
       {!alive ? (
         <Card>
@@ -58,13 +73,28 @@ export function NightScreen() {
             <PlayerPicker
               candidates={pending.candidates}
               selectedId={pick}
-              onSelect={(id) => {
-                setPick(id);
-                setConfirmed(false);
-              }}
+              onSelect={handlePick}
               allowSkip
               skipLabel={actionCopy.skip}
             />
+            {isAttack && pending.wolfSelections && (
+              <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs">
+                <p className="flex items-center gap-1.5 font-semibold text-red-300">
+                  <Users className="size-3.5" /> {t.night.wolfSelectionsTitle}
+                </p>
+                {pending.wolfSelections.length === 0 ? (
+                  <p className="mt-1 text-red-300/70">{t.night.wolfSelectionsEmpty}</p>
+                ) : (
+                  <ul className="mt-1.5 space-y-1">
+                    {pending.wolfSelections.map((w) => (
+                      <li key={w.id} className="text-red-200">
+                        {t.night.wolfSelectionsLine(w.name, w.targetName)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
             {privateState.seerResult && (
               <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-3 text-xs">
                 <p className="font-semibold text-violet-300">

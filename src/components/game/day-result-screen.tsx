@@ -1,6 +1,6 @@
 "use client";
 
-import { Sun, Skull } from "lucide-react";
+import { Sun, Skull, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
@@ -8,13 +8,16 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { PhaseTag } from "@/components/game/shared";
 
 export function DayResultScreen() {
-  const { publicState, session, advance } = useGame();
+  const { publicState, privateState, session, advance } = useGame();
   const { t } = useLocale();
   if (!publicState || !session) return null;
 
   const me = publicState.players.find((p) => p.id === session.playerId);
   const isHost = !!me?.isHost;
   const deaths = publicState.lastDeaths;
+  // 今夜占った結果のみ表示する(過去の古い占い結果を「今」の結果のように見せないため)
+  const freshSeerResult =
+    privateState?.seerResult && privateState.seerResult.day === publicState.day ? privateState.seerResult : null;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-top safe-bottom">
@@ -48,6 +51,21 @@ export function DayResultScreen() {
           )}
         </CardContent>
       </Card>
+
+      {freshSeerResult && (
+        <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-semibold text-violet-300">
+            <Eye className="size-3.5" /> {t.dayResult.seerResult}
+          </p>
+          <p
+            className={
+              "mt-0.5 text-sm " + (freshSeerResult.isBlack ? "font-bold text-red-400" : "font-bold text-sky-300")
+            }
+          >
+            {t.night.seerResultLine(freshSeerResult.targetName, freshSeerResult.isBlack)}
+          </p>
+        </div>
+      )}
 
       {isHost ? (
         <Button size="lg" className="w-full font-bold" onClick={() => advance("discussion")}>

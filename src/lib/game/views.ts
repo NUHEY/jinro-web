@@ -30,6 +30,10 @@ export function buildPublicView(state: GameState): PublicGameState {
   } else if (state.phase === "vote") {
     const alive = alivePlayers(state);
     progress = { submitted: state.votes.length, total: alive.length };
+  } else if (state.phase === "appeal_vote") {
+    const alive = alivePlayers(state);
+    const eligible = alive.filter((p) => p.id !== state.pendingExecution?.targetId);
+    progress = { submitted: state.appealVotes.length, total: eligible.length };
   }
 
   let awaitingHunterRevenge: PublicGameState["awaitingHunterRevenge"] = null;
@@ -38,6 +42,15 @@ export function buildPublicView(state: GameState): PublicGameState {
     awaitingHunterRevenge = {
       hunterId: state.awaitingHunterRevenge.hunterId,
       hunterName: hunter?.name ?? "?",
+    };
+  }
+
+  let pendingExecution: PublicGameState["pendingExecution"] = null;
+  if (state.pendingExecution) {
+    const target = getPlayer(state, state.pendingExecution.targetId);
+    pendingExecution = {
+      playerId: state.pendingExecution.targetId,
+      playerName: target?.name ?? "?",
     };
   }
 
@@ -51,6 +64,8 @@ export function buildPublicView(state: GameState): PublicGameState {
     lastExecuted: state.lastExecuted,
     voteTally: state.voteTally,
     runoffCandidateIds: state.runoffCandidateIds,
+    pendingExecution,
+    appealVoteResult: state.appealVoteResult,
     winner: state.winner,
     phaseEndsAt: state.phaseEndsAt,
     roleCounts: state.roleCounts,
@@ -103,6 +118,18 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
     }));
   }
 
+  // 仲間内だけで見える短いメモ(周りに悟られず意思疎通するための簡易な手段)
+  if (state.wolfIds.includes(playerId) || state.insiderIds.includes(playerId)) {
+    view.allyNote = {
+      text: state.groupNotes.wolf,
+      groupSize: new Set([...state.wolfIds, ...state.insiderIds]).size,
+    };
+  } else if (state.masonIds.includes(playerId)) {
+    view.allyNote = { text: state.groupNotes.mason, groupSize: state.masonIds.length };
+  } else if (state.loverIds && state.loverIds.includes(playerId)) {
+    view.allyNote = { text: state.groupNotes.lover, groupSize: state.loverIds.length };
+  }
+
   // 予言結果・霊媒結果(自分のログのみ)
   if (role === "seer") {
     const logs = state.seerLogs.filter((l) => l.seerId === playerId);
@@ -141,9 +168,24 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
     if (nightAction !== "none") {
       let submitted = false;
       let candidates = others;
+      let wolfSelections: NonNullable<PrivateViewState["pendingNightAction"]>["wolfSelections"] =
+        undefined;
       if (nightAction === "attack") {
         submitted = state.attackSubmissions.some((s) => s.actorId === playerId);
         candidates = others.filter((p) => !state.wolfIds.includes(p.id));
+        // 仲間の人狼が今どこを選んでいるか(相談用、リアルタイム更新)。自分自身も含めて表示する。
+        wolfSelections = state.wolfIds
+          .filter((id) => getPlayer(state, id)?.alive)
+          .map((id) => {
+            const sub = state.attackSubmissions.find((s) => s.actorId === id);
+            const targetId = sub?.targetId ?? null;
+            return {
+              id,
+              name: nameOf(id),
+              targetId,
+              targetName: targetId ? nameOf(targetId) : null,
+            };
+          });
       } else if (nightAction === "guard") {
         submitted = state.guardSubmissions.some((s) => s.actorId === playerId);
         const lastGuarded = state.previousGuardTargets[playerId];
@@ -155,6 +197,7 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
         type: nightAction,
         candidates: candidates.map(toPublicPlayer),
         submitted,
+        ...(wolfSelections ? { wolfSelections } : {}),
       };
     }
   }
@@ -169,6 +212,14 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
   // 投票
   if (state.phase === "vote") {
     view.hasVoted = state.votes.some((v) => v.voterId === playerId);
+  }
+
+  // 最後の一言・生存決選投票
+  if (state.pendingExecution) {
+    view.isPendingExecution = state.pendingExecution.targetId === playerId;
+  }
+  if (state.phase === "appeal_vote") {
+    view.hasVotedAppeal = state.appealVotes.some((v) => v.voterId === playerId);
   }
 
   return view;

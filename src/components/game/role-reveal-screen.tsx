@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { ROLES } from "@/lib/game/roles";
-import { ICONS, styleOf } from "@/lib/game/role-style";
-import { Eye, Moon, CheckCircle2 } from "lucide-react";
+import { Moon, CheckCircle2 } from "lucide-react";
 import { PlayerPicker } from "@/components/game/player-picker";
+import { RoleInfoCard } from "@/components/game/role-info-card";
 
 export function RoleRevealScreen() {
   const { publicState, privateState, session, ackRole, earlyDivine } = useGame();
@@ -19,10 +17,6 @@ export function RoleRevealScreen() {
   if (!publicState || !privateState || !session) return null;
 
   const role = privateState.self.role;
-  const def = role ? ROLES[role] : null;
-  const text = role ? t.roles[role] : null;
-  const style = def ? styleOf(def.color) : null;
-  const Icon = def ? (ICONS[def.icon] ?? Eye) : Eye;
   const acked = !!privateState.roleAcked;
 
   const canEarlyDivine = role === "seer" && publicState.settings.seerFirstNightDivine;
@@ -47,42 +41,14 @@ export function RoleRevealScreen() {
           <p className="text-lg font-bold">{t.roleReveal.tapToReveal}</p>
           <p className="px-6 text-xs text-muted-foreground">{t.roleReveal.privacyHint}</p>
         </button>
-      ) : def && style && text ? (
-        <Card className={`w-full max-w-[320px] overflow-hidden border-2 bg-gradient-to-b ${style.panel}`}>
-          <CardContent className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-            <div className={`flex size-16 items-center justify-center rounded-2xl border ${style.chip}`}>
-              <Icon className="size-8" />
-            </div>
-            <div>
-              <p className="font-heading text-3xl font-bold">{text.name}</p>
-              <Badge variant="outline" className={`mt-1 ${style.text}`}>
-                {t.team[def.team]}
-              </Badge>
-            </div>
-            <p className="text-sm leading-relaxed text-foreground/90">{text.detail}</p>
-
-            {privateState.knownAllies && privateState.knownAllies.length > 0 && (
-              <div className="mt-2 w-full rounded-xl border border-border/60 bg-background/40 p-3">
-                <p className="mb-1 text-xs font-semibold text-muted-foreground">{t.roleReveal.allies}</p>
-                <p className="text-sm font-medium">
-                  {privateState.knownAllies.map((a) => a.name).join(t.common.listSeparator)}
-                </p>
-              </div>
-            )}
-
-            {privateState.allRolesKnown && (
-              <div className="mt-2 w-full space-y-1 rounded-xl border border-border/60 bg-background/40 p-3 text-left">
-                <p className="mb-1 text-xs font-semibold text-muted-foreground">{t.roleReveal.allRoles}</p>
-                {privateState.allRolesKnown.map((p) => (
-                  <div key={p.id} className="flex items-center justify-between text-xs">
-                    <span>{p.name}</span>
-                    <span className="text-muted-foreground">{t.roles[p.role].name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      ) : role ? (
+        <div className="w-full max-w-[320px]">
+          <RoleInfoCard
+            role={role}
+            knownAllies={privateState.knownAllies}
+            allRolesKnown={privateState.allRolesKnown}
+          />
+        </div>
       ) : null}
 
       {revealed && canEarlyDivine && (

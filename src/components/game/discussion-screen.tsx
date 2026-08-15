@@ -19,6 +19,7 @@ import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { PhaseTag, PlayerAvatar } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
+import { AllyNote } from "@/components/game/ally-note";
 
 export function DiscussionScreen() {
   const { publicState, privateState, session, advance, dictatorAct } = useGame();
@@ -50,6 +51,8 @@ export function DiscussionScreen() {
           </CardContent>
         </Card>
       )}
+
+      <AllyNote />
 
       {runoffNames && runoffNames.length > 0 && (
         <Card className="border-amber-500/40 bg-amber-500/10">

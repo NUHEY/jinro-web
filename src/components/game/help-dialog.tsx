@@ -14,8 +14,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { useGame } from "@/hooks/use-game";
 import { ROLE_ORDER, ROLES, type Team } from "@/lib/game/roles";
 import { ICONS, styleOf } from "@/lib/game/role-style";
+import { RoleInfoCard } from "@/components/game/role-info-card";
 import { cn } from "@/lib/utils";
 
 const WIN_TEAM_ORDER: Array<{ key: "winVillage" | "winWerewolf" | "winFox" | "winGod" | "winLover"; team: Team }> = [
@@ -32,6 +34,9 @@ export function HelpDialog({
   trigger?: React.ReactNode;
 }) {
   const { t } = useLocale();
+  const { privateState } = useGame();
+  const myRole = privateState?.self?.role ?? null;
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -50,14 +55,24 @@ export function HelpDialog({
           {t.help.tldr}
         </p>
 
-        <Tabs defaultValue="flow" className="flex min-h-0 flex-1 flex-col">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue={myRole ? "myrole" : "flow"} className="flex min-h-0 flex-1 flex-col">
+          <TabsList className={cn("grid w-full", myRole ? "grid-cols-4" : "grid-cols-3")}>
+            {myRole && <TabsTrigger value="myrole">{t.help.tabMyRole}</TabsTrigger>}
             <TabsTrigger value="flow">{t.help.tabFlow}</TabsTrigger>
             <TabsTrigger value="win">{t.help.tabWin}</TabsTrigger>
             <TabsTrigger value="roles">{t.help.tabRoles}</TabsTrigger>
           </TabsList>
 
           <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
+            {myRole && (
+              <TabsContent value="myrole" className="mt-0 space-y-3">
+                <RoleInfoCard
+                  role={myRole}
+                  knownAllies={privateState?.knownAllies}
+                  allRolesKnown={privateState?.allRolesKnown}
+                />
+              </TabsContent>
+            )}
             <TabsContent value="flow" className="mt-0 space-y-3">
               <p className="text-sm leading-relaxed text-muted-foreground">{t.help.intro}</p>
               <div className="space-y-2">
