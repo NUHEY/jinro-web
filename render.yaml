@@ -1,0 +1,18 @@
+# Render (render.com) 用のデプロイ設定。
+# Renderのダッシュボードで「New +」→「Blueprint」からこのリポジトリを選ぶと、
+# 以下の設定を読み取って自動的にWebサービスを作成します。
+# (Dockerを使わず、RenderのネイティブNode環境でビルド・起動する構成)
+services:
+  - type: web
+    name: jinro-dx
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20.18.1
+    healthCheckPath: /
