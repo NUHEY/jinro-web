@@ -130,7 +130,7 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
     view.allyNote = { text: state.groupNotes.lover, groupSize: state.loverIds.length };
   }
 
-  // 予言結果・霊媒結果(自分のログのみ)
+  // 予言結果・霊媒結果(自分のログのみ)。「今回」表示用に最新の1件、「自分の役職」画面での振り返り用に全履歴(新しい順)の両方を持たせる。
   if (role === "seer") {
     const logs = state.seerLogs.filter((l) => l.seerId === playerId);
     const latest = logs[logs.length - 1];
@@ -142,6 +142,9 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
         isBlack: latest.isBlack,
       };
     }
+    view.seerHistory = [...logs]
+      .reverse()
+      .map((l) => ({ day: l.day, targetId: l.targetId, targetName: nameOf(l.targetId), isBlack: l.isBlack }));
   }
   if (role === "medium") {
     const logs = state.mediumLogs.filter((l) => l.mediumId === playerId);
@@ -154,6 +157,9 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
         isBlack: latest.isBlack,
       };
     }
+    view.mediumHistory = [...logs]
+      .reverse()
+      .map((l) => ({ day: l.day, targetId: l.targetId, targetName: nameOf(l.targetId), isBlack: l.isBlack }));
   }
 
   // 独裁者(最初の昼(議論のみ、day===0)では発動できない)

@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { PlayerPicker } from "@/components/game/player-picker";
+import { ConfirmButton } from "@/components/game/shared";
 
 export function HunterRevengeScreen() {
   const { publicState, privateState, session, hunterRevenge, skipHunterRevenge } = useGame();
@@ -61,9 +62,16 @@ export function HunterRevengeScreen() {
       )}
 
       {!isMe && isHost && (
-        <Button variant="outline" onClick={skipHunterRevenge}>
+        <ConfirmButton
+          title={t.confirm.skipHunterRevengeTitle}
+          description={t.confirm.skipHunterRevengeDesc}
+          confirmLabel={t.confirm.skipHunterRevengeAction}
+          onConfirm={skipHunterRevenge}
+          variant="outline"
+          size="default"
+        >
           <FastForward className="size-4" /> {t.hunterRevenge.hostSkipButton}
-        </Button>
+        </ConfirmButton>
       )}
     </div>
   );

@@ -31,9 +31,9 @@ export function PlayerPicker({
             disabled={disabled}
             onClick={() => onSelect(p.id)}
             className={cn(
-              "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition active:scale-[0.97] disabled:opacity-50",
+              "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.97] disabled:opacity-50",
               active
-                ? "border-primary bg-primary/15 ring-1 ring-primary"
+                ? "scale-[1.02] border-primary bg-primary/15 ring-1 ring-primary shadow-[0_0_0_4px_color-mix(in_oklab,var(--primary)_15%,transparent)]"
                 : "border-border/60 bg-card/60 hover:bg-card"
             )}
           >

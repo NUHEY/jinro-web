@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { PhaseTag } from "@/components/game/shared";
+import { PhaseTag, ConfirmButton } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
 
 export function VoteScreen() {
@@ -27,7 +27,7 @@ export function VoteScreen() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-top safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30">
+        <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30">
           <VoteIcon className="size-7" />
         </div>
         <PhaseTag>{isRunoff ? t.vote.runoffTag(publicState.day) : t.vote.tag(publicState.day)}</PhaseTag>
@@ -86,9 +86,16 @@ export function VoteScreen() {
       )}
 
       {isHost && (
-        <Button variant="outline" className="w-full" onClick={forceResolveVote}>
+        <ConfirmButton
+          title={t.confirm.forceResolveTitle}
+          description={t.confirm.forceResolveDesc}
+          confirmLabel={t.confirm.forceResolveAction}
+          onConfirm={forceResolveVote}
+          variant="outline"
+          className="w-full"
+        >
           <FastForward className="size-4" /> {t.vote.forceAdvanceButton}
-        </Button>
+        </ConfirmButton>
       )}
     </div>
   );

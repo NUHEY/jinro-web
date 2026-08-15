@@ -35,14 +35,14 @@ export function RoleRevealScreen() {
       {!revealed ? (
         <button
           onClick={handleReveal}
-          className="flex aspect-[3/4] w-full max-w-[280px] flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-primary/40 bg-card/60 text-center transition active:scale-[0.98]"
+          className="flex aspect-[3/4] w-full max-w-[280px] animate-glow-pulse flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-primary/40 bg-card/60 text-center transition active:scale-[0.98]"
         >
-          <Moon className="size-10 text-primary" />
+          <Moon className="size-10 animate-float-slow text-primary" />
           <p className="text-lg font-bold">{t.roleReveal.tapToReveal}</p>
           <p className="px-6 text-xs text-muted-foreground">{t.roleReveal.privacyHint}</p>
         </button>
       ) : role ? (
-        <div className="w-full max-w-[320px]">
+        <div className="w-full max-w-[320px] animate-pop-in">
           <RoleInfoCard
             role={role}
             knownAllies={privateState.knownAllies}

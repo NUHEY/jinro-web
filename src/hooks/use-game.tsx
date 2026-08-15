@@ -25,6 +25,7 @@ import type { ErrorCode } from "@/lib/i18n/strings";
 interface GameContextValue {
   status: "connecting" | "entry" | "in_room";
   connected: boolean;
+  showReconnecting: boolean;
   session: StoredSession | null;
   publicState: PublicGameState | null;
   privateState: PrivateViewState | null;
@@ -55,23 +56,35 @@ interface GameContextValue {
   newGame: () => void;
 }
 
-const GameContext = createContext<GameContextValue | null>(null);
+// app-shell.tsx がフェーズ切り替えの緩衝(一定時間、直前の画面のデータを凍結して表示し続ける)を
+// 実装するために、直前のスナップショットで一時的に値を上書きした Provider を子要素にかぶせられるよう export する。
+export const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const { t } = useLocale();
   const [status, setStatus] = useState<GameContextValue["status"]>("connecting");
   const [connected, setConnected] = useState(false);
+  const [showReconnecting, setShowReconnecting] = useState(false);
   const [session, setSession] = useState<StoredSession | null>(null);
   const [publicState, setPublicState] = useState<PublicGameState | null>(null);
   const [privateState, setPrivateState] = useState<PrivateViewState | null>(null);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
   const attemptedRejoin = useRef(false);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const socket = getSocket();
 
+    // 瞬間的な切断(数百msの再接続ブリップ)でUIが「切断」を一瞬表示してしまわないよう、
+    // 一定時間(グレースピリオド)接続が復活しない場合のみ「再接続中」を表示する。
+    // 再接続できた場合は即座に(遅延なく)表示を消す。
     function onConnect() {
       setConnected(true);
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+      }
+      setShowReconnecting(false);
       const saved = loadSession();
       if (saved && !attemptedRejoin.current) {
         attemptedRejoin.current = true;
@@ -90,6 +103,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
     function onDisconnect() {
       setConnected(false);
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = setTimeout(() => {
+        setShowReconnecting(true);
+        reconnectTimer.current = null;
+      }, 1400);
     }
     function onPublic(state: PublicGameState) {
       setPublicState(state);
@@ -125,6 +143,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       socket.off("state:private", onPrivate);
       socket.off("room:error", onError);
       socket.off("room:kicked", onKicked);
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+      }
     };
   }, []);
 
@@ -264,6 +286,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const value: GameContextValue = {
     status,
     connected,
+    showReconnecting,
     session,
     publicState,
     privateState,

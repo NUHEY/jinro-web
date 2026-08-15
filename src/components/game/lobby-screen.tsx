@@ -76,7 +76,7 @@ export function LobbyScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-6 safe-top safe-bottom">
-      <Card className="border-primary/30 bg-primary/5">
+      <Card className="animate-in fade-in-0 zoom-in-95 border-primary/30 bg-primary/5 duration-500">
         <CardContent className="flex flex-col items-center gap-2 py-4">
           <p className="text-xs text-muted-foreground">{t.lobby.codeLabel}</p>
           <p className="font-mono text-4xl font-black tracking-[0.25em] text-primary">{publicState.code}</p>

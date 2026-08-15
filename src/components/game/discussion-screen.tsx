@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { PhaseTag, PlayerAvatar } from "@/components/game/shared";
+import { PhaseTag, PlayerAvatar, ConfirmButton } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
 import { AllyNote } from "@/components/game/ally-note";
 
@@ -38,7 +38,7 @@ export function DiscussionScreen() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-top safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30">
+        <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30">
           <MessagesSquare className="size-7" />
         </div>
         <PhaseTag>{isFirstRound ? t.discussion.firstRoundTag : t.discussion.tag(publicState.day)}</PhaseTag>
@@ -108,13 +108,25 @@ export function DiscussionScreen() {
       {isHost && (
         <div className="flex flex-col gap-2">
           {isFirstRound ? (
-            <Button size="lg" className="w-full font-bold" onClick={() => advance("night")}>
+            <ConfirmButton
+              title={t.confirm.advanceTitle}
+              description={t.confirm.advanceDesc}
+              confirmLabel={t.confirm.advanceAction}
+              onConfirm={() => advance("night")}
+              className="w-full font-bold"
+            >
               <Moon className="size-4" /> {t.discussion.proceedToNightButton}
-            </Button>
+            </ConfirmButton>
           ) : (
-            <Button size="lg" className="w-full font-bold" onClick={() => advance("vote")}>
+            <ConfirmButton
+              title={t.confirm.advanceTitle}
+              description={t.confirm.advanceDesc}
+              confirmLabel={t.confirm.advanceAction}
+              onConfirm={() => advance("vote")}
+              className="w-full font-bold"
+            >
               {t.discussion.skipButton}
-            </Button>
+            </ConfirmButton>
           )}
         </div>
       )}

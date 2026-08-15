@@ -2,9 +2,22 @@
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { PublicPlayer } from "@/lib/game/types";
 import { Wifi, WifiOff, Skull } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
+import type { ComponentProps, ReactNode } from "react";
 
 export function PlayerAvatar({
   player,
@@ -77,5 +90,52 @@ export function PhaseTag({ children }: { children: React.ReactNode }) {
     <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-semibold tracking-wide">
       {children}
     </Badge>
+  );
+}
+
+/**
+ * ホストなどの「進行を確定させるボタン」を、確認ポップアップ付きでラップする共通コンポーネント。
+ * 誤タップでゲームを進めてしまう事故を防ぐため、進行系のアクションはすべてこれを経由させる。
+ */
+export function ConfirmButton({
+  title,
+  description,
+  onConfirm,
+  children,
+  variant = "default",
+  size = "lg",
+  className,
+  confirmLabel,
+  disabled,
+}: {
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  children: ReactNode;
+  variant?: ComponentProps<typeof Button>["variant"];
+  size?: ComponentProps<typeof Button>["size"];
+  className?: string;
+  confirmLabel?: string;
+  disabled?: boolean;
+}) {
+  const { t } = useLocale();
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant={variant} size={size} className={className} disabled={disabled}>
+          {children}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>{confirmLabel ?? t.common.confirmProceed}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

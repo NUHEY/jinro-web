@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { PhaseTag } from "@/components/game/shared";
+import { PhaseTag, ConfirmButton } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
 import { AllyNote } from "@/components/game/ally-note";
 import type { NightActionType } from "@/lib/game/roles";
@@ -44,7 +44,7 @@ export function NightScreen() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-top safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-300 ring-1 ring-indigo-500/30">
+        <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-indigo-500/15 text-indigo-300 ring-1 ring-indigo-500/30">
           <Moon className="size-7" />
         </div>
         <PhaseTag>{t.night.tag(publicState.day)}</PhaseTag>
@@ -143,9 +143,16 @@ export function NightScreen() {
       )}
 
       {isHost && (
-        <Button variant="outline" className="w-full" onClick={forceResolveNight}>
+        <ConfirmButton
+          title={t.confirm.forceResolveTitle}
+          description={t.confirm.forceResolveDesc}
+          confirmLabel={t.confirm.forceResolveAction}
+          onConfirm={forceResolveNight}
+          variant="outline"
+          className="w-full"
+        >
           <FastForward className="size-4" /> {t.night.forceAdvanceButton}
-        </Button>
+        </ConfirmButton>
       )}
     </div>
   );

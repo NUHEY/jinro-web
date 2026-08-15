@@ -112,6 +112,9 @@ export interface PrivateViewState {
   knownAllies?: Array<{ id: string; name: string; role: RoleId }>; // 共有者・人狼・内通者・恋人
   seerResult?: { day: number; targetId: string; targetName: string; isBlack: boolean } | null;
   mediumResult?: { day: number; targetId: string; targetName: string; isBlack: boolean } | null;
+  // 予言者・霊媒師が「自分の役職」画面でこれまでの全結果を振り返れるように、最新の1件だけでなく全履歴も持たせる(新しい順)。
+  seerHistory?: Array<{ day: number; targetId: string; targetName: string; isBlack: boolean }>;
+  mediumHistory?: Array<{ day: number; targetId: string; targetName: string; isBlack: boolean }>;
   allRolesKnown?: Array<{ id: string; name: string; role: RoleId }>; // 神様専用
   canUseDictator?: boolean;
   pendingNightAction?: {

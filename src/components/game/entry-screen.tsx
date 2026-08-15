@@ -47,15 +47,15 @@ export function EntryScreen() {
         <LanguageSwitcher />
       </div>
 
-      <div className="mb-8 flex flex-col items-center gap-3 text-center">
-        <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/30">
+      <div className="mb-8 flex animate-in fade-in-0 flex-col items-center gap-3 text-center duration-500">
+        <div className="flex size-16 animate-float-slow items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/30">
           <Moon className="size-8" />
         </div>
         <h1 className="font-heading text-3xl font-bold tracking-tight">{t.entry.title}</h1>
         <p className="max-w-xs text-sm text-muted-foreground">{t.entry.subtitle}</p>
       </div>
 
-      <Card className="w-full max-w-sm border-border/70 bg-card/80 backdrop-blur">
+      <Card className="w-full max-w-sm animate-in fade-in-0 zoom-in-95 border-border/70 bg-card/80 backdrop-blur duration-500">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">{t.entry.cardTitle}</CardTitle>
           <CardDescription>{t.entry.cardDesc}</CardDescription>

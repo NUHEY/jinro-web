@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { PhaseTag } from "@/components/game/shared";
+import { PhaseTag, ConfirmButton } from "@/components/game/shared";
 import { cn } from "@/lib/utils";
 import type { AppealChoice } from "@/lib/game/types";
 
@@ -25,7 +25,7 @@ export function AppealVoteScreen() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-top safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30">
+        <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30">
           <Scale className="size-7" />
         </div>
         <PhaseTag>{t.appealVote.tag(publicState.day)}</PhaseTag>
@@ -104,9 +104,16 @@ export function AppealVoteScreen() {
       )}
 
       {isHost && (
-        <Button variant="outline" className="w-full" onClick={forceResolveAppealVote}>
+        <ConfirmButton
+          title={t.confirm.forceResolveTitle}
+          description={t.confirm.forceResolveDesc}
+          confirmLabel={t.confirm.forceResolveAction}
+          onConfirm={forceResolveAppealVote}
+          variant="outline"
+          className="w-full"
+        >
           <FastForward className="size-4" /> {t.appealVote.forceAdvanceButton}
-        </Button>
+        </ConfirmButton>
       )}
     </div>
   );

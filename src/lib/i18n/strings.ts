@@ -46,6 +46,8 @@ interface Strings {
     cancel: string;
     people: (n: number) => string;
     listSeparator: string;
+    confirmProceed: string;
+    transitioning: string;
   };
   entry: {
     title: string;
@@ -219,11 +221,24 @@ interface Strings {
     waitingHost: string;
     leaveButton: string;
   };
+  confirm: {
+    advanceTitle: string;
+    advanceDesc: string;
+    advanceAction: string;
+    forceResolveTitle: string;
+    forceResolveDesc: string;
+    forceResolveAction: string;
+    newGameTitle: string;
+    newGameDesc: string;
+    newGameAction: string;
+    skipHunterRevengeTitle: string;
+    skipHunterRevengeDesc: string;
+    skipHunterRevengeAction: string;
+  };
   help: {
     button: string;
     title: string;
     tldr: string;
-    tabMyRole: string;
     tabFlow: string;
     tabWin: string;
     tabRoles: string;
@@ -239,6 +254,17 @@ interface Strings {
     winLover: string;
     rolesTitle: string;
     rolesIntro: string;
+    close: string;
+  };
+  myRole: {
+    button: string;
+    title: string;
+    dayLabel: (day: number) => string;
+    seerHistoryTitle: string;
+    seerHistoryEmpty: string;
+    mediumHistoryTitle: string;
+    mediumHistoryEmpty: string;
+    noRoleYet: string;
     close: string;
   };
   team: Record<Team, string>;
@@ -266,6 +292,8 @@ const ja: Strings = {
     cancel: "キャンセル",
     people: (n) => `${n}人`,
     listSeparator: "、",
+    confirmProceed: "進める",
+    transitioning: "次の場面へ移ります…",
   },
   entry: {
     title: "人狼DX オンライン",
@@ -451,11 +479,24 @@ const ja: Strings = {
     waitingHost: "ホストが次のゲームを開始するのを待っています…",
     leaveButton: "退出する",
   },
+  confirm: {
+    advanceTitle: "次へ進みますか?",
+    advanceDesc: "全員の準備ができていることを確認してから進めてください。この操作は取り消せません。",
+    advanceAction: "次へ進む",
+    forceResolveTitle: "強制的に進めますか?",
+    forceResolveDesc: "まだ行動・投票していない人がいる場合、その人の分はスキップされます。",
+    forceResolveAction: "強制的に進める",
+    newGameTitle: "同じメンバーで新しいゲームを始めますか?",
+    newGameDesc: "現在の結果はリセットされ、役職の再配布から始まります。",
+    newGameAction: "新しいゲームを始める",
+    skipHunterRevengeTitle: "道連れの機会をスキップしますか?",
+    skipHunterRevengeDesc: "スキップすると、狩人は誰も道連れにできません。",
+    skipHunterRevengeAction: "スキップする",
+  },
   help: {
     button: "遊び方",
     title: "遊び方・ルール",
     tldr: "ひとことで言うと: 隠れている「人狼」を、市民たちが話し合いで見つけ出して追放するゲームです。",
-    tabMyRole: "自分の役職",
     tabFlow: "流れ",
     tabWin: "勝利条件",
     tabRoles: "役職",
@@ -479,7 +520,18 @@ const ja: Strings = {
     winGod: "神様: ゲーム終了時に生きていれば、単独で勝利。",
     winLover: "恋人: ゲーム終了時に2人とも生きていれば、2人で勝利。",
     rolesTitle: "役職一覧(13種)",
-    rolesIntro: "自分の役職の説明は、この画面の「自分の役職」タブからゲーム中いつでも確認できます。",
+    rolesIntro: "自分の役職の説明は、画面上部の「自分の役職」ボタンからゲーム中いつでも確認できます。",
+    close: "閉じる",
+  },
+  myRole: {
+    button: "自分の役職",
+    title: "あなたの役職",
+    dayLabel: (day) => `${day}日目`,
+    seerHistoryTitle: "今まで占った人",
+    seerHistoryEmpty: "まだ誰も占っていません。",
+    mediumHistoryTitle: "今まで判定した人",
+    mediumHistoryEmpty: "まだ判定した人はいません。",
+    noRoleYet: "まだ役職が確認されていません。",
     close: "閉じる",
   },
   team: {
@@ -622,6 +674,8 @@ const en: Strings = {
     cancel: "Cancel",
     people: (n) => `${n}`,
     listSeparator: ", ",
+    confirmProceed: "Proceed",
+    transitioning: "Moving to the next scene…",
   },
   entry: {
     title: "Jinro DX Online",
@@ -807,11 +861,24 @@ const en: Strings = {
     waitingHost: "Waiting for the host to start a new game…",
     leaveButton: "Leave room",
   },
+  confirm: {
+    advanceTitle: "Move on to the next step?",
+    advanceDesc: "Make sure everyone is ready before continuing. This can't be undone.",
+    advanceAction: "Continue",
+    forceResolveTitle: "Force everyone forward?",
+    forceResolveDesc: "Anyone who hasn't acted or voted yet will be skipped.",
+    forceResolveAction: "Force forward",
+    newGameTitle: "Start a new game with the same players?",
+    newGameDesc: "The current results will be reset and roles will be redealt.",
+    newGameAction: "Start new game",
+    skipHunterRevengeTitle: "Skip the hunter's revenge?",
+    skipHunterRevengeDesc: "If skipped, the hunter won't take anyone down with them.",
+    skipHunterRevengeAction: "Skip",
+  },
   help: {
     button: "How to play",
     title: "How to play / Rules",
     tldr: "In short: the Villagers talk it out to find and vote off the hidden Werewolves.",
-    tabMyRole: "My role",
     tabFlow: "Flow",
     tabWin: "Winning",
     tabRoles: "Roles",
@@ -835,7 +902,18 @@ const en: Strings = {
     winGod: "God: wins alone if still alive when the game ends.",
     winLover: "Lovers: win together if both are still alive when the game ends.",
     rolesTitle: "All 13 roles",
-    rolesIntro: "You can check your own role's description any time during the game from the \"My role\" tab on this screen.",
+    rolesIntro: "You can check your own role's description any time during the game from the \"My Role\" button at the top of the screen.",
+    close: "Close",
+  },
+  myRole: {
+    button: "My Role",
+    title: "Your role",
+    dayLabel: (day) => `Night ${day}`,
+    seerHistoryTitle: "Everyone you've investigated",
+    seerHistoryEmpty: "You haven't investigated anyone yet.",
+    mediumHistoryTitle: "Everyone you've read",
+    mediumHistoryEmpty: "You haven't read anyone yet.",
+    noRoleYet: "Your role hasn't been revealed yet.",
     close: "Close",
   },
   team: {
@@ -978,6 +1056,8 @@ const ko: Strings = {
     cancel: "취소",
     people: (n) => `${n}명`,
     listSeparator: ", ",
+    confirmProceed: "진행",
+    transitioning: "다음 장면으로 이동 중…",
   },
   entry: {
     title: "진로DX 온라인",
@@ -1163,11 +1243,24 @@ const ko: Strings = {
     waitingHost: "호스트가 다음 게임을 시작하기를 기다리는 중…",
     leaveButton: "나가기",
   },
+  confirm: {
+    advanceTitle: "다음으로 진행할까요?",
+    advanceDesc: "모두 준비되었는지 확인한 후 진행해 주세요. 이 작업은 취소할 수 없습니다.",
+    advanceAction: "진행하기",
+    forceResolveTitle: "강제로 진행할까요?",
+    forceResolveDesc: "아직 행동하거나 투표하지 않은 사람이 있다면 건너뜁니다.",
+    forceResolveAction: "강제로 진행",
+    newGameTitle: "같은 멤버로 새 게임을 시작할까요?",
+    newGameDesc: "현재 결과는 초기화되고 역할이 다시 배분됩니다.",
+    newGameAction: "새 게임 시작",
+    skipHunterRevengeTitle: "사냥꾼의 복수를 건너뛸까요?",
+    skipHunterRevengeDesc: "건너뛰면 사냥꾼은 아무도 함께 데려가지 못합니다.",
+    skipHunterRevengeAction: "건너뛰기",
+  },
   help: {
     button: "게임 방법",
     title: "게임 방법 · 규칙",
     tldr: "한마디로: 숨어 있는 「인랑」을, 시민들이 대화를 통해 찾아내 추방하는 게임입니다.",
-    tabMyRole: "나의 역할",
     tabFlow: "진행 순서",
     tabWin: "승리 조건",
     tabRoles: "역할",
@@ -1191,7 +1284,18 @@ const ko: Strings = {
     winGod: "신: 게임 종료 시 살아 있으면 단독 승리.",
     winLover: "연인: 게임 종료 시 두 사람 모두 살아 있으면 함께 승리.",
     rolesTitle: "역할 목록 (13종)",
-    rolesIntro: "자신의 역할에 대한 설명은 이 화면의 「나의 역할」 탭에서 게임 중 언제든지 확인할 수 있습니다.",
+    rolesIntro: "자신의 역할에 대한 설명은 화면 상단의 「나의 역할」 버튼에서 게임 중 언제든지 확인할 수 있습니다.",
+    close: "닫기",
+  },
+  myRole: {
+    button: "나의 역할",
+    title: "당신의 역할",
+    dayLabel: (day) => `${day}일차`,
+    seerHistoryTitle: "지금까지 점술한 사람",
+    seerHistoryEmpty: "아직 아무도 점술하지 않았습니다.",
+    mediumHistoryTitle: "지금까지 판정한 사람",
+    mediumHistoryEmpty: "아직 판정한 사람이 없습니다.",
+    noRoleYet: "아직 역할이 확인되지 않았습니다.",
     close: "닫기",
   },
   team: {

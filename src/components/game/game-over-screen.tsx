@@ -9,6 +9,7 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { ROLES } from "@/lib/game/roles";
 import { ICONS, styleOf } from "@/lib/game/role-style";
 import { cn } from "@/lib/utils";
+import { ConfirmButton } from "@/components/game/shared";
 
 const PRIMARY_COLOR: Record<"village" | "werewolf" | "draw", string> = {
   village: "text-sky-300",
@@ -27,7 +28,7 @@ export function GameOverScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-top safe-bottom">
-      <div className="flex flex-col items-center gap-2 text-center">
+      <div className="flex animate-pop-in flex-col items-center gap-2 text-center">
         <PartyPopper className="size-10 text-primary" />
         <h2 className={cn("font-heading text-3xl font-bold", PRIMARY_COLOR[winner.primary])}>
           {t.gameOver.primary[winner.primary]}
@@ -67,9 +68,15 @@ export function GameOverScreen() {
 
       <div className="flex flex-col gap-2 pb-4">
         {isHost ? (
-          <Button size="lg" className="w-full font-bold" onClick={newGame}>
+          <ConfirmButton
+            title={t.confirm.newGameTitle}
+            description={t.confirm.newGameDesc}
+            confirmLabel={t.confirm.newGameAction}
+            onConfirm={newGame}
+            className="w-full font-bold"
+          >
             <RefreshCcw className="size-4" /> {t.gameOver.newGameButton}
-          </Button>
+          </ConfirmButton>
         ) : (
           <p className="text-center text-sm text-muted-foreground">{t.gameOver.waitingHost}</p>
         )}

@@ -1,11 +1,10 @@
 "use client";
 
 import { Sun, Skull, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { PhaseTag } from "@/components/game/shared";
+import { PhaseTag, ConfirmButton } from "@/components/game/shared";
 
 export function DayResultScreen() {
   const { publicState, privateState, session, advance } = useGame();
@@ -22,7 +21,7 @@ export function DayResultScreen() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-top safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30">
+        <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30">
           <Sun className="size-7" />
         </div>
         <PhaseTag>{t.dayResult.tag(publicState.day)}</PhaseTag>
@@ -68,9 +67,15 @@ export function DayResultScreen() {
       )}
 
       {isHost ? (
-        <Button size="lg" className="w-full font-bold" onClick={() => advance("discussion")}>
+        <ConfirmButton
+          title={t.confirm.advanceTitle}
+          description={t.confirm.advanceDesc}
+          confirmLabel={t.confirm.advanceAction}
+          onConfirm={() => advance("discussion")}
+          className="w-full font-bold"
+        >
           {t.dayResult.continueButton}
-        </Button>
+        </ConfirmButton>
       ) : (
         <p className="text-center text-xs text-muted-foreground">{t.dayResult.waitingHost}</p>
       )}
