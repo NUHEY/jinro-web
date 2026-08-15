@@ -25,8 +25,11 @@ export interface ClientToServerEvents {
   "room:updateComposition": (payload: { roleCounts: RoleCounts }) => void;
   "room:start": (payload: Record<string, never>, cb?: (res: StartResult) => void) => void;
   "host:advance": (payload: { to: "night" | "discussion" | "vote" }) => void;
-  "discussion:extend": (payload: Record<string, never>) => void;
+  "host:forceResolveNight": (payload: Record<string, never>) => void;
+  "host:forceResolveVote": (payload: Record<string, never>) => void;
+  "host:skipHunterRevenge": (payload: Record<string, never>) => void;
   "role:ack": (payload: Record<string, never>) => void;
+  "seer:earlyDivine": (payload: { targetId: string }) => void;
   "night:submit": (payload: { targetId: string | null }) => void;
   "hunter:revenge": (payload: { targetId: string | null }) => void;
   "vote:submit": (payload: { targetId: string }) => void;

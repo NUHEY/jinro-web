@@ -80,12 +80,13 @@ export function ExecutionResultScreen() {
         </CardContent>
       </Card>
 
-      {isHost && (
+      {isHost ? (
         <Button size="lg" className="w-full font-bold" onClick={() => advance("night")}>
           {t.executionResult.continueButton}
         </Button>
+      ) : (
+        <p className="text-center text-xs text-muted-foreground">{t.executionResult.waitingHost}</p>
       )}
-      <p className="text-center text-xs text-muted-foreground">{t.executionResult.autoNotice}</p>
     </div>
   );
 }

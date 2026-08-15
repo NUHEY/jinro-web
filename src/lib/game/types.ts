@@ -35,11 +35,8 @@ export interface RoleCounts {
 
 export interface RoomSettings {
   revealRoleOnDeath: boolean; // 死亡時に役職を公開するか(デフォルトOFF)
-  discussionSeconds: number; // 議論タイマーの秒数
-  voteSeconds: number; // 投票タイマーの秒数
-  nightSeconds: number; // 夜フェーズタイマーの秒数
-  roleRevealSeconds: number; // 役職確認フェーズの自動進行までの秒数
-  resultPauseSeconds: number; // 朝の結果発表→議論、追放結果→次の夜、の自動進行までの秒数
+  seerFirstNightDivine: boolean; // 予言者が役職確認のタイミングで1人占える発展ルール(デフォルトOFF、説明書11ページ)
+  allowFirstNightKill: boolean; // 最初の夜(1日目の夜)に人狼が襲撃できるか(デフォルトON=通常ルール)
 }
 
 export interface NightSubmission {

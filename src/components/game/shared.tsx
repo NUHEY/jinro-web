@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import type { PublicPlayer } from "@/lib/game/types";
@@ -69,48 +68,6 @@ export function PlayerRow({
         </span>
       </div>
       {right}
-    </div>
-  );
-}
-
-export function useCountdown(endsAt: number | null): number | null {
-  const [remaining, setRemaining] = useState<number | null>(null);
-  useEffect(() => {
-    if (!endsAt) return undefined;
-    const update = () => setRemaining(Math.max(0, endsAt - Date.now()));
-    const immediate = setTimeout(update, 0);
-    const id = setInterval(update, 250);
-    return () => {
-      clearTimeout(immediate);
-      clearInterval(id);
-    };
-  }, [endsAt]);
-  return remaining;
-}
-
-export function CountdownBar({ endsAt, totalSeconds }: { endsAt: number | null; totalSeconds: number }) {
-  const { t } = useLocale();
-  const remaining = useCountdown(endsAt);
-  if (remaining === null) return null;
-  const seconds = Math.ceil(remaining / 1000);
-  const pct = Math.max(0, Math.min(100, (remaining / (totalSeconds * 1000)) * 100));
-  return (
-    <div className="w-full space-y-1.5">
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>{t.common.timeRemaining}</span>
-        <span className={cn("font-mono font-semibold tabular-nums", seconds <= 10 && "text-destructive")}>
-          {t.common.seconds(seconds)}
-        </span>
-      </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn(
-            "h-full rounded-full transition-[width] duration-300 ease-linear",
-            seconds <= 10 ? "bg-destructive" : "bg-primary"
-          )}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
     </div>
   );
 }

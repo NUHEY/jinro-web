@@ -129,10 +129,10 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
     }
   }
 
-  // 独裁者
+  // 独裁者(最初の昼(議論のみ、day===0)では発動できない)
   if (role === "dictator") {
     view.canUseDictator =
-      !!self.alive && !state.dictatorUsed && state.phase === "discussion";
+      !!self.alive && !state.dictatorUsed && state.phase === "discussion" && state.day > 0;
   }
 
   // 夜アクション
@@ -146,6 +146,8 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
         candidates = others.filter((p) => !state.wolfIds.includes(p.id));
       } else if (nightAction === "guard") {
         submitted = state.guardSubmissions.some((s) => s.actorId === playerId);
+        const lastGuarded = state.previousGuardTargets[playerId];
+        if (lastGuarded) candidates = others.filter((p) => p.id !== lastGuarded);
       } else if (nightAction === "divine") {
         submitted = state.divineSubmissions.some((s) => s.actorId === playerId);
       }

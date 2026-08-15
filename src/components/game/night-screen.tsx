@@ -1,25 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Moon, CheckCircle2 } from "lucide-react";
+import { Moon, CheckCircle2, FastForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { CountdownBar, PhaseTag } from "@/components/game/shared";
+import { PhaseTag } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
 import type { NightActionType } from "@/lib/game/roles";
 
 export function NightScreen() {
-  const { publicState, privateState, submitNight } = useGame();
+  const { publicState, privateState, session, submitNight, forceResolveNight } = useGame();
   const { t } = useLocale();
   const [pick, setPick] = useState<string | null | undefined>(undefined);
   const [confirmed, setConfirmed] = useState(false);
 
-  if (!publicState || !privateState) return null;
+  if (!publicState || !privateState || !session) return null;
   const pending = privateState.pendingNightAction;
   const alive = privateState.self.alive;
   const actionCopy = pending ? t.night.actions[pending.type as Exclude<NightActionType, "none">] : null;
+  const me = publicState.players.find((p) => p.id === session.playerId);
+  const isHost = !!me?.isHost;
 
   const handleSubmit = () => {
     submitNight(pick ?? null);
@@ -35,8 +37,6 @@ export function NightScreen() {
         <PhaseTag>{t.night.tag(publicState.day)}</PhaseTag>
       </div>
 
-      <CountdownBar endsAt={publicState.phaseEndsAt} totalSeconds={publicState.settings.nightSeconds} />
-
       {!alive ? (
         <Card>
           <CardContent className="py-8 text-center text-sm text-muted-foreground">
@@ -50,6 +50,11 @@ export function NightScreen() {
               <p className="text-base font-bold">{actionCopy.title}</p>
               <p className="mt-1 text-xs text-muted-foreground">{actionCopy.desc}</p>
             </div>
+            {pending.type === "attack" && publicState.day === 1 && !publicState.settings.allowFirstNightKill && (
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+                {t.night.firstNightKillDisabledNotice}
+              </div>
+            )}
             <PlayerPicker
               candidates={pending.candidates}
               selectedId={pick}
@@ -105,6 +110,12 @@ export function NightScreen() {
         <p className="text-center text-xs text-muted-foreground">
           {t.night.progress(publicState.progress.submitted, publicState.progress.total)}
         </p>
+      )}
+
+      {isHost && (
+        <Button variant="outline" className="w-full" onClick={forceResolveNight}>
+          <FastForward className="size-4" /> {t.night.forceAdvanceButton}
+        </Button>
       )}
     </div>
   );

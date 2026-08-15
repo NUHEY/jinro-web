@@ -33,8 +33,11 @@ interface GameContextValue {
   updateComposition: (roleCounts: RoleCounts) => void;
   startGame: () => Promise<StartResult>;
   advance: (to: "night" | "discussion" | "vote") => void;
-  extendDiscussion: () => void;
+  forceResolveNight: () => void;
+  forceResolveVote: () => void;
+  skipHunterRevenge: () => void;
   ackRole: () => void;
+  earlyDivine: (targetId: string) => void;
   submitNight: (targetId: string | null) => void;
   hunterRevenge: (targetId: string | null) => void;
   vote: (targetId: string) => void;
@@ -192,12 +195,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     getSocket().emit("host:advance", { to });
   }, []);
 
-  const extendDiscussion = useCallback(() => {
-    getSocket().emit("discussion:extend", {});
+  const forceResolveNight = useCallback(() => {
+    getSocket().emit("host:forceResolveNight", {});
+  }, []);
+
+  const forceResolveVote = useCallback(() => {
+    getSocket().emit("host:forceResolveVote", {});
+  }, []);
+
+  const skipHunterRevenge = useCallback(() => {
+    getSocket().emit("host:skipHunterRevenge", {});
   }, []);
 
   const ackRole = useCallback(() => {
     getSocket().emit("role:ack", {});
+  }, []);
+
+  const earlyDivine = useCallback((targetId: string) => {
+    getSocket().emit("seer:earlyDivine", { targetId });
   }, []);
 
   const submitNight = useCallback((targetId: string | null) => {
@@ -237,8 +252,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     updateComposition,
     startGame,
     advance,
-    extendDiscussion,
+    forceResolveNight,
+    forceResolveVote,
+    skipHunterRevenge,
     ackRole,
+    earlyDivine,
     submitNight,
     hunterRevenge,
     vote,

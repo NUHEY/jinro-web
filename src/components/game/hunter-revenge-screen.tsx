@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Crosshair } from "lucide-react";
+import { Crosshair, FastForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
@@ -9,13 +9,15 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { PlayerPicker } from "@/components/game/player-picker";
 
 export function HunterRevengeScreen() {
-  const { publicState, privateState, hunterRevenge } = useGame();
+  const { publicState, privateState, session, hunterRevenge, skipHunterRevenge } = useGame();
   const { t } = useLocale();
   const [pick, setPick] = useState<string | null | undefined>(undefined);
   const [sent, setSent] = useState(false);
-  if (!publicState) return null;
+  if (!publicState || !session) return null;
 
   const isMe = !!privateState?.pendingHunterRevenge;
+  const me = publicState.players.find((p) => p.id === session.playerId);
+  const isHost = !!me?.isHost;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-8 safe-top safe-bottom">
@@ -56,6 +58,12 @@ export function HunterRevengeScreen() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {!isMe && isHost && (
+        <Button variant="outline" onClick={skipHunterRevenge}>
+          <FastForward className="size-4" /> {t.hunterRevenge.hostSkipButton}
+        </Button>
       )}
     </div>
   );

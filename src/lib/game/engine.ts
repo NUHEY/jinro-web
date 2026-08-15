@@ -62,6 +62,7 @@ export interface GameState {
   votes: VoteSubmission[];
   voteTally: Record<string, number> | null;
   runoffCandidateIds: string[] | null; // 決選投票中: 投票対象をこのIDに限定する
+  previousGuardTargets: Record<string, string>; // ボディーガードactorId -> 前回守った相手(連続ガード禁止用)
 
   roundDeaths: DeathRecord[];
   lastDeaths: DeathRecord[];
@@ -83,11 +84,8 @@ export interface GameState {
 
 export const DEFAULT_SETTINGS: RoomSettings = {
   revealRoleOnDeath: false,
-  discussionSeconds: 180,
-  voteSeconds: 30,
-  nightSeconds: 60,
-  roleRevealSeconds: 25,
-  resultPauseSeconds: 10,
+  seerFirstNightDivine: false,
+  allowFirstNightKill: true,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -127,6 +125,7 @@ export function createLobbyState(code: string, settings: RoomSettings): GameStat
     votes: [],
     voteTally: null,
     runoffCandidateIds: null,
+    previousGuardTargets: {},
     roundDeaths: [],
     lastDeaths: [],
     lastExecuted: null,
@@ -179,6 +178,7 @@ export function assignRolesAndStart(state: GameState, roleCounts: RoleCounts) {
   state.votes = [];
   state.voteTally = null;
   state.runoffCandidateIds = null;
+  state.previousGuardTargets = {};
   state.roundDeaths = [];
   state.lastDeaths = [];
   state.lastExecuted = null;
@@ -190,7 +190,7 @@ export function assignRolesAndStart(state: GameState, roleCounts: RoleCounts) {
   state.deathLog = [];
   state.roleAcked = new Set();
   state.phase = "role_reveal";
-  state.phaseEndsAt = Date.now() + state.settings.roleRevealSeconds * 1000;
+  state.phaseEndsAt = null;
 }
 
 // ゲーム終了後、同じ部屋・同じメンバーで再戦できるようにロビーへ戻す
@@ -216,6 +216,7 @@ export function resetToLobby(state: GameState) {
   state.votes = [];
   state.voteTally = null;
   state.runoffCandidateIds = null;
+  state.previousGuardTargets = {};
   state.roundDeaths = [];
   state.lastDeaths = [];
   state.lastExecuted = null;
@@ -239,6 +240,20 @@ export function allAliveAcked(state: GameState): boolean {
   return alive.every((p) => state.roleAcked.has(p.id));
 }
 
+// 発展ルール: 予言者が「役職確認」のタイミングで1人だけ占える(説明書11ページ、設定でON/OFF可能)。
+// 1ゲームにつき1回のみ。結果は通常の占い結果(seerLogs, day:0)として記録され、
+// 以降の画面でも「前回の占い結果」として自然に表示される。
+export function submitEarlyDivine(state: GameState, seerId: string, targetId: string) {
+  if (!state.settings.seerFirstNightDivine) return;
+  if (state.phase !== "role_reveal") return;
+  const seer = getPlayer(state, seerId);
+  const target = getPlayer(state, targetId);
+  if (!seer || seer.role !== "seer" || !target || target.id === seerId) return;
+  if (state.seerLogs.some((l) => l.seerId === seerId && l.day === 0)) return; // 1ゲームにつき1回まで
+  const isBlack = judgeAsBlack(target.role as RoleId);
+  state.seerLogs.push({ day: 0, seerId, targetId: target.id, isBlack });
+}
+
 export function alivePlayers(state: GameState): Player[] {
   return state.players.filter((p) => p.alive);
 }
@@ -247,13 +262,24 @@ export function getPlayer(state: GameState, id: string): Player | undefined {
   return state.players.find((p) => p.id === id);
 }
 
+// 最初の役職確認の直後に行う「最初の昼(議論のみ、追放投票なし)」。
+// ここでは人狼の襲撃などの夜の能力はまだ発動しない(公式ルールブック通り)。
+export function startFirstDiscussion(state: GameState) {
+  state.phase = "discussion";
+  state.phaseEndsAt = null;
+}
+
 export function startNight(state: GameState) {
+  // 直前の夜にボディーガードが守った相手を記録しておく(連続ガード禁止のため)
+  for (const sub of state.guardSubmissions) {
+    if (sub.targetId) state.previousGuardTargets[sub.actorId] = sub.targetId;
+  }
   state.phase = "night";
   state.day += 1;
   state.attackSubmissions = [];
   state.guardSubmissions = [];
   state.divineSubmissions = [];
-  state.phaseEndsAt = Date.now() + state.settings.nightSeconds * 1000;
+  state.phaseEndsAt = null;
 }
 
 export function submitAttack(state: GameState, actorId: string, targetId: string | null) {
@@ -340,7 +366,7 @@ function finalizeResolution(state: GameState) {
   }
   state.roundDeaths = [];
   state.resolution = null;
-  state.phaseEndsAt = Date.now() + state.settings.resultPauseSeconds * 1000;
+  state.phaseEndsAt = null;
   checkWinConditions(state);
 }
 
@@ -365,8 +391,9 @@ export function resolveNight(state: GameState) {
     }
   }
 
-  // 人狼の襲撃処理
-  if (attackTargetId) {
+  // 人狼の襲撃処理(設定で「最初の夜は人狼が殺せない」がONの場合、day===1の襲撃は不発になる)
+  const firstNightKillBlocked = state.day === 1 && !state.settings.allowFirstNightKill;
+  if (attackTargetId && !firstNightKillBlocked) {
     const target = getPlayer(state, attackTargetId);
     if (target && target.alive) {
       const protectedByGuard = guardedIds.has(attackTargetId);
@@ -406,20 +433,14 @@ export function recordMediumReading(state: GameState) {
 
 export function startDiscussion(state: GameState) {
   state.phase = "discussion";
-  state.phaseEndsAt = Date.now() + state.settings.discussionSeconds * 1000;
-}
-
-// ホストが議論タイムを任意の回数だけ延長できる(上限なし)
-export function extendDiscussion(state: GameState, extraSeconds: number) {
-  if (state.phase !== "discussion" || !state.phaseEndsAt) return;
-  state.phaseEndsAt += extraSeconds * 1000;
+  state.phaseEndsAt = null;
 }
 
 export function startVote(state: GameState) {
   state.phase = "vote";
   state.votes = [];
   state.voteTally = null;
-  state.phaseEndsAt = Date.now() + state.settings.voteSeconds * 1000;
+  state.phaseEndsAt = null;
 }
 
 export function submitVote(state: GameState, voterId: string, targetId: string) {
@@ -486,16 +507,18 @@ function executeTarget(state: GameState, targetId: string | null) {
 
 export function checkWinConditions(state: GameState) {
   const alive = alivePlayers(state);
+  // 勝敗判定の頭数ルール(説明書8ページ準拠):
+  // ・「人狼」としてカウントされるのは人狼カードそのものだけ(裏切り者・内通者は含まない)
+  // ・裏切り者/内通者/神様/恋人は、勝敗の頭数計算上は「人間」としてカウントされる
+  //   (裏切り者・内通者はチームとしては人狼側で勝つが、頭数には入らない)
+  // ・妖狐だけは頭数計算から完全に除外される(人間にも人狼にもカウントしない)
   const aliveWolves = alive.filter((p) => p.role === "werewolf");
-  const aliveWolfSide = alive.filter(
-    (p) => p.role === "werewolf" || p.role === "traitor" || p.role === "insider"
-  );
-  const aliveOthers = alive.length - aliveWolfSide.length;
+  const aliveHumans = alive.filter((p) => p.role !== "werewolf" && p.role !== "fox");
 
   let primary: WinnerInfo["primary"] | null = null;
   if (aliveWolves.length === 0) {
     primary = "village";
-  } else if (aliveWolfSide.length >= aliveOthers) {
+  } else if (aliveWolves.length >= aliveHumans.length) {
     primary = "werewolf";
   }
 

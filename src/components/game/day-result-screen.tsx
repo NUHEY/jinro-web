@@ -49,12 +49,13 @@ export function DayResultScreen() {
         </CardContent>
       </Card>
 
-      {isHost && (
+      {isHost ? (
         <Button size="lg" className="w-full font-bold" onClick={() => advance("discussion")}>
           {t.dayResult.continueButton}
         </Button>
+      ) : (
+        <p className="text-center text-xs text-muted-foreground">{t.dayResult.waitingHost}</p>
       )}
-      <p className="text-center text-xs text-muted-foreground">{t.dayResult.autoNotice}</p>
     </div>
   );
 }

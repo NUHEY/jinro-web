@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessagesSquare, Gavel, TimerReset, Vote as VoteIcon } from "lucide-react";
+import { MessagesSquare, Gavel, Vote as VoteIcon, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,17 +17,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { CountdownBar, PhaseTag, PlayerAvatar } from "@/components/game/shared";
+import { PhaseTag, PlayerAvatar } from "@/components/game/shared";
 import { PlayerPicker } from "@/components/game/player-picker";
 
 export function DiscussionScreen() {
-  const { publicState, privateState, session, advance, extendDiscussion, dictatorAct } = useGame();
+  const { publicState, privateState, session, advance, dictatorAct } = useGame();
   const { t } = useLocale();
   const [dictatorTarget, setDictatorTarget] = useState<string | null | undefined>(undefined);
   if (!publicState || !session) return null;
 
   const me = publicState.players.find((p) => p.id === session.playerId);
   const isHost = !!me?.isHost;
+  const isFirstRound = publicState.day === 0;
   const aliveCandidates = publicState.players.filter((p) => p.alive && p.id !== session.playerId);
   const runoffNames = publicState.runoffCandidateIds
     ?.map((id) => publicState.players.find((p) => p.id === id)?.name)
@@ -39,10 +40,16 @@ export function DiscussionScreen() {
         <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30">
           <MessagesSquare className="size-7" />
         </div>
-        <PhaseTag>{t.discussion.tag(publicState.day)}</PhaseTag>
+        <PhaseTag>{isFirstRound ? t.discussion.firstRoundTag : t.discussion.tag(publicState.day)}</PhaseTag>
       </div>
 
-      <CountdownBar endsAt={publicState.phaseEndsAt} totalSeconds={publicState.settings.discussionSeconds} />
+      {isFirstRound && (
+        <Card className="border-sky-500/30 bg-sky-500/10">
+          <CardContent className="py-4 text-center text-sm text-sky-200">
+            {t.discussion.firstRoundNotice}
+          </CardContent>
+        </Card>
+      )}
 
       {runoffNames && runoffNames.length > 0 && (
         <Card className="border-amber-500/40 bg-amber-500/10">
@@ -56,12 +63,6 @@ export function DiscussionScreen() {
           </CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardContent className="py-4 text-center text-sm text-muted-foreground">
-          {t.discussion.instructions}
-        </CardContent>
-      </Card>
 
       <div>
         <p className="mb-2 px-1 text-xs font-bold text-muted-foreground">{t.discussion.survivors}</p>
@@ -103,13 +104,19 @@ export function DiscussionScreen() {
 
       {isHost && (
         <div className="flex flex-col gap-2">
-          <Button variant="outline" className="w-full" onClick={() => extendDiscussion()}>
-            <TimerReset className="size-4" /> {t.discussion.extendButton}
-          </Button>
-          <Button size="lg" variant="outline" className="w-full font-bold" onClick={() => advance("vote")}>
-            {t.discussion.skipButton}
-          </Button>
+          {isFirstRound ? (
+            <Button size="lg" className="w-full font-bold" onClick={() => advance("night")}>
+              <Moon className="size-4" /> {t.discussion.proceedToNightButton}
+            </Button>
+          ) : (
+            <Button size="lg" className="w-full font-bold" onClick={() => advance("vote")}>
+              {t.discussion.skipButton}
+            </Button>
+          )}
         </div>
+      )}
+      {!isHost && (
+        <p className="text-center text-xs text-muted-foreground">{t.discussion.waitingHost}</p>
       )}
     </div>
   );

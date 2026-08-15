@@ -227,40 +227,53 @@ function SettingsDialog() {
         <DialogHeader>
           <DialogTitle>{t.lobby.settingsTitle}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="reveal-death">{t.lobby.revealOnDeath}</Label>
-            <Switch
-              id="reveal-death"
-              checked={s.revealRoleOnDeath}
-              onCheckedChange={(v) => updateSettings({ revealRoleOnDeath: v })}
-            />
+        <div className="space-y-5 py-2">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="reveal-death">{t.lobby.revealOnDeath}</Label>
+              <Switch
+                id="reveal-death"
+                checked={s.revealRoleOnDeath}
+                onCheckedChange={(v) => updateSettings({ revealRoleOnDeath: v })}
+              />
+            </div>
           </div>
-          <TimeField
-            label={t.lobby.nightSeconds}
-            value={s.nightSeconds}
-            onChange={(v) => updateSettings({ nightSeconds: v })}
-          />
-          <TimeField
-            label={t.lobby.discussionSeconds}
-            value={s.discussionSeconds}
-            onChange={(v) => updateSettings({ discussionSeconds: v })}
-          />
-          <TimeField
-            label={t.lobby.voteSeconds}
-            value={s.voteSeconds}
-            onChange={(v) => updateSettings({ voteSeconds: v })}
-          />
-          <TimeField
-            label={t.lobby.roleRevealSeconds}
-            value={s.roleRevealSeconds}
-            onChange={(v) => updateSettings({ roleRevealSeconds: v })}
-          />
-          <TimeField
-            label={t.lobby.resultPauseSeconds}
-            value={s.resultPauseSeconds}
-            onChange={(v) => updateSettings({ resultPauseSeconds: v })}
-          />
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="first-night-kill" className="flex-1">
+                {t.lobby.allowFirstNightKill}
+              </Label>
+              <Switch
+                id="first-night-kill"
+                checked={s.allowFirstNightKill}
+                onCheckedChange={(v) => updateSettings({ allowFirstNightKill: v })}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.allowFirstNightKillDesc}</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="seer-early-divine" className="flex-1">
+                {t.lobby.seerFirstNightDivine}
+              </Label>
+              <Switch
+                id="seer-early-divine"
+                checked={s.seerFirstNightDivine}
+                onCheckedChange={(v) => updateSettings({ seerFirstNightDivine: v })}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.seerFirstNightDivineDesc}</p>
+          </div>
+
+          <Separator />
+
+          <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.settingsPacingNote}</p>
         </div>
         <DialogFooter>
           <DialogClose asChild>
@@ -269,31 +282,5 @@ function SettingsDialog() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function TimeField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  const { t } = useLocale();
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <Label>{label}</Label>
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" className="size-7" onClick={() => onChange(Math.max(10, value - 15))}>
-          -
-        </Button>
-        <span className="w-14 text-center font-mono text-sm tabular-nums">{t.common.seconds(value)}</span>
-        <Button variant="outline" size="icon" className="size-7" onClick={() => onChange(Math.min(600, value + 15))}>
-          +
-        </Button>
-      </div>
-    </div>
   );
 }

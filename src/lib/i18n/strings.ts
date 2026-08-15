@@ -42,7 +42,6 @@ interface Strings {
     kicked: string;
     seconds: (n: number) => string;
     timeRemaining: string;
-    minutesUntilAuto: string;
     close: string;
     cancel: string;
     people: (n: number) => string;
@@ -88,11 +87,11 @@ interface Strings {
     leaveButton: string;
     settingsTitle: string;
     revealOnDeath: string;
-    nightSeconds: string;
-    discussionSeconds: string;
-    voteSeconds: string;
-    roleRevealSeconds: string;
-    resultPauseSeconds: string;
+    allowFirstNightKill: string;
+    allowFirstNightKillDesc: string;
+    seerFirstNightDivine: string;
+    seerFirstNightDivineDesc: string;
+    settingsPacingNote: string;
     kick: string;
     makeHost: string;
     makeHostConfirmTitle: string;
@@ -106,7 +105,13 @@ interface Strings {
     allies: string;
     allRoles: string;
     waitingOthers: string;
-    skipButton: string;
+    confirmButton: string;
+    progress: (submitted: number, total: number) => string;
+    earlyDivineTitle: string;
+    earlyDivineDesc: string;
+    earlyDivineButton: string;
+    earlyDivineSkipNote: string;
+    earlyDivineDone: string;
   };
   night: {
     tag: (day: number) => string;
@@ -119,6 +124,8 @@ interface Strings {
     previousSeerResult: (day: number) => string;
     seerResultLine: (name: string, isBlack: boolean) => string;
     actions: Record<Exclude<NightActionType, "none">, { title: string; desc: string; skip: string }>;
+    firstNightKillDisabledNotice: string;
+    forceAdvanceButton: string;
   };
   hunterRevenge: {
     title: string;
@@ -127,23 +134,26 @@ interface Strings {
     skip: string;
     submit: string;
     submitted: string;
+    hostSkipButton: string;
   };
   dayResult: {
     tag: (day: number) => string;
     noDeaths: string;
     continueButton: string;
-    autoNotice: string;
+    waitingHost: string;
   };
   discussion: {
     tag: (day: number) => string;
-    instructions: string;
+    firstRoundTag: string;
+    firstRoundNotice: string;
+    proceedToNightButton: string;
     survivors: string;
     dictatorButton: string;
     dictatorConfirmTitle: string;
     dictatorConfirmDesc: string;
     dictatorConfirmAction: string;
     skipButton: string;
-    extendButton: string;
+    waitingHost: string;
     runoffNotice: string;
     runoffCandidatesLabel: string;
   };
@@ -156,6 +166,7 @@ interface Strings {
     submitButton: string;
     submittedButton: string;
     progress: (submitted: number, total: number) => string;
+    forceAdvanceButton: string;
   };
   executionResult: {
     tag: (day: number) => string;
@@ -164,7 +175,7 @@ interface Strings {
     mediumResult: string;
     mediumResultLine: (name: string, isBlack: boolean) => string;
     continueButton: string;
-    autoNotice: string;
+    waitingHost: string;
   };
   gameOver: {
     primary: Record<"village" | "werewolf" | "draw", string>;
@@ -217,7 +228,6 @@ const ja: Strings = {
     kicked: "ホストによって部屋から退出させられました。",
     seconds: (n) => `${n}秒`,
     timeRemaining: "残り時間",
-    minutesUntilAuto: "まもなく自動的に進みます",
     close: "閉じる",
     cancel: "キャンセル",
     people: (n) => `${n}人`,
@@ -236,7 +246,7 @@ const ja: Strings = {
     codeLabel: "合言葉コード",
     codePlaceholder: "例: AB3XZ",
     joinButton: "参加する",
-    footerNote: "※このアプリにチャット機能はありません。実際に集まって(またはオンライン通話で)会話しながら遊ぶことを想定しています。",
+    footerNote: "※このアプリにチャット機能はありません。会話しながら遊んでください。",
     helpButton: "遊び方・ルールを見る",
     customCodeLabel: "ルームコード(任意)",
     customCodePlaceholder: "空欄なら自動生成されます",
@@ -263,11 +273,11 @@ const ja: Strings = {
     leaveButton: "退出する",
     settingsTitle: "ゲーム設定",
     revealOnDeath: "死亡時に役職を公開する",
-    nightSeconds: "夜フェーズの時間",
-    discussionSeconds: "議論タイムの時間",
-    voteSeconds: "投票タイムの時間",
-    roleRevealSeconds: "役職確認の自動進行までの時間",
-    resultPauseSeconds: "結果発表の自動進行までの時間",
+    allowFirstNightKill: "最初の夜、人狼は襲撃できる",
+    allowFirstNightKillDesc: "オフにすると、最初の夜(1日目の夜)だけ人狼が誰を襲撃しても死にません。人狼DXに慣れていないメンバーが多い場合におすすめの設定です。2日目以降の夜は通常通り襲撃が有効になります。",
+    seerFirstNightDivine: "予言者は役職確認のときに1人占える(発展ルール)",
+    seerFirstNightDivineDesc: "説明書11ページの発展ルールです。役職確認のタイミングで、予言者が1人を占うことができます(7人以上でのプレイ推奨)。占うかどうかは予言者が自由に選べます。",
+    settingsPacingNote: "このアプリに自動タイマーはありません。それぞれの画面はホストの操作、または全員の行動がそろったタイミングで進みます。自分たちのペースでどうぞ。",
     kick: "退出させる",
     makeHost: "ホストにする",
     makeHostConfirmTitle: "ホストを交代しますか？",
@@ -280,8 +290,14 @@ const ja: Strings = {
     privacyHint: "周りの人に見られないように確認してください",
     allies: "あなたの仲間",
     allRoles: "全プレイヤーの役職",
-    waitingOthers: "確認済みです。他のプレイヤーの確認が終わり次第、自動的に夜へ進みます。",
-    skipButton: "今すぐ夜へ進む",
+    waitingOthers: "確認しました。全員の確認が終わると、自動的に最初の話し合いへ進みます。",
+    confirmButton: "確認しました",
+    progress: (s, t) => `確認済み: ${s} / ${t} 人`,
+    earlyDivineTitle: "予言者の力を今すぐ使う(任意)",
+    earlyDivineDesc: "役職確認のタイミングで、1人を占うことができます。使わずに進めても構いません。",
+    earlyDivineButton: "この人を占う",
+    earlyDivineSkipNote: "占わずに「確認しました」を押して進めることもできます。",
+    earlyDivineDone: "占い済みです。結果は以下の通りです。",
   },
   night: {
     tag: (day) => `夜 ${day}日目`,
@@ -295,9 +311,11 @@ const ja: Strings = {
     seerResultLine: (name, isBlack) => `${name}さんは${isBlack ? "【黒(人狼)】" : "【白】"}でした`,
     actions: {
       attack: { title: "誰を襲撃しますか？", desc: "仲間の人狼と相談して、今夜襲う相手を選んでください。", skip: "今夜は襲撃しない" },
-      guard: { title: "誰を守りますか？", desc: "人狼の襲撃から守る相手を選んでください。自分は守れません。", skip: "今夜は誰も守らない" },
+      guard: { title: "誰を守りますか？", desc: "人狼の襲撃から守る相手を選んでください。自分は守れません。また、前回の夜に守った相手は選べません。", skip: "今夜は誰も守らない" },
       divine: { title: "誰を占いますか？", desc: "相手が人狼かどうかを占います。", skip: "今夜は占わない" },
     },
+    firstNightKillDisabledNotice: "設定により、最初の夜(1日目)は誰を襲撃しても死にません。2日目以降の夜は通常通り効果があります。",
+    forceAdvanceButton: "全員の行動を待たずに進める(ホスト操作)",
   },
   hunterRevenge: {
     title: "ハンターの正体が明らかに！",
@@ -306,23 +324,26 @@ const ja: Strings = {
     skip: "誰も道連れにしない",
     submit: "決定する",
     submitted: "送信済み",
+    hostSkipButton: "ハンターの代わりに「道連れなし」にする(ホスト操作)",
   },
   dayResult: {
     tag: (day) => `朝 ${day}日目`,
     noDeaths: "昨夜は誰も犠牲になりませんでした。平和な朝です。",
-    continueButton: "今すぐ議論タイムへ進む",
-    autoNotice: "まもなく自動的に議論タイムが始まります…",
+    continueButton: "議論タイムへ進む",
+    waitingHost: "ホストが議論タイムへ進めるのを待っています…",
   },
   discussion: {
     tag: (day) => `議論タイム ${day}日目`,
-    instructions: "実際に集まって(またはオンライン通話で)話し合いましょう。誰が人狼か、みんなで推理してください。",
+    firstRoundTag: "最初の話し合い",
+    firstRoundNotice: "役職確認を終えたばかりの、最初の話し合いです。まだ誰も襲われていません。ここでは追放の投票も行いません。自由に話し合ったら、ホストの操作で本当の「夜」へ進みます。",
+    proceedToNightButton: "話し合いを終えて夜へ進む",
     survivors: "生存者",
     dictatorButton: "独裁者の権限を発動する",
     dictatorConfirmTitle: "独裁者の権限を発動しますか？",
     dictatorConfirmDesc: "議論を強制終了し、投票なしで指定した人を独断で追放します。この能力はゲーム中1度しか使えません。",
     dictatorConfirmAction: "この人を追放する",
-    skipButton: "今すぐ投票へ進む",
-    extendButton: "話し合いを延長する(+1分)",
+    skipButton: "話し合いを終えて投票へ進む",
+    waitingHost: "ホストが次へ進めるのを待っています。時間の制限はないので、納得いくまで話し合いましょう。",
     runoffNotice: "投票が同数だったため、決選投票の前の話し合いです。それでも決まらない場合はランダムで決まります。",
     runoffCandidatesLabel: "決選投票の対象",
   },
@@ -335,6 +356,7 @@ const ja: Strings = {
     submitButton: "投票する",
     submittedButton: "投票済み(変更する)",
     progress: (s, t) => `投票完了: ${s} / ${t} 人`,
+    forceAdvanceButton: "全員の投票を待たずに締め切る(ホスト操作)",
   },
   executionResult: {
     tag: (day) => `追放結果 ${day}日目`,
@@ -342,8 +364,8 @@ const ja: Strings = {
     noExecution: "投票の結果、誰も追放されませんでした。",
     mediumResult: "霊媒結果",
     mediumResultLine: (name, isBlack) => `${name}さんは${isBlack ? "【黒(人狼)】" : "【白】"}でした`,
-    continueButton: "今すぐ次の夜へ進む",
-    autoNotice: "まもなく自動的に次の夜になります…",
+    continueButton: "次の夜へ進む",
+    waitingHost: "ホストが次の夜へ進めるのを待っています…",
   },
   gameOver: {
     primary: {
@@ -370,13 +392,14 @@ const ja: Strings = {
     tabWin: "勝利条件",
     tabRoles: "役職",
     intro:
-      "人狼DXは、正体を隠した「人狼」を「市民」たちが会話と推理で見つけ出す心理ゲームです。実際に集まって(またはビデオ通話などで)話しながら、このアプリで役職確認・夜の行動・投票を行います。「昼(議論・投票)」と「夜(能力行動)」を繰り返し、どちらかの陣営が条件を満たすと決着します。",
+      "人狼DXは、正体を隠した「人狼」を「市民」たちが会話と推理で見つけ出す心理ゲームです。このアプリで役職確認・夜の行動・投票を行います。「昼(議論・投票)」と「夜(能力行動)」を繰り返し、どちらかの陣営が条件を満たすと決着します。このアプリに自動タイマーはなく、各画面はホストの操作か全員の行動がそろったタイミングで進みます。自分たちのペースで遊んでください。",
     flowTitle: "ゲームの流れ",
     flowSteps: [
-      { title: "役職確認", desc: "全員が自分だけの役職をこっそり確認します。周りに見られないように注意しましょう。" },
-      { title: "夜", desc: "人狼・予言者・ボディーガードなど、能力を持つ役職だけがこっそり行動します。能力を持たない人は何もせず待機します。" },
+      { title: "役職確認", desc: "全員が自分だけの役職をこっそり確認し、「確認しました」を押します。周りに見られないように注意しましょう。全員が押し終えるまで次には進みません。" },
+      { title: "最初の話し合い", desc: "役職確認の直後に行う、投票なしの話し合いです。まだ誰も襲われていません。自己紹介がてら軽く話したら、ホストの操作で本当の「夜」へ進みます。" },
+      { title: "夜", desc: "人狼・予言者・ボディーガードなど、能力を持つ役職だけがこっそり行動します。能力を持たない人は何もせず待機します。ここで初めて人狼の襲撃が発生する可能性があります(設定でオフにすることもできます)。" },
       { title: "朝(結果発表)", desc: "夜に何が起きたか(誰が犠牲になったか)が発表されます。" },
-      { title: "議論", desc: "実際に話し合って、誰が人狼か推理します(このアプリにチャット機能はないので、口頭やビデオ通話で話してください)。" },
+      { title: "議論", desc: "誰が人狼か話し合って推理します。" },
       { title: "投票", desc: "追放する人をひとり選んで投票します。最多票の人が追放され、同数の場合は決選投票になります。" },
       { title: "くり返し", desc: "「夜→朝→議論→投票」を、どちらかの陣営が勝利するまでくり返します。" },
     ],
@@ -527,7 +550,6 @@ const en: Strings = {
     kicked: "You were removed from the room by the host.",
     seconds: (n) => `${n}s`,
     timeRemaining: "Time remaining",
-    minutesUntilAuto: "Moving on automatically soon",
     close: "Close",
     cancel: "Cancel",
     people: (n) => `${n}`,
@@ -546,7 +568,7 @@ const en: Strings = {
     codeLabel: "Room code",
     codePlaceholder: "e.g. AB3XZ",
     joinButton: "Join",
-    footerNote: "Note: this app has no chat feature. It's meant to be played while talking together in person (or on a call).",
+    footerNote: "Note: this app has no chat feature. Talk it out as you play.",
     helpButton: "How to play / rules",
     customCodeLabel: "Room code (optional)",
     customCodePlaceholder: "Leave blank to auto-generate",
@@ -573,11 +595,11 @@ const en: Strings = {
     leaveButton: "Leave room",
     settingsTitle: "Game settings",
     revealOnDeath: "Reveal role on death",
-    nightSeconds: "Night phase duration",
-    discussionSeconds: "Discussion duration",
-    voteSeconds: "Voting duration",
-    roleRevealSeconds: "Time before role reveal auto-advances",
-    resultPauseSeconds: "Time before results auto-advance",
+    allowFirstNightKill: "Werewolves can attack on the first night",
+    allowFirstNightKillDesc: "Turn this off to make the first night (night 1) attack-proof — whoever the werewolves attack survives. From night 2 onward, attacks work normally. Recommended if most players are new to Jinro DX.",
+    seerFirstNightDivine: "Seer can investigate one player during role reveal (advanced rule)",
+    seerFirstNightDivineDesc: "An advanced rule from the rulebook (p.11): the Seer may investigate one player right at role reveal. Recommended for 7+ players. Using it is optional.",
+    settingsPacingNote: "There are no automatic timers in this app. Every screen advances only when the host acts, or once everyone has finished their action. Play at your own pace.",
     kick: "Remove",
     makeHost: "Make host",
     makeHostConfirmTitle: "Hand over host to this player?",
@@ -590,8 +612,14 @@ const en: Strings = {
     privacyHint: "Make sure no one else can see your screen",
     allies: "Your allies",
     allRoles: "Everyone's roles",
-    waitingOthers: "You're ready. Night will begin automatically once everyone has checked their role.",
-    skipButton: "Start night now",
+    waitingOthers: "Confirmed. Once everyone has confirmed their role, the first discussion begins automatically.",
+    confirmButton: "I've confirmed my role",
+    progress: (s, t) => `Confirmed: ${s} / ${t}`,
+    earlyDivineTitle: "Use your Seer power now (optional)",
+    earlyDivineDesc: "You may investigate one player right now, during role reveal. Feel free to skip this.",
+    earlyDivineButton: "Investigate this player",
+    earlyDivineSkipNote: "You can also skip this and just tap \"I've confirmed my role\".",
+    earlyDivineDone: "You've already investigated. Here's the result.",
   },
   night: {
     tag: (day) => `Night ${day}`,
@@ -605,9 +633,11 @@ const en: Strings = {
     seerResultLine: (name, isBlack) => `${name} was ${isBlack ? "【Black - Werewolf】" : "【White】"}`,
     actions: {
       attack: { title: "Who will you attack?", desc: "Coordinate with your fellow werewolves and choose tonight's target.", skip: "Don't attack tonight" },
-      guard: { title: "Who will you protect?", desc: "Choose someone to protect from the werewolves' attack. You can't protect yourself.", skip: "Don't protect anyone tonight" },
+      guard: { title: "Who will you protect?", desc: "Choose someone to protect from the werewolves' attack. You can't protect yourself, and you can't protect the same person you protected last night.", skip: "Don't protect anyone tonight" },
       divine: { title: "Who will you investigate?", desc: "Find out whether they are a werewolf.", skip: "Don't investigate tonight" },
     },
+    firstNightKillDisabledNotice: "House rule: on the first night, whoever the werewolves attack survives. Attacks work normally from night 2 onward.",
+    forceAdvanceButton: "Close this night without waiting for everyone (host)",
   },
   hunterRevenge: {
     title: "The Hunter's true identity is revealed!",
@@ -616,23 +646,26 @@ const en: Strings = {
     skip: "Take no one down",
     submit: "Confirm",
     submitted: "Submitted",
+    hostSkipButton: "Choose \"no one\" on the Hunter's behalf (host)",
   },
   dayResult: {
     tag: (day) => `Morning ${day}`,
     noDeaths: "No one fell victim last night. A peaceful morning.",
-    continueButton: "Start discussion now",
-    autoNotice: "Discussion will begin automatically soon…",
+    continueButton: "Continue to discussion",
+    waitingHost: "Waiting for the host to continue to discussion…",
   },
   discussion: {
     tag: (day) => `Discussion — Day ${day}`,
-    instructions: "Talk it over together (in person or on a call). Figure out who the werewolves might be.",
+    firstRoundTag: "First discussion",
+    firstRoundNotice: "This is the first discussion, right after role reveal. No one has been attacked yet, and there's no execution vote this round. Talk freely, then the host will move on to the real first night.",
+    proceedToNightButton: "Done talking — proceed to night",
     survivors: "Survivors",
     dictatorButton: "Use Dictator power",
     dictatorConfirmTitle: "Use your Dictator power?",
     dictatorConfirmDesc: "This ends discussion immediately and executes your chosen target without a vote. You can only use this once per game.",
     dictatorConfirmAction: "Execute this player",
-    skipButton: "Start voting now",
-    extendButton: "Extend discussion (+1 min)",
+    skipButton: "Done talking — proceed to vote",
+    waitingHost: "Waiting for the host to move on. There's no time limit, so talk it through.",
     runoffNotice: "The vote was tied, so this is discussion time before a runoff vote. If it's still tied after the runoff, the result will be random.",
     runoffCandidatesLabel: "Runoff candidates",
   },
@@ -645,6 +678,7 @@ const en: Strings = {
     submitButton: "Vote",
     submittedButton: "Voted (tap to change)",
     progress: (s, t) => `Votes cast: ${s} / ${t}`,
+    forceAdvanceButton: "Close this vote without waiting for everyone (host)",
   },
   executionResult: {
     tag: (day) => `Execution result — Day ${day}`,
@@ -652,8 +686,8 @@ const en: Strings = {
     noExecution: "The vote resulted in no execution.",
     mediumResult: "Medium's reading",
     mediumResultLine: (name, isBlack) => `${name} was ${isBlack ? "【Black - Werewolf】" : "【White】"}`,
-    continueButton: "Start next night now",
-    autoNotice: "The next night will begin automatically soon…",
+    continueButton: "Continue to next night",
+    waitingHost: "Waiting for the host to continue to the next night…",
   },
   gameOver: {
     primary: {
@@ -680,13 +714,14 @@ const en: Strings = {
     tabWin: "Winning",
     tabRoles: "Roles",
     intro:
-      "Jinro DX is a social deduction game: the hidden 'Werewolves' try to survive while the 'Villagers' try to find them through conversation and deduction. Talk together in person (or on a call) while using this app for role reveals, night actions, and voting. 'Day' (discussion + vote) and 'Night' (secret actions) repeat until one side wins.",
+      "Jinro DX is a social deduction game: the hidden 'Werewolves' try to survive while the 'Villagers' try to find them through conversation and deduction. Use this app for role reveals, night actions, and voting. 'Day' (discussion + vote) and 'Night' (secret actions) repeat until one side wins. This app has no automatic timers — every screen advances only when the host acts or everyone has finished, so you always play at your own pace.",
     flowTitle: "Game flow",
     flowSteps: [
-      { title: "Role reveal", desc: "Everyone privately checks their own role. Make sure no one else can see your screen." },
-      { title: "Night", desc: "Only players with night abilities (Werewolf, Seer, Bodyguard, etc.) act in secret. Everyone else just waits." },
+      { title: "Role reveal", desc: "Everyone privately checks their own role and taps \"I've confirmed my role\". Make sure no one else can see your screen. The game won't move on until everyone has confirmed." },
+      { title: "First discussion", desc: "A discussion-only round right after role reveal. No one has been attacked yet. Chat a little, then the host moves on to the real first night." },
+      { title: "Night", desc: "Only players with night abilities (Werewolf, Seer, Bodyguard, etc.) act in secret. Everyone else just waits. This is where a werewolf attack can first happen (this can be turned off in settings)." },
       { title: "Morning (results)", desc: "The results of the night — who fell victim, if anyone — are announced." },
-      { title: "Discussion", desc: "Talk it over and figure out who the werewolves are (this app has no chat feature, so talk in person or on a call)." },
+      { title: "Discussion", desc: "Talk it over and figure out who the werewolves are." },
       { title: "Vote", desc: "Everyone votes for one player to execute. The top vote-getter is executed; a tie triggers a runoff vote." },
       { title: "Repeat", desc: "Night → morning → discussion → vote repeats until one side wins." },
     ],
@@ -837,7 +872,6 @@ const ko: Strings = {
     kicked: "호스트에 의해 방에서 나가게 되었습니다.",
     seconds: (n) => `${n}초`,
     timeRemaining: "남은 시간",
-    minutesUntilAuto: "곧 자동으로 진행됩니다",
     close: "닫기",
     cancel: "취소",
     people: (n) => `${n}명`,
@@ -856,7 +890,7 @@ const ko: Strings = {
     codeLabel: "방 코드",
     codePlaceholder: "예: AB3XZ",
     joinButton: "참가하기",
-    footerNote: "※ 이 앱에는 채팅 기능이 없습니다. 실제로 모여서(또는 화상 통화로) 대화하며 플레이하는 것을 전제로 합니다.",
+    footerNote: "※ 이 앱에는 채팅 기능이 없습니다. 대화를 나누며 플레이하세요.",
     helpButton: "게임 방법 · 규칙 보기",
     customCodeLabel: "방 코드 (선택)",
     customCodePlaceholder: "비워두면 자동으로 생성됩니다",
@@ -883,11 +917,11 @@ const ko: Strings = {
     leaveButton: "나가기",
     settingsTitle: "게임 설정",
     revealOnDeath: "사망 시 역할 공개",
-    nightSeconds: "밤 페이즈 시간",
-    discussionSeconds: "토론 시간",
-    voteSeconds: "투표 시간",
-    roleRevealSeconds: "역할 확인 자동 진행까지의 시간",
-    resultPauseSeconds: "결과 발표 자동 진행까지의 시간",
+    allowFirstNightKill: "첫날 밤에 인랑이 습격할 수 있다",
+    allowFirstNightKillDesc: "꺼두면 첫날 밤(1일차 밤)에는 인랑이 누구를 습격해도 죽지 않습니다. 2일차 밤부터는 평소대로 습격이 유효해집니다. 인랑DX에 익숙하지 않은 멤버가 많을 때 추천하는 설정입니다.",
+    seerFirstNightDivine: "예언자는 역할 확인 시 1명을 점칠 수 있다 (발전 규칙)",
+    seerFirstNightDivineDesc: "설명서 11페이지의 발전 규칙입니다. 역할 확인 시점에 예언자가 1명을 점칠 수 있습니다 (7명 이상 플레이 권장). 점칠지 여부는 예언자가 자유롭게 선택할 수 있습니다.",
+    settingsPacingNote: "이 앱에는 자동 타이머가 없습니다. 각 화면은 호스트의 조작이나 전원의 행동이 모두 끝났을 때만 다음으로 넘어갑니다. 여러분의 속도에 맞춰 진행하세요.",
     kick: "내보내기",
     makeHost: "호스트로 지정",
     makeHostConfirmTitle: "호스트를 교체하시겠습니까?",
@@ -900,8 +934,14 @@ const ko: Strings = {
     privacyHint: "주변 사람에게 보이지 않도록 확인하세요",
     allies: "나의 동료",
     allRoles: "전체 플레이어의 역할",
-    waitingOthers: "확인이 끝났습니다. 다른 플레이어의 확인이 끝나는 대로 자동으로 밤으로 넘어갑니다.",
-    skipButton: "지금 바로 밤으로 진행",
+    waitingOthers: "확인을 마쳤습니다. 전원의 확인이 끝나면 자동으로 첫 번째 토론으로 넘어갑니다.",
+    confirmButton: "확인했습니다",
+    progress: (s, t) => `확인 완료: ${s} / ${t}명`,
+    earlyDivineTitle: "예언자의 능력을 지금 사용하기 (선택)",
+    earlyDivineDesc: "역할 확인 시점에 1명을 점칠 수 있습니다. 사용하지 않고 넘어가도 됩니다.",
+    earlyDivineButton: "이 사람을 점치기",
+    earlyDivineSkipNote: "점치지 않고 '확인했습니다'를 눌러 진행할 수도 있습니다.",
+    earlyDivineDone: "이미 점을 쳤습니다. 결과는 아래와 같습니다.",
   },
   night: {
     tag: (day) => `밤 ${day}일차`,
@@ -915,9 +955,11 @@ const ko: Strings = {
     seerResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
     actions: {
       attack: { title: "누구를 습격하시겠습니까?", desc: "동료 인랑과 상의하여 오늘 밤 습격할 대상을 선택하세요.", skip: "오늘 밤은 습격하지 않는다" },
-      guard: { title: "누구를 지키시겠습니까?", desc: "인랑의 습격으로부터 지킬 대상을 선택하세요. 자기 자신은 지킬 수 없습니다.", skip: "오늘 밤은 아무도 지키지 않는다" },
+      guard: { title: "누구를 지키시겠습니까?", desc: "인랑의 습격으로부터 지킬 대상을 선택하세요. 자기 자신은 지킬 수 없고, 어젯밤 지킨 대상도 다시 선택할 수 없습니다.", skip: "오늘 밤은 아무도 지키지 않는다" },
       divine: { title: "누구를 점치시겠습니까?", desc: "상대가 인랑인지 아닌지를 점칩니다.", skip: "오늘 밤은 점치지 않는다" },
     },
+    firstNightKillDisabledNotice: "설정에 따라 첫날 밤(1일차)에는 누구를 습격해도 죽지 않습니다. 2일차 밤부터는 평소대로 효과가 있습니다.",
+    forceAdvanceButton: "전원을 기다리지 않고 진행하기 (호스트 조작)",
   },
   hunterRevenge: {
     title: "헌터의 정체가 드러났다!",
@@ -926,23 +968,26 @@ const ko: Strings = {
     skip: "아무도 데려가지 않는다",
     submit: "결정하기",
     submitted: "제출됨",
+    hostSkipButton: "헌터 대신 '아무도 데려가지 않음'으로 처리 (호스트 조작)",
   },
   dayResult: {
     tag: (day) => `아침 ${day}일차`,
     noDeaths: "어젯밤에는 아무도 희생되지 않았습니다. 평화로운 아침입니다.",
-    continueButton: "지금 바로 토론 시간으로 진행",
-    autoNotice: "곧 자동으로 토론 시간이 시작됩니다…",
+    continueButton: "토론 시간으로 진행",
+    waitingHost: "호스트가 토론 시간으로 진행하기를 기다리는 중…",
   },
   discussion: {
     tag: (day) => `토론 시간 ${day}일차`,
-    instructions: "실제로 모여서 (또는 화상 통화로) 이야기를 나눠 보세요. 누가 인랑인지 다 함께 추리해 봅시다.",
+    firstRoundTag: "첫 번째 토론",
+    firstRoundNotice: "역할 확인 직후에 진행되는, 투표 없는 첫 번째 토론입니다. 아직 아무도 습격당하지 않았습니다. 이번 라운드에는 추방 투표도 없습니다. 자유롭게 이야기를 나눈 뒤, 호스트가 진짜 「밤」으로 진행합니다.",
+    proceedToNightButton: "토론을 마치고 밤으로 진행",
     survivors: "생존자",
     dictatorButton: "독재자 권한 발동",
     dictatorConfirmTitle: "독재자 권한을 발동하시겠습니까?",
     dictatorConfirmDesc: "토론을 강제로 종료하고, 투표 없이 지정한 사람을 독단으로 추방합니다. 이 능력은 게임 중 단 한 번만 사용할 수 있습니다.",
     dictatorConfirmAction: "이 사람을 추방하기",
-    skipButton: "지금 바로 투표로 진행",
-    extendButton: "토론 시간 연장 (+1분)",
+    skipButton: "토론을 마치고 투표로 진행",
+    waitingHost: "호스트가 다음으로 진행하기를 기다리는 중입니다. 시간 제한이 없으니 충분히 이야기하세요.",
     runoffNotice: "투표가 동수였기 때문에, 결선 투표 전의 토론 시간입니다. 그래도 결정되지 않으면 무작위로 결정됩니다.",
     runoffCandidatesLabel: "결선 투표 대상",
   },
@@ -955,6 +1000,7 @@ const ko: Strings = {
     submitButton: "투표하기",
     submittedButton: "투표됨 (변경하기)",
     progress: (s, t) => `투표 완료: ${s} / ${t}명`,
+    forceAdvanceButton: "전원의 투표를 기다리지 않고 마감하기 (호스트 조작)",
   },
   executionResult: {
     tag: (day) => `추방 결과 ${day}일차`,
@@ -962,8 +1008,8 @@ const ko: Strings = {
     noExecution: "투표 결과, 아무도 추방되지 않았습니다.",
     mediumResult: "영매 결과",
     mediumResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
-    continueButton: "지금 바로 다음 밤으로 진행",
-    autoNotice: "곧 자동으로 다음 밤이 시작됩니다…",
+    continueButton: "다음 밤으로 진행",
+    waitingHost: "호스트가 다음 밤으로 진행하기를 기다리는 중…",
   },
   gameOver: {
     primary: {
@@ -990,13 +1036,14 @@ const ko: Strings = {
     tabWin: "승리 조건",
     tabRoles: "역할",
     intro:
-      "진로DX는 정체를 숨긴 「인랑」을 「시민」들이 대화와 추리로 찾아내는 심리 게임입니다. 실제로 모여서 (또는 화상 통화 등으로) 이야기하면서, 이 앱으로 역할 확인·밤의 행동·투표를 진행합니다. 「낮(토론·투표)」과 「밤(능력 행동)」을 반복하며, 어느 한쪽 진영이 조건을 만족하면 게임이 종료됩니다.",
+      "진로DX는 정체를 숨긴 「인랑」을 「시민」들이 대화와 추리로 찾아내는 심리 게임입니다. 이 앱으로 역할 확인·밤의 행동·투표를 진행합니다. 「낮(토론·투표)」과 「밤(능력 행동)」을 반복하며, 어느 한쪽 진영이 조건을 만족하면 게임이 종료됩니다. 이 앱에는 자동 타이머가 없습니다 — 각 화면은 호스트의 조작이나 전원의 행동이 끝났을 때만 넘어가므로, 항상 여러분의 속도에 맞춰 진행할 수 있습니다.",
     flowTitle: "게임 진행 순서",
     flowSteps: [
-      { title: "역할 확인", desc: "모든 사람이 각자 자신의 역할만 몰래 확인합니다. 주변 사람에게 보이지 않도록 주의하세요." },
-      { title: "밤", desc: "인랑·점술사·보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 아무것도 하지 않고 대기합니다." },
+      { title: "역할 확인", desc: "모든 사람이 각자 자신의 역할을 몰래 확인하고 '확인했습니다'를 누릅니다. 주변 사람에게 보이지 않도록 주의하세요. 전원이 누르기 전에는 다음으로 넘어가지 않습니다." },
+      { title: "첫 번째 토론", desc: "역할 확인 직후에 진행되는, 투표가 없는 토론입니다. 아직 아무도 습격당하지 않았습니다. 가볍게 이야기를 나눈 뒤, 호스트가 진짜 「밤」으로 진행합니다." },
+      { title: "밤", desc: "인랑·점술사·보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 아무것도 하지 않고 대기합니다. 여기서 처음으로 인랑의 습격이 발생할 수 있습니다 (설정에서 끌 수도 있습니다)." },
       { title: "아침 (결과 발표)", desc: "밤사이 무슨 일이 있었는지 (누가 희생되었는지)가 발표됩니다." },
-      { title: "토론", desc: "실제로 이야기를 나누며 누가 인랑인지 추리합니다 (이 앱에는 채팅 기능이 없으므로 직접 말하거나 화상 통화로 대화하세요)." },
+      { title: "토론", desc: "누가 인랑인지 이야기를 나누며 추리합니다." },
       { title: "투표", desc: "추방할 사람을 한 명 선택해 투표합니다. 최다 득표자가 추방되며, 동수일 경우 결선 투표가 진행됩니다." },
       { title: "반복", desc: "「밤 → 아침 → 토론 → 투표」를 어느 한쪽 진영이 승리할 때까지 반복합니다." },
     ],

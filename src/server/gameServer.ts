@@ -7,10 +7,12 @@ import {
   createLobbyState,
   assignRolesAndStart,
   resetToLobby,
+  startFirstDiscussion,
   startNight,
   submitAttack,
   submitGuard,
   submitDivine,
+  submitEarlyDivine,
   resolveNight,
   submitHunterRevenge,
   startDiscussion,
@@ -18,7 +20,6 @@ import {
   submitVote,
   resolveVote,
   dictatorExecute,
-  extendDiscussion,
   ackRole,
   allAliveAcked,
   alivePlayers,
@@ -36,8 +37,6 @@ interface RoomRuntime {
   tokens: Map<string, string>; // playerId -> token
   socketOf: Map<string, string>; // playerId -> socketId
   playerOf: Map<string, string>; // socketId -> playerId
-  timer: NodeJS.Timeout | null;
-  hunterTimer: NodeJS.Timeout | null;
   manualComposition: boolean;
   lastActivity: number;
 }
@@ -47,9 +46,7 @@ type IOSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const rooms = new Map<string, RoomRuntime>();
 
-const HUNTER_REVENGE_TIMEOUT_MS = 45_000;
 const MAX_NAME_LENGTH = 16;
-const DISCUSSION_EXTEND_SECONDS = 60; // ホストの「話し合いを延長する」1回あたりの追加秒数(回数無制限)
 const CUSTOM_CODE_PATTERN = /^[A-Z0-9]{5,8}$/;
 
 function sanitizeName(raw: string): string {
@@ -57,6 +54,10 @@ function sanitizeName(raw: string): string {
   return trimmed.length > 0 ? trimmed : "Player";
 }
 
+// 進行(司会)は完全に「自分たちのペース」: サーバー側は強制タイマーを一切持たない。
+// 各フェーズは (a) 必要な全員の行動が揃ったら自動的に次へ進む(=待たされる側は自分の速さで
+// 操作すればよい)か、(b) ホストが手動で「進める」ボタンを押した時だけ進む。
+// 一定時間で勝手にページが切り替わる、ということは起こらない。
 export function attachGameServer(io: IOServer) {
   function touch(room: RoomRuntime) {
     room.lastActivity = Date.now();
@@ -73,123 +74,16 @@ export function attachGameServer(io: IOServer) {
     }
   }
 
-  function clearTimer(room: RoomRuntime) {
-    if (room.timer) {
-      clearTimeout(room.timer);
-      room.timer = null;
-    }
-  }
-
-  function clearHunterTimer(room: RoomRuntime) {
-    if (room.hunterTimer) {
-      clearTimeout(room.hunterTimer);
-      room.hunterTimer = null;
-    }
-  }
-
-  // 進行(司会)は完全自動: 各フェーズの終了条件(タイマー満了 or 全員の行動完了)を
-  // サーバー側で監視し、次のフェーズへ自動的に進める。ホストのボタンは「今すぐ進める」
-  // というショートカット操作としてのみ機能する(必須ではない)。
-
-  function scheduleRoleRevealTimeout(room: RoomRuntime) {
-    clearTimer(room);
-    room.timer = setTimeout(() => {
-      if (room.state.phase === "role_reveal") {
-        startNight(room.state);
-        scheduleNightTimeout(room);
-        broadcast(room);
-      }
-    }, room.state.settings.roleRevealSeconds * 1000);
-  }
-
-  function scheduleNightTimeout(room: RoomRuntime) {
-    clearTimer(room);
-    room.timer = setTimeout(() => {
-      if (room.state.phase === "night" && !room.state.awaitingHunterRevenge) {
-        resolveNight(room.state);
-        afterResolution(room);
-      }
-    }, room.state.settings.nightSeconds * 1000);
-  }
-
-  function scheduleDayResultTimeout(room: RoomRuntime) {
-    clearTimer(room);
-    room.timer = setTimeout(() => {
-      if (room.state.phase === "day_result") {
-        startDiscussion(room.state);
-        scheduleDiscussionTimeout(room);
-        broadcast(room);
-      }
-    }, room.state.settings.resultPauseSeconds * 1000);
-  }
-
-  function scheduleDiscussionTimeout(room: RoomRuntime) {
-    clearTimer(room);
-    // phaseEndsAt基準で遅延を計算する(延長ボタンで押し戻された終了時刻にも追従できるように)
-    const fallback = Date.now() + room.state.settings.discussionSeconds * 1000;
-    const delay = Math.max(0, (room.state.phaseEndsAt ?? fallback) - Date.now());
-    room.timer = setTimeout(() => {
-      if (room.state.phase === "discussion") {
-        startVote(room.state);
-        scheduleVoteTimeout(room);
-        broadcast(room);
-      }
-    }, delay);
-  }
-
-  function scheduleVoteTimeout(room: RoomRuntime) {
-    clearTimer(room);
-    room.timer = setTimeout(() => {
-      if (room.state.phase === "vote") {
-        resolveVote(room.state);
-        afterVoteResolution(room);
-      }
-    }, room.state.settings.voteSeconds * 1000);
-  }
-
-  function scheduleExecutionResultTimeout(room: RoomRuntime) {
-    clearTimer(room);
-    room.timer = setTimeout(() => {
-      if (room.state.phase === "execution_result") {
-        startNight(room.state);
-        scheduleNightTimeout(room);
-        broadcast(room);
-      }
-    }, room.state.settings.resultPauseSeconds * 1000);
-  }
-
   function afterResolution(room: RoomRuntime) {
     // resolveNight / resolveVote / dictatorExecute の後に呼ぶ。
-    clearTimer(room);
-    clearHunterTimer(room);
-    if (room.state.awaitingHunterRevenge) {
-      room.hunterTimer = setTimeout(() => {
-        const hunterId = room.state.awaitingHunterRevenge?.hunterId;
-        if (!hunterId) return;
-        submitHunterRevenge(room.state, hunterId, null);
-        afterResolution(room);
-        broadcast(room);
-      }, HUNTER_REVENGE_TIMEOUT_MS);
-    } else if (room.state.phase === "day_result") {
-      scheduleDayResultTimeout(room);
-    } else if (room.state.phase === "execution_result") {
-      scheduleExecutionResultTimeout(room);
-    }
+    // ハンターの道連れ待ちがあれば、そのままハンターの選択を待つ(タイムアウトなし)。
     broadcast(room);
   }
 
-  // resolveVote() の後に呼ぶ。同数タイで決選投票前の話し合いへ戻った場合(phaseが
-  // "discussion"に変わっている)は、その話し合いフェーズのタイマーを仕掛け直す。
-  // それ以外(執行 or ハンター道連れ待ち)は通常のafterResolutionに委ねる。
+  // resolveVote() の後に呼ぶ。同数タイで決選投票前の話し合いへ戻った場合は
+  // 単にブロードキャストするだけでよい(タイマーの再設定は不要)。
   function afterVoteResolution(room: RoomRuntime) {
-    if (room.state.phase === "discussion") {
-      clearTimer(room);
-      clearHunterTimer(room);
-      scheduleDiscussionTimeout(room);
-      broadcast(room);
-      return;
-    }
-    afterResolution(room);
+    broadcast(room);
   }
 
   function maybeAutoResolveNight(room: RoomRuntime) {
@@ -274,8 +168,6 @@ export function attachGameServer(io: IOServer) {
         tokens: new Map([[playerId, token]]),
         socketOf: new Map([[playerId, socket.id]]),
         playerOf: new Map([[socket.id, playerId]]),
-        timer: null,
-        hunterTimer: null,
         manualComposition: false,
         lastActivity: Date.now(),
       };
@@ -441,44 +333,75 @@ export function attachGameServer(io: IOServer) {
       if (!valid) return cb?.({ ok: false, errorCode: "INVALID_COMPOSITION", issues });
 
       assignRolesAndStart(room.state, room.state.roleCounts);
-      scheduleRoleRevealTimeout(room);
       touch(room);
       cb?.({ ok: true });
       broadcast(room);
     });
 
-    // ホストの「今すぐ進める」ショートカット。進行は自動なので必須ではない。
+    // ホストの「進める」操作。タイマーは存在しないため、これと各フェーズの完了条件
+    // (全員の行動が揃う)だけが唯一の進行トリガー。
     socket.on("host:advance", ({ to }) => {
       if (!currentCode || !currentPlayerId) return;
       const room = findRoom(currentCode);
       if (!room || !ensureHost(room, currentPlayerId)) return;
       const phase = room.state.phase;
+      const day = room.state.day;
 
-      if (to === "night" && (phase === "role_reveal" || phase === "day_result" || phase === "execution_result")) {
-        startNight(room.state);
-        scheduleNightTimeout(room);
+      if (to === "discussion" && phase === "role_reveal") {
+        // 役職確認 → 最初の昼(議論のみ、まだ誰も襲撃されない)。
+        // 全員が役職確認ボタンを押すまでは、ホストでも進めることはできない。
+        if (!allAliveAcked(room.state)) return;
+        startFirstDiscussion(room.state);
         broadcast(room);
       } else if (to === "discussion" && phase === "day_result") {
         startDiscussion(room.state);
-        scheduleDiscussionTimeout(room);
         broadcast(room);
-      } else if (to === "vote" && phase === "discussion") {
+      } else if (to === "night" && phase === "discussion" && day === 0) {
+        // 最初の昼(議論) → 本当の「夜」(ここで初めて人狼の襲撃などが発生する)
+        startNight(room.state);
+        broadcast(room);
+      } else if (to === "night" && phase === "execution_result") {
+        startNight(room.state);
+        broadcast(room);
+      } else if (to === "vote" && phase === "discussion" && day > 0) {
         startVote(room.state);
-        scheduleVoteTimeout(room);
         broadcast(room);
       }
       touch(room);
     });
 
-    // ホストが議論タイムを+60秒延長する。回数の上限はなく、何度でも押せる。
-    socket.on("discussion:extend", () => {
+    // ホストが「全員の行動を待たずに今の夜を締め切る」。未提出者は「何もしない」扱い。
+    socket.on("host:forceResolveNight", () => {
       if (!currentCode || !currentPlayerId) return;
       const room = findRoom(currentCode);
-      if (!room || !ensureHost(room, currentPlayerId) || room.state.phase !== "discussion") return;
-      extendDiscussion(room.state, DISCUSSION_EXTEND_SECONDS);
-      scheduleDiscussionTimeout(room);
+      if (!room || !ensureHost(room, currentPlayerId)) return;
+      if (room.state.phase !== "night" || room.state.awaitingHunterRevenge) return;
+      resolveNight(room.state);
       touch(room);
-      broadcast(room);
+      afterResolution(room);
+    });
+
+    // ホストが「全員の投票を待たずに今の投票を締め切る」。未投票者はカウントされない。
+    socket.on("host:forceResolveVote", () => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || !ensureHost(room, currentPlayerId)) return;
+      if (room.state.phase !== "vote") return;
+      resolveVote(room.state);
+      touch(room);
+      afterVoteResolution(room);
+    });
+
+    // ホストが、応答のないハンターの代わりに「道連れなし」を選ぶ。
+    socket.on("host:skipHunterRevenge", () => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || !ensureHost(room, currentPlayerId)) return;
+      const hunterId = room.state.awaitingHunterRevenge?.hunterId;
+      if (!hunterId) return;
+      submitHunterRevenge(room.state, hunterId, null);
+      touch(room);
+      afterResolution(room);
     });
 
     socket.on("role:ack", () => {
@@ -490,9 +413,23 @@ export function attachGameServer(io: IOServer) {
       ackRole(room.state, currentPlayerId);
       touch(room);
       if (allAliveAcked(room.state)) {
-        startNight(room.state);
-        scheduleNightTimeout(room);
+        // 全員が確認を終えたら、自動的に「最初の昼(議論のみ)」へ進む
+        startFirstDiscussion(room.state);
       }
+      broadcast(room);
+    });
+
+    // 発展ルール: 予言者が役職確認のタイミングで1人を占う(設定でON時のみ)
+    socket.on("seer:earlyDivine", ({ targetId }) => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || room.state.phase !== "role_reveal" || !room.state.settings.seerFirstNightDivine) return;
+      const player = getPlayer(room.state, currentPlayerId);
+      if (!player || player.role !== "seer") return;
+      const target = getPlayer(room.state, targetId);
+      if (!target || target.id === currentPlayerId) return;
+      submitEarlyDivine(room.state, currentPlayerId, targetId);
+      touch(room);
       broadcast(room);
     });
 
@@ -508,6 +445,12 @@ export function attachGameServer(io: IOServer) {
         const target = getPlayer(room.state, targetId);
         if (!target || !target.alive || target.id === currentPlayerId) return;
         if (action === "attack" && room.state.wolfIds.includes(target.id)) return;
+        if (
+          action === "guard" &&
+          room.state.previousGuardTargets[currentPlayerId] === target.id
+        ) {
+          return; // 二夜続けて同じ人物を守ることはできない
+        }
       }
       if (action === "attack") submitAttack(room.state, currentPlayerId, targetId);
       else if (action === "guard") submitGuard(room.state, currentPlayerId, targetId);
@@ -544,7 +487,7 @@ export function attachGameServer(io: IOServer) {
     socket.on("dictator:act", ({ targetId }) => {
       if (!currentCode || !currentPlayerId) return;
       const room = findRoom(currentCode);
-      if (!room || room.state.phase !== "discussion") return;
+      if (!room || room.state.phase !== "discussion" || room.state.day === 0) return;
       const player = getPlayer(room.state, currentPlayerId);
       if (!player || player.role !== "dictator" || room.state.dictatorUsed) return;
       const target = getPlayer(room.state, targetId);
@@ -559,8 +502,6 @@ export function attachGameServer(io: IOServer) {
       const room = findRoom(currentCode);
       if (!room || !ensureHost(room, currentPlayerId)) return;
       if (room.state.phase !== "game_over") return;
-      clearTimer(room);
-      clearHunterTimer(room);
       resetToLobby(room.state);
       room.manualComposition = false;
       refreshSuggestedComposition(room);
@@ -587,8 +528,6 @@ export function attachGameServer(io: IOServer) {
     for (const [code, room] of rooms.entries()) {
       const anyConnected = room.state.players.some((p) => p.connected);
       if (!anyConnected && now - room.lastActivity > 2 * 60 * 60 * 1000) {
-        clearTimer(room);
-        clearHunterTimer(room);
         rooms.delete(code);
       }
     }

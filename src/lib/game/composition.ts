@@ -44,8 +44,13 @@ export function validateComposition(
   if ((counts.lover || 0) !== 0 && (counts.lover || 0) !== 2) {
     issues.push({ code: "LOVER_INVALID" });
   }
-  const wolfSide = (counts.werewolf || 0) + (counts.traitor || 0) + (counts.insider || 0);
-  if (wolfSide >= playerCount - wolfSide && total === playerCount) {
+  // 勝敗判定(checkWinConditions)の頭数ルールと一致させる:
+  // 人狼としてカウントされるのは人狼カードのみ。妖狐は頭数から除外。
+  // 裏切り者/内通者/神様/恋人は人間側としてカウントされる。
+  const wolfCount = counts.werewolf || 0;
+  const foxCount = counts.fox || 0;
+  const humanCount = total - wolfCount - foxCount;
+  if (wolfCount >= humanCount && total === playerCount) {
     issues.push({ code: "WOLF_TOO_MANY" });
   }
   return { valid: issues.length === 0, issues };

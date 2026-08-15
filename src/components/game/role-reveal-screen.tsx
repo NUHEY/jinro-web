@@ -8,25 +8,30 @@ import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { ROLES } from "@/lib/game/roles";
 import { ICONS, styleOf } from "@/lib/game/role-style";
-import { Eye, Moon } from "lucide-react";
+import { Eye, Moon, CheckCircle2 } from "lucide-react";
+import { PlayerPicker } from "@/components/game/player-picker";
 
 export function RoleRevealScreen() {
-  const { publicState, privateState, session, ackRole, advance } = useGame();
+  const { publicState, privateState, session, ackRole, earlyDivine } = useGame();
   const { t } = useLocale();
   const [revealed, setRevealed] = useState(false);
+  const [divineTarget, setDivineTarget] = useState<string | null | undefined>(undefined);
   if (!publicState || !privateState || !session) return null;
 
-  const me = publicState.players.find((p) => p.id === session.playerId);
-  const isHost = !!me?.isHost;
   const role = privateState.self.role;
   const def = role ? ROLES[role] : null;
   const text = role ? t.roles[role] : null;
   const style = def ? styleOf(def.color) : null;
   const Icon = def ? (ICONS[def.icon] ?? Eye) : Eye;
+  const acked = !!privateState.roleAcked;
 
-  const handleReveal = () => {
-    setRevealed(true);
-    ackRole();
+  const canEarlyDivine = role === "seer" && publicState.settings.seerFirstNightDivine;
+  const alreadyDivined = !!privateState.seerResult && privateState.seerResult.day === 0;
+
+  const handleReveal = () => setRevealed(true);
+  const handleConfirm = () => ackRole();
+  const handleDivine = () => {
+    if (divineTarget) earlyDivine(divineTarget);
   };
 
   return (
@@ -80,14 +85,59 @@ export function RoleRevealScreen() {
         </Card>
       ) : null}
 
-      {revealed && (
+      {revealed && canEarlyDivine && (
+        <Card className="w-full max-w-[320px] border-violet-500/30 bg-violet-500/10">
+          <CardContent className="space-y-3 py-5">
+            {alreadyDivined && privateState.seerResult ? (
+              <>
+                <p className="text-sm font-semibold text-violet-300">{t.roleReveal.earlyDivineDone}</p>
+                <p
+                  className={
+                    "text-sm font-bold " +
+                    (privateState.seerResult.isBlack ? "text-red-400" : "text-sky-300")
+                  }
+                >
+                  {t.night.seerResultLine(privateState.seerResult.targetName, privateState.seerResult.isBlack)}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold text-violet-300">{t.roleReveal.earlyDivineTitle}</p>
+                <p className="text-xs text-muted-foreground">{t.roleReveal.earlyDivineDesc}</p>
+                <PlayerPicker
+                  candidates={publicState.players.filter((p) => p.id !== session.playerId)}
+                  selectedId={divineTarget}
+                  onSelect={setDivineTarget}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full font-bold"
+                  disabled={!divineTarget}
+                  onClick={handleDivine}
+                >
+                  {t.roleReveal.earlyDivineButton}
+                </Button>
+                <p className="text-center text-[11px] text-muted-foreground">{t.roleReveal.earlyDivineSkipNote}</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {revealed && !acked && (
+        <Button className="w-full max-w-[320px] font-bold" size="lg" onClick={handleConfirm}>
+          <CheckCircle2 className="size-4" /> {t.roleReveal.confirmButton}
+        </Button>
+      )}
+
+      {revealed && acked && (
         <p className="text-center text-xs text-muted-foreground">{t.roleReveal.waitingOthers}</p>
       )}
 
-      {revealed && isHost && (
-        <Button variant="outline" className="w-full max-w-[320px] font-bold" onClick={() => advance("night")}>
-          {t.roleReveal.skipButton}
-        </Button>
+      {publicState.progress && (
+        <p className="text-center text-xs font-medium text-muted-foreground">
+          {t.roleReveal.progress(publicState.progress.submitted, publicState.progress.total)}
+        </p>
       )}
     </div>
   );
