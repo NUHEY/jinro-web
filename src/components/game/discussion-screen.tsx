@@ -51,7 +51,7 @@ export function DiscussionScreen() {
               <VoteIcon className="size-4" /> {t.discussion.runoffNotice}
             </p>
             <p className="text-xs text-muted-foreground">
-              {t.discussion.runoffCandidatesLabel}: {runoffNames.join("、")}
+              {t.discussion.runoffCandidatesLabel}: {runoffNames.join(t.common.listSeparator)}
             </p>
           </CardContent>
         </Card>

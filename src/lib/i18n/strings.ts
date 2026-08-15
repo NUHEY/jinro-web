@@ -1,8 +1,8 @@
 import type { RoleId, Team, NightActionType } from "@/lib/game/roles";
 import type { DeathCause } from "@/lib/game/types";
 
-export type Locale = "ja" | "en";
-export const LOCALES: Locale[] = ["ja", "en"];
+export type Locale = "ja" | "en" | "ko";
+export const LOCALES: Locale[] = ["ja", "en", "ko"];
 
 interface RoleText {
   name: string;
@@ -46,6 +46,7 @@ interface Strings {
     close: string;
     cancel: string;
     people: (n: number) => string;
+    listSeparator: string;
   };
   entry: {
     title: string;
@@ -220,6 +221,7 @@ const ja: Strings = {
     close: "閉じる",
     cancel: "キャンセル",
     people: (n) => `${n}人`,
+    listSeparator: "、",
   },
   entry: {
     title: "人狼DX オンライン",
@@ -529,6 +531,7 @@ const en: Strings = {
     close: "Close",
     cancel: "Cancel",
     people: (n) => `${n}`,
+    listSeparator: ", ",
   },
   entry: {
     title: "Jinro DX Online",
@@ -819,6 +822,316 @@ const en: Strings = {
   },
 };
 
-export const STRINGS: Record<Locale, Strings> = { ja, en };
+const ko: Strings = {
+  meta: {
+    title: "진로DX 온라인",
+    description:
+      "대화형 심리 게임 「진로DX 신장판(인랑 게임)」의 온라인 진행 앱. 모인 인원끼리 각자 스마트폰으로 즐길 수 있습니다.",
+  },
+  common: {
+    host: "호스트",
+    connected: "연결됨",
+    disconnected: "연결 끊김",
+    reconnecting: "재접속 중…",
+    connecting: "접속하는 중…",
+    kicked: "호스트에 의해 방에서 나가게 되었습니다.",
+    seconds: (n) => `${n}초`,
+    timeRemaining: "남은 시간",
+    minutesUntilAuto: "곧 자동으로 진행됩니다",
+    close: "닫기",
+    cancel: "취소",
+    people: (n) => `${n}명`,
+    listSeparator: ", ",
+  },
+  entry: {
+    title: "진로DX 온라인",
+    subtitle: "대화형 심리 게임 「진로DX 신장판」 13개 역할 지원. 어디서든 스마트폰 하나로 즐길 수 있습니다.",
+    cardTitle: "시작하기",
+    cardDesc: "방을 만들거나, 방 코드로 참가하세요.",
+    tabCreate: "방 만들기",
+    tabJoin: "방 참가하기",
+    nameLabel: "닉네임",
+    namePlaceholder: "예: 민준",
+    createButton: "방 만들기",
+    codeLabel: "방 코드",
+    codePlaceholder: "예: AB3XZ",
+    joinButton: "참가하기",
+    footerNote: "※ 이 앱에는 채팅 기능이 없습니다. 실제로 모여서(또는 화상 통화로) 대화하며 플레이하는 것을 전제로 합니다.",
+    helpButton: "게임 방법 · 규칙 보기",
+    customCodeLabel: "방 코드 (선택)",
+    customCodePlaceholder: "비워두면 자동으로 생성됩니다",
+    customCodeHint: "영문자·숫자 5~8자. 지정하지 않으면 자동으로 발급됩니다.",
+  },
+  lobby: {
+    codeLabel: "방 코드",
+    copyCode: "코드 복사",
+    copyLink: "초대 링크 복사",
+    copyCodeToast: "코드를 복사했습니다",
+    copyLinkToast: "초대 링크를 복사했습니다",
+    copyErrorToast: "복사에 실패했습니다",
+    participants: (n) => `참가자 (${n}명)`,
+    waitingForMorePlayers: (n) => `${n}명이 더 모이면 게임을 시작할 수 있습니다`,
+    composition: "역할 구성",
+    compositionReadonly: "역할 구성 (호스트가 설정 중)",
+    compositionReadonlyDesc: (wolves, total) => `인랑 ${wolves}명을 포함해 총 ${total}명분의 역할이 설정되어 있습니다.`,
+    suggest: "추천 구성",
+    seatTotal: "역할 합계",
+    seatTotalOf: (total, count) => `${total} / ${count}명`,
+    soloGroupLabel: "단독 진영",
+    startButton: "게임 시작",
+    waitingHost: "호스트가 시작하기를 기다리는 중…",
+    leaveButton: "나가기",
+    settingsTitle: "게임 설정",
+    revealOnDeath: "사망 시 역할 공개",
+    nightSeconds: "밤 페이즈 시간",
+    discussionSeconds: "토론 시간",
+    voteSeconds: "투표 시간",
+    roleRevealSeconds: "역할 확인 자동 진행까지의 시간",
+    resultPauseSeconds: "결과 발표 자동 진행까지의 시간",
+    kick: "내보내기",
+    makeHost: "호스트로 지정",
+    makeHostConfirmTitle: "호스트를 교체하시겠습니까?",
+    makeHostConfirmDesc: (name) => `${name}님이 새로운 호스트가 됩니다. 당신은 호스트 권한을 잃고, 진행 조작 등을 할 수 없게 됩니다.`,
+    makeHostConfirmAction: "교체하기",
+  },
+  roleReveal: {
+    label: "나의 역할",
+    tapToReveal: "탭하여 확인",
+    privacyHint: "주변 사람에게 보이지 않도록 확인하세요",
+    allies: "나의 동료",
+    allRoles: "전체 플레이어의 역할",
+    waitingOthers: "확인이 끝났습니다. 다른 플레이어의 확인이 끝나는 대로 자동으로 밤으로 넘어갑니다.",
+    skipButton: "지금 바로 밤으로 진행",
+  },
+  night: {
+    tag: (day) => `밤 ${day}일차`,
+    deadNotice: "당신은 이미 탈락했습니다. 조용히 밤이 지나가는 것을 지켜봐 주세요…",
+    dormant: "밤이 깊어가고 있습니다…",
+    dormantDesc: "능력을 가진 사람이 행동을 마칠 때까지 기다려 주세요.",
+    progress: (s, t) => `행동 완료: ${s} / ${t}명`,
+    submitButton: "결정하기",
+    resubmitButton: "제출됨 (변경하기)",
+    previousSeerResult: (day) => `이전 점술 결과 (${day}일차)`,
+    seerResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
+    actions: {
+      attack: { title: "누구를 습격하시겠습니까?", desc: "동료 인랑과 상의하여 오늘 밤 습격할 대상을 선택하세요.", skip: "오늘 밤은 습격하지 않는다" },
+      guard: { title: "누구를 지키시겠습니까?", desc: "인랑의 습격으로부터 지킬 대상을 선택하세요. 자기 자신은 지킬 수 없습니다.", skip: "오늘 밤은 아무도 지키지 않는다" },
+      divine: { title: "누구를 점치시겠습니까?", desc: "상대가 인랑인지 아닌지를 점칩니다.", skip: "오늘 밤은 점치지 않는다" },
+    },
+  },
+  hunterRevenge: {
+    title: "헌터의 정체가 드러났다!",
+    waitingFor: (name) => `${name}님이 함께 데려갈 상대를 선택하는 중입니다…`,
+    youAre: "당신은 헌터입니다. 함께 데려갈 상대를 한 명 선택할 수 있습니다 (선택하지 않아도 됩니다).",
+    skip: "아무도 데려가지 않는다",
+    submit: "결정하기",
+    submitted: "제출됨",
+  },
+  dayResult: {
+    tag: (day) => `아침 ${day}일차`,
+    noDeaths: "어젯밤에는 아무도 희생되지 않았습니다. 평화로운 아침입니다.",
+    continueButton: "지금 바로 토론 시간으로 진행",
+    autoNotice: "곧 자동으로 토론 시간이 시작됩니다…",
+  },
+  discussion: {
+    tag: (day) => `토론 시간 ${day}일차`,
+    instructions: "실제로 모여서 (또는 화상 통화로) 이야기를 나눠 보세요. 누가 인랑인지 다 함께 추리해 봅시다.",
+    survivors: "생존자",
+    dictatorButton: "독재자 권한 발동",
+    dictatorConfirmTitle: "독재자 권한을 발동하시겠습니까?",
+    dictatorConfirmDesc: "토론을 강제로 종료하고, 투표 없이 지정한 사람을 독단으로 추방합니다. 이 능력은 게임 중 단 한 번만 사용할 수 있습니다.",
+    dictatorConfirmAction: "이 사람을 추방하기",
+    skipButton: "지금 바로 투표로 진행",
+    extendButton: "토론 시간 연장 (+1분)",
+    runoffNotice: "투표가 동수였기 때문에, 결선 투표 전의 토론 시간입니다. 그래도 결정되지 않으면 무작위로 결정됩니다.",
+    runoffCandidatesLabel: "결선 투표 대상",
+  },
+  vote: {
+    tag: (day) => `투표 시간 ${day}일차`,
+    runoffTag: (day) => `결선 투표 ${day}일차`,
+    cannotVote: "당신은 투표할 수 없습니다. 결과를 지켜봐 주세요.",
+    instructions: "추방할 사람을 한 명 선택하세요",
+    runoffNotice: "동수였기 때문에 대상을 좁힌 결선 투표입니다. 그래도 결정되지 않으면 무작위로 결정됩니다.",
+    submitButton: "투표하기",
+    submittedButton: "투표됨 (변경하기)",
+    progress: (s, t) => `투표 완료: ${s} / ${t}명`,
+  },
+  executionResult: {
+    tag: (day) => `추방 결과 ${day}일차`,
+    executed: (name) => `${name}님이 추방되었습니다`,
+    noExecution: "투표 결과, 아무도 추방되지 않았습니다.",
+    mediumResult: "영매 결과",
+    mediumResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
+    continueButton: "지금 바로 다음 밤으로 진행",
+    autoNotice: "곧 자동으로 다음 밤이 시작됩니다…",
+  },
+  gameOver: {
+    primary: {
+      village: "시민 진영의 승리!",
+      werewolf: "인랑 진영의 승리!",
+      draw: "무승부",
+    },
+    extra: {
+      fox: "요호도 살아남아 단독 승리!",
+      god: "신도 살아남아 단독 승리!",
+      lover: "연인 두 사람 모두 살아남아 승리!",
+    },
+    allRoles: "전원의 역할",
+    eliminated: "탈락",
+    newGameButton: "같은 멤버로 다시 하기",
+    waitingHost: "호스트가 다음 게임을 시작하기를 기다리는 중…",
+    leaveButton: "나가기",
+  },
+  help: {
+    button: "게임 방법",
+    title: "게임 방법 · 규칙",
+    tldr: "한마디로: 숨어 있는 「인랑」을, 시민들이 대화를 통해 찾아내 추방하는 게임입니다.",
+    tabFlow: "진행 순서",
+    tabWin: "승리 조건",
+    tabRoles: "역할",
+    intro:
+      "진로DX는 정체를 숨긴 「인랑」을 「시민」들이 대화와 추리로 찾아내는 심리 게임입니다. 실제로 모여서 (또는 화상 통화 등으로) 이야기하면서, 이 앱으로 역할 확인·밤의 행동·투표를 진행합니다. 「낮(토론·투표)」과 「밤(능력 행동)」을 반복하며, 어느 한쪽 진영이 조건을 만족하면 게임이 종료됩니다.",
+    flowTitle: "게임 진행 순서",
+    flowSteps: [
+      { title: "역할 확인", desc: "모든 사람이 각자 자신의 역할만 몰래 확인합니다. 주변 사람에게 보이지 않도록 주의하세요." },
+      { title: "밤", desc: "인랑·점술사·보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 아무것도 하지 않고 대기합니다." },
+      { title: "아침 (결과 발표)", desc: "밤사이 무슨 일이 있었는지 (누가 희생되었는지)가 발표됩니다." },
+      { title: "토론", desc: "실제로 이야기를 나누며 누가 인랑인지 추리합니다 (이 앱에는 채팅 기능이 없으므로 직접 말하거나 화상 통화로 대화하세요)." },
+      { title: "투표", desc: "추방할 사람을 한 명 선택해 투표합니다. 최다 득표자가 추방되며, 동수일 경우 결선 투표가 진행됩니다." },
+      { title: "반복", desc: "「밤 → 아침 → 토론 → 투표」를 어느 한쪽 진영이 승리할 때까지 반복합니다." },
+    ],
+    winTitle: "승리 조건",
+    winIntro: "게임이 끝나는 방식은 진영마다 다릅니다. 여러 진영이 동시에 승리하는 경우도 있습니다.",
+    winVillage: "시민 진영: 인랑을 모두 추방하면 승리.",
+    winWerewolf: "인랑 진영: 인랑의 수가 인랑 이외의 생존자 수 이상이 되면 승리.",
+    winFox: "요호: 게임 종료 시 살아 있으면 단독 승리 (시민·인랑의 승패와는 별개).",
+    winGod: "신: 게임 종료 시 살아 있으면 단독 승리.",
+    winLover: "연인: 게임 종료 시 두 사람 모두 살아 있으면 함께 승리.",
+    rolesTitle: "역할 목록 (13종)",
+    rolesIntro: "자신의 역할에 대한 설명은 게임 중 「나의 역할」 화면에서도 확인할 수 있습니다.",
+    close: "닫기",
+  },
+  team: {
+    village: "시민 진영",
+    werewolf: "인랑 진영",
+    fox: "요호 (단독 진영)",
+    god: "신 (단독 진영)",
+    lover: "연인 (단독 진영)",
+  },
+  deathCause: {
+    attack: "인랑에게 습격당함",
+    execution: "추방됨",
+    curse: "점술사에게 점쳐져 저주로 사망",
+    hunter: "헌터에게 함께 죽임을 당함",
+    lover_grief: "연인의 뒤를 따라감",
+  },
+  roles: {
+    villager: {
+      name: "시민",
+      short: "특별한 능력이 없는 마을 사람",
+      detail: "당신은 시민입니다. 특별한 능력은 없습니다. 대화와 추리만으로 인랑을 찾아내 추방합시다.",
+    },
+    seer: {
+      name: "점술사",
+      short: "매일 밤 한 명을 점쳐 인랑인지 아닌지 알아낸다",
+      detail:
+        "당신은 점술사입니다. 매일 밤 한 명을 골라 점칠 수 있습니다. 그 사람이 「인랑」이면 흑, 그 외에는 백으로 판명됩니다. 참고로 요호를 점치면 요호는 그날 밤 저주로 사망합니다.",
+    },
+    bodyguard: {
+      name: "보디가드",
+      short: "매일 밤 한 명을 인랑의 습격으로부터 지킨다",
+      detail:
+        "당신은 보디가드입니다. 매일 밤 자신을 제외한 한 명을 선택해 인랑의 습격으로부터 지킬 수 있습니다. 지킨 상대가 습격 대상이었다면 그 사람은 살아남습니다.",
+    },
+    medium: {
+      name: "영매사",
+      short: "추방된 사람이 인랑이었는지 알 수 있다",
+      detail: "당신은 영매사입니다. 낮에 추방된 플레이어가 「인랑」이었는지 아닌지를 그날 밤 알 수 있습니다.",
+    },
+    hunter: {
+      name: "헌터",
+      short: "자신이 죽을 때, 한 명을 함께 데려갈 수 있다",
+      detail:
+        "당신은 헌터입니다. 「추방」되거나 「인랑에게 습격」당해 사망할 때, 한 명을 지목하여 함께 죽음에 이르게 할 수 있습니다.",
+    },
+    mason: {
+      name: "공유자",
+      short: "2명 이상이 서로를 알고 있는 마을 사람",
+      detail: "당신은 공유자입니다. 다른 공유자가 누구인지 알고 있습니다. 특별한 능력은 없지만, 서로를 믿고 마을을 이끌어 갑시다.",
+    },
+    dictator: {
+      name: "독재자",
+      short: "단 한 번, 토론을 중단시키고 독단으로 추방자를 결정할 수 있다",
+      detail:
+        "당신은 독재자입니다. 게임 중 단 한 번, 낮의 토론 중에 정체를 밝히고 토론을 강제 종료시켜 투표 없이 추방자를 독단으로 결정할 수 있습니다. 사용할 때는 신중하게.",
+    },
+    werewolf: {
+      name: "인랑",
+      short: "매일 밤 한 명을 습격한다. 다른 인랑을 알 수 있다",
+      detail:
+        "당신은 인랑입니다. 동료 인랑이 누구인지 알고 있습니다. 매일 밤 동료와 상의하여 한 명을 습격하세요. 정체를 숨기고 시민을 인랑과 같은 수까지 줄이면 승리입니다.",
+    },
+    traitor: {
+      name: "배신자",
+      short: "인랑 진영이지만 누가 인랑인지는 모르는 시민인 척하는 사람",
+      detail:
+        "당신은 배신자입니다. 인랑 진영의 승리가 곧 당신의 승리이지만, 누가 인랑인지는 알지 못합니다. 점술·영매에서는 「백」으로 판정됩니다. 시민인 척하며 인랑 진영을 도웁시다.",
+    },
+    insider: {
+      name: "내통자",
+      short: "인랑이 누구인지 알고 있는 인랑 진영의 협력자",
+      detail:
+        "당신은 내통자입니다. 인랑이 누구인지 알고 있습니다. 점술·영매에서는 「백」으로 판정되기 때문에, 인랑 진영 중에서도 특히 활동하기 쉬운 존재입니다. 노골적인 옹호는 피하세요.",
+    },
+    fox: {
+      name: "요호",
+      short: "인랑에게 습격당해도 죽지 않는 단독 진영. 점쳐지면 사망",
+      detail:
+        "당신은 요호입니다. 시민·인랑 어느 쪽에도 속하지 않는 단독 진영으로, 인랑에게 습격당해도 죽지 않습니다. 다만 점술사에게 점쳐지면 그날 밤 저주로 사망합니다. 게임 종료 시 생존해 있으면 당신의 승리입니다.",
+    },
+    god: {
+      name: "신",
+      short: "모든 사람의 역할을 알고 있는 단독 진영. 살아남으면 승리",
+      detail:
+        "당신은 신입니다. 게임 시작 시점부터 모든 플레이어의 역할을 알고 있습니다. 점술·영매에서는 「백」으로 판정됩니다. 시민·인랑 어느 쪽의 승패와도 관계없이, 게임 종료 시 생존해 있으면 당신의 승리입니다.",
+    },
+    lover: {
+      name: "연인",
+      short: "2명이 한 쌍. 상대가 죽으면 자신도 죽는 단독 진영",
+      detail:
+        "당신은 연인입니다. 또 다른 연인이 누구인지 알고 있습니다. 둘 중 한 명이 추방이나 습격으로 사망하면, 남은 한 명도 그 뒤를 따라 사망합니다. 게임 종료 시 두 사람 모두 생존해 있으면 연인의 승리입니다.",
+    },
+  },
+  errors: {
+    ROOM_NOT_FOUND: "방을 찾을 수 없습니다. 방 코드를 확인해 주세요.",
+    GAME_ALREADY_STARTED: "이미 게임이 시작되어 참가할 수 없습니다.",
+    ROOM_FULL: "참가 인원 상한에 도달했습니다.",
+    REJOIN_FAILED: "재접속에 실패했습니다.",
+    PLAYER_NOT_FOUND: "플레이어 정보를 찾을 수 없습니다.",
+    NOT_HOST: "이 조작은 호스트만 할 수 있습니다.",
+    ALREADY_STARTED: "이미 시작되었습니다.",
+    NOT_IN_ROOM: "방에 참가하고 있지 않습니다.",
+    MIN_PLAYERS: "참가 인원이 부족합니다.",
+    KICKED: "호스트에 의해 방에서 나가게 되었습니다.",
+    INVALID_ROOM_CODE: "방 코드는 영문자·숫자 5~8자로 입력해 주세요.",
+    ROOM_CODE_TAKEN: "그 방 코드는 이미 사용 중입니다. 다른 코드를 시도해 주세요.",
+  },
+  validation: (issue) => {
+    switch (issue.code) {
+      case "SEAT_MISMATCH":
+        return `역할 합계 인원(${issue.total}명)이 참가 인원(${issue.playerCount}명)과 일치하지 않습니다.`;
+      case "NO_WEREWOLF":
+        return "인랑이 최소 1명은 필요합니다.";
+      case "MASON_ODD":
+        return "공유자는 2명 1조로 설정해 주세요.";
+      case "LOVER_INVALID":
+        return "연인은 2명 1조로 설정해 주세요.";
+      case "WOLF_TOO_MANY":
+        return "인랑 진영의 인원이 너무 많습니다. 시민 진영이 처음부터 불리해집니다.";
+    }
+  },
+};
+
+export const STRINGS: Record<Locale, Strings> = { ja, en, ko };
 
 export type { Strings };

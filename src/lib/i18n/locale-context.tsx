@@ -9,12 +9,15 @@ function detectInitialLocale(): Locale {
   if (typeof window === "undefined") return "ja";
   try {
     const saved = window.localStorage.getItem(KEY);
-    if (saved === "ja" || saved === "en") return saved;
+    if (saved === "ja" || saved === "en" || saved === "ko") return saved;
   } catch {
     // ignore
   }
   const nav = window.navigator?.language ?? "ja";
-  return nav.toLowerCase().startsWith("ja") ? "ja" : "en";
+  const lower = nav.toLowerCase();
+  if (lower.startsWith("ja")) return "ja";
+  if (lower.startsWith("ko")) return "ko";
+  return "en";
 }
 
 interface LocaleContextValue {

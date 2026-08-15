@@ -6,6 +6,7 @@ import { LOCALES, useLocale, type Locale } from "@/lib/i18n/locale-context";
 const LOCALE_LABEL: Record<Locale, string> = {
   ja: "日本語",
   en: "English",
+  ko: "한국어",
 };
 
 export function LanguageSwitcher({ className }: { className?: string }) {

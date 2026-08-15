@@ -46,7 +46,7 @@ export function HelpDialog({
           <DialogTitle className="font-heading text-xl">{t.help.title}</DialogTitle>
         </DialogHeader>
 
-        <p className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium leading-relaxed text-primary-foreground/90">
+        <p className="rounded-lg border border-primary/40 bg-primary/15 px-3 py-2 text-sm font-medium leading-relaxed text-foreground">
           {t.help.tldr}
         </p>
 

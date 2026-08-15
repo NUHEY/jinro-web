@@ -60,7 +60,7 @@ export function RoleRevealScreen() {
               <div className="mt-2 w-full rounded-xl border border-border/60 bg-background/40 p-3">
                 <p className="mb-1 text-xs font-semibold text-muted-foreground">{t.roleReveal.allies}</p>
                 <p className="text-sm font-medium">
-                  {privateState.knownAllies.map((a) => a.name).join("、")}
+                  {privateState.knownAllies.map((a) => a.name).join(t.common.listSeparator)}
                 </p>
               </div>
             )}

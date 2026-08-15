@@ -87,7 +87,7 @@ export function EntryScreen() {
                     value={customCode}
                     maxLength={8}
                     placeholder={t.entry.customCodePlaceholder}
-                    className="text-center font-mono text-lg tracking-[0.3em] uppercase"
+                    className="text-center font-mono text-lg tracking-[0.3em] uppercase placeholder:text-xs placeholder:tracking-normal placeholder:normal-case placeholder:font-sans"
                     onChange={(e) => setCustomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
                   />
                   <p className="text-xs text-muted-foreground">{t.entry.customCodeHint}</p>
