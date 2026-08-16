@@ -12,6 +12,9 @@ import { styleOf } from "@/lib/game/role-style";
 import { cn } from "@/lib/utils";
 import { HelpDialog } from "@/components/game/help-dialog";
 import { MyRoleDialog } from "@/components/game/my-role-dialog";
+import { ProfileEditDialog } from "@/components/game/profile-edit-dialog";
+import { PlayerAvatar } from "@/components/game/shared";
+import { ThemeToggle } from "@/components/game/theme-toggle";
 import { EntryScreen } from "@/components/game/entry-screen";
 import { LobbyScreen } from "@/components/game/lobby-screen";
 import { RoleRevealScreen } from "@/components/game/role-reveal-screen";
@@ -37,11 +40,12 @@ function LoadingScreen() {
 }
 
 function TopBar() {
-  const { status, showReconnecting, publicState, privateState } = useGame();
+  const { status, showReconnecting, publicState, privateState, session } = useGame();
   const { t } = useLocale();
   if (status !== "in_room" || !publicState) return null;
   const myRole = privateState?.self?.role ?? null;
   const roleStyle = myRole ? styleOf(ROLES[myRole].color) : null;
+  const me = publicState.players.find((p) => p.id === session?.playerId);
   return (
     <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-4 py-2 backdrop-blur safe-top">
       <div className="flex min-w-0 items-center gap-1.5 font-heading text-base font-bold">
@@ -56,6 +60,15 @@ function TopBar() {
           </span>
         ) : (
           <Wifi className="size-4 text-emerald-400" />
+        )}
+        {me && (
+          <ProfileEditDialog
+            trigger={
+              <button type="button" aria-label={t.profile.editButton} className="rounded-full transition active:scale-95">
+                <PlayerAvatar player={me} size="sm" />
+              </button>
+            }
+          />
         )}
         {myRole && roleStyle && (
           <MyRoleDialog
@@ -79,6 +92,7 @@ function TopBar() {
             </Button>
           }
         />
+        <ThemeToggle />
         <LanguageSwitcher />
       </div>
     </div>

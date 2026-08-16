@@ -1,11 +1,18 @@
 import { ROLES, type RoleId } from "./roles";
 import type { GameState } from "./engine";
-import { alivePlayers, getPlayer } from "./engine";
+import { alivePlayers, getPlayer, wolfAttackConsensusReached } from "./engine";
 import type { PrivateViewState, PublicGameState, PublicPlayer } from "./types";
 import { totalSeats } from "./composition";
 
 function toPublicPlayer(p: GameState["players"][number]): PublicPlayer {
-  return { id: p.id, name: p.name, isHost: p.isHost, connected: p.connected, alive: p.alive };
+  return {
+    id: p.id,
+    name: p.name,
+    isHost: p.isHost,
+    connected: p.connected,
+    alive: p.alive,
+    avatarUrl: p.avatarUrl,
+  };
 }
 
 export function buildPublicView(state: GameState): PublicGameState {
@@ -45,6 +52,17 @@ export function buildPublicView(state: GameState): PublicGameState {
     };
   }
 
+  // 設定でONの場合のみ、投票フェーズ中に「誰が誰に投票しているか」をリアルタイムで全員に公開する
+  let voteChoices: PublicGameState["voteChoices"] = null;
+  if (state.phase === "vote" && state.settings.revealVoteChoices) {
+    voteChoices = state.votes.map((v) => ({
+      voterId: v.voterId,
+      voterName: getPlayer(state, v.voterId)?.name ?? "?",
+      targetId: v.targetId,
+      targetName: getPlayer(state, v.targetId)?.name ?? "?",
+    }));
+  }
+
   let pendingExecution: PublicGameState["pendingExecution"] = null;
   if (state.pendingExecution) {
     const target = getPlayer(state, state.pendingExecution.targetId);
@@ -63,6 +81,7 @@ export function buildPublicView(state: GameState): PublicGameState {
     lastDeaths: state.lastDeaths,
     lastExecuted: state.lastExecuted,
     voteTally: state.voteTally,
+    voteChoices,
     runoffCandidateIds: state.runoffCandidateIds,
     pendingExecution,
     appealVoteResult: state.appealVoteResult,
@@ -176,6 +195,7 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
       let candidates = others;
       let wolfSelections: NonNullable<PrivateViewState["pendingNightAction"]>["wolfSelections"] =
         undefined;
+      let wolfConsensusReached: boolean | undefined = undefined;
       if (nightAction === "attack") {
         submitted = state.attackSubmissions.some((s) => s.actorId === playerId);
         candidates = others.filter((p) => !state.wolfIds.includes(p.id));
@@ -192,6 +212,9 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
               targetName: targetId ? nameOf(targetId) : null,
             };
           });
+        // 生存する人狼が2人以上いる場合、全員が同じ相手(または全員「襲撃しない」)を
+        // 選ぶまでは夜が自動的に終わらないようにするための合意フラグ。
+        wolfConsensusReached = wolfAttackConsensusReached(state);
       } else if (nightAction === "guard") {
         submitted = state.guardSubmissions.some((s) => s.actorId === playerId);
         const lastGuarded = state.previousGuardTargets[playerId];
@@ -204,6 +227,7 @@ export function buildPrivateView(state: GameState, playerId: string): PrivateVie
         candidates: candidates.map(toPublicPlayer),
         submitted,
         ...(wolfSelections ? { wolfSelections } : {}),
+        ...(wolfConsensusReached !== undefined ? { wolfConsensusReached } : {}),
       };
     }
   }

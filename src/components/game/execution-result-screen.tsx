@@ -25,7 +25,7 @@ export function ExecutionResultScreen() {
       : null;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30">
           <Gavel className="size-7" />
@@ -39,7 +39,11 @@ export function ExecutionResultScreen() {
             <div className="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-3">
               <HeartHandshake className="size-5 shrink-0 text-emerald-400" />
               <div>
-                <p className="text-base font-bold">{t.executionResult.spared(executedName)}</p>
+                <p className="text-base font-bold">
+                  {publicState.lastExecuted?.sparedReason === "first_vote_rule"
+                    ? t.executionResult.sparedFirstVoteRule(executedName)
+                    : t.executionResult.spared(executedName)}
+                </p>
               </div>
             </div>
           ) : executedName ? (

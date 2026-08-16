@@ -33,7 +33,7 @@ export function PlayerAvatar({
   return (
     <div
       className={cn(
-        "relative flex shrink-0 items-center justify-center rounded-full border font-bold select-none",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border font-bold select-none",
         sizeClass,
         player.alive
           ? "bg-secondary text-secondary-foreground border-border"
@@ -41,7 +41,12 @@ export function PlayerAvatar({
         highlighted && "ring-2 ring-primary"
       )}
     >
-      {initial}
+      {player.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={player.avatarUrl} alt="" className="size-full object-cover" />
+      ) : (
+        initial
+      )}
       {!player.alive && (
         <Skull className="absolute -bottom-1 -right-1 size-4 rounded-full bg-background p-0.5 text-muted-foreground" />
       )}

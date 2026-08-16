@@ -29,7 +29,7 @@ export function RoleRevealScreen() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-4 py-8 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-4 py-8 safe-bottom">
       <p className="text-sm text-muted-foreground">{t.roleReveal.label}</p>
 
       {!revealed ? (

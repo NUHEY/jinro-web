@@ -77,7 +77,12 @@ export interface GameState {
 
   roundDeaths: DeathRecord[];
   lastDeaths: DeathRecord[];
-  lastExecuted: { playerId: string; revealedRole?: RoleId; spared?: boolean } | null;
+  lastExecuted: {
+    playerId: string;
+    revealedRole?: RoleId;
+    spared?: boolean;
+    sparedReason?: "appeal_vote" | "first_vote_rule" | null;
+  } | null;
 
   resolution: ResolutionContext | null;
   awaitingHunterRevenge: { hunterId: string; cause: DeathCause } | null;
@@ -98,6 +103,12 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   seerFirstNightDivine: false,
   allowFirstNightKill: true,
   allowFirstVoteExecution: true,
+  allowSelfVote: true,
+  revealVoteChoices: false,
+  hunterRevengeOnAnyDeath: false,
+  allowBodyguardSelfGuard: false,
+  secondTieExecutesRandomly: true,
+  dictatorCanTargetSelf: true,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -331,6 +342,24 @@ function resolveAttackTarget(submissions: NightActorSubmission[]): string | null
   return pickRandom(top);
 }
 
+// 生存している人狼(襲撃アクションを持つロール)が2人以上いる場合、全員が同じ相手
+// (または全員「今夜は襲撃しない」)を選ぶまでは合意が取れていないとみなす。
+// 1人しかいない場合は常に合意済み扱い。ホストの「全員の行動を待たずに進める」操作は
+// この合意チェックをバイパスし、resolveAttackTarget() の多数決/ランダム決定にフォールバックする。
+export function wolfAttackConsensusReached(state: GameState): boolean {
+  const aliveWolfActors = alivePlayers(state).filter(
+    (p) => p.role && ROLES[p.role].nightAction === "attack"
+  );
+  if (aliveWolfActors.length <= 1) return true;
+  const targets = aliveWolfActors.map((p) => {
+    const sub = state.attackSubmissions.find((s) => s.actorId === p.id);
+    return sub ? sub.targetId : undefined;
+  });
+  if (targets.some((t) => t === undefined)) return false; // まだ全員提出していない
+  const first = targets[0];
+  return targets.every((t) => t === first);
+}
+
 function pushDeath(state: GameState, playerId: string, cause: DeathCause) {
   if (!state.resolution) return;
   state.resolution.queue.push({ playerId, cause });
@@ -363,10 +392,15 @@ function pumpDeathQueue(state: GameState) {
       }
     }
 
-    // ハンターの道連れ(割り込み待ち)
+    // ハンターの道連れ(割り込み待ち)。
+    // 標準ルールは襲撃・処刑による死亡時のみだが、設定でONにすると呪殺・後追いなど
+    // それ以外の死因でも発動するようになる(発展ルール)。
+    const hunterRevengeTriggerCauses: DeathCause[] = state.settings.hunterRevengeOnAnyDeath
+      ? ["attack", "execution", "curse", "lover_grief", "hunter"]
+      : ["attack", "execution"];
     if (
       player.role === "hunter" &&
-      (next.cause === "attack" || next.cause === "execution") &&
+      hunterRevengeTriggerCauses.includes(next.cause) &&
       !state.hunterRevengeUsed.has(player.id)
     ) {
       record.revealedRole = "hunter"; // ハンターは道連れ発動時に必ず正体を公開する
@@ -495,6 +529,13 @@ export function resolveVote(state: GameState) {
     return;
   }
 
+  if (top.length > 1 && state.runoffCandidateIds && !state.settings.secondTieExecutesRandomly) {
+    // 決選投票でもなお同数タイ。設定がOFFの場合はランダム処刑をせず、誰も処刑しない。
+    state.runoffCandidateIds = null;
+    executeTarget(state, null);
+    return;
+  }
+
   const executedId = top.length > 0 ? pickRandom(top) : null;
   state.runoffCandidateIds = null;
 
@@ -503,10 +544,14 @@ export function resolveVote(state: GameState) {
     return;
   }
 
-  // 発展ルール: 最初の投票(1日目)では設定がOFFの場合、実際には追放されない(生かされる)
+  // 発展ルール: 最初の投票(1日目)では設定がOFFの場合、実際には追放されない(生かされる)。
+  // このケースは「最後の一言」「生存決選投票(決選投票)」を一切経由しないため、
+  // 決選投票の結果として生かされたわけではないことがUI上で正しく伝わるよう、
+  // sparedReason を "first_vote_rule" として明示的に区別する(バグ修正: 以前は
+  // 決選投票を行っていないのに「決選投票の結果、生かされました」と表示されていた)。
   const firstVoteExecutionBlocked = state.day === 1 && !state.settings.allowFirstVoteExecution;
   if (firstVoteExecutionBlocked) {
-    executeTarget(state, executedId, true);
+    executeTarget(state, executedId, true, "first_vote_rule");
     return;
   }
 
@@ -564,10 +609,15 @@ export function resolveAppealVote(state: GameState) {
   const result: AppealVoteResult = { targetId, executeCount, spareCount, spared };
   state.appealVoteResult = result;
 
-  executeTarget(state, targetId, spared);
+  executeTarget(state, targetId, spared, "appeal_vote");
 }
 
-function executeTarget(state: GameState, targetId: string | null, spared: boolean = false) {
+function executeTarget(
+  state: GameState,
+  targetId: string | null,
+  spared: boolean = false,
+  sparedReason: "appeal_vote" | "first_vote_rule" | null = null
+) {
   state.roundDeaths = [];
   state.resolution = { kind: "execution", queue: [] };
   state.pendingExecution = null;
@@ -578,6 +628,7 @@ function executeTarget(state: GameState, targetId: string | null, spared: boolea
       playerId: targetId,
       revealedRole: state.settings.revealRoleOnDeath ? (target?.role ?? undefined) : undefined,
       spared,
+      sparedReason: spared ? sparedReason : null,
     };
     if (!spared) {
       pushDeath(state, targetId, "execution");

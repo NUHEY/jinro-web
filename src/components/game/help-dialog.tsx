@@ -14,8 +14,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { useGame } from "@/hooks/use-game";
 import { ROLE_ORDER, ROLES, type Team } from "@/lib/game/roles";
 import { ICONS, styleOf } from "@/lib/game/role-style";
+import { RoleCompositionSummary, RoomSettingsSummary } from "@/components/game/room-config-summary";
 import { cn } from "@/lib/utils";
 
 const WIN_TEAM_ORDER: Array<{ key: "winVillage" | "winWerewolf" | "winFox" | "winGod" | "winLover"; team: Team }> = [
@@ -32,6 +34,7 @@ export function HelpDialog({
   trigger?: React.ReactNode;
 }) {
   const { t } = useLocale();
+  const { publicState } = useGame();
 
   return (
     <Dialog>
@@ -51,14 +54,31 @@ export function HelpDialog({
           {t.help.tldr}
         </p>
 
-        <Tabs defaultValue="flow" className="flex min-h-0 flex-1 flex-col">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue={publicState ? "config" : "flow"} className="flex min-h-0 flex-1 flex-col">
+          <TabsList className={cn("grid w-full", publicState ? "grid-cols-4" : "grid-cols-3")}>
+            {publicState && <TabsTrigger value="config">{t.lobby.roomInfoButton}</TabsTrigger>}
             <TabsTrigger value="flow">{t.help.tabFlow}</TabsTrigger>
             <TabsTrigger value="win">{t.help.tabWin}</TabsTrigger>
             <TabsTrigger value="roles">{t.help.tabRoles}</TabsTrigger>
           </TabsList>
 
           <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
+            {publicState && (
+              <TabsContent value="config" className="mt-0 space-y-4">
+                <div>
+                  <p className="mb-2 px-1 text-xs font-bold text-muted-foreground">{t.lobby.composition}</p>
+                  <RoleCompositionSummary
+                    counts={publicState.roleCounts}
+                    totalSeats={publicState.totalSeats}
+                    playerCount={publicState.players.length}
+                  />
+                </div>
+                <div>
+                  <p className="mb-2 px-1 text-xs font-bold text-muted-foreground">{t.lobby.settingsTitle}</p>
+                  <RoomSettingsSummary settings={publicState.settings} />
+                </div>
+              </TabsContent>
+            )}
             <TabsContent value="flow" className="mt-0 space-y-3">
               <p className="text-sm leading-relaxed text-muted-foreground">{t.help.intro}</p>
               <div className="space-y-2">

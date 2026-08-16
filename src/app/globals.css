@@ -72,7 +72,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.85rem;
+  --radius: 1.1rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -117,6 +117,55 @@
   --sidebar-ring: #fbbf24;
 }
 
+/* ライトモード限定のコントラスト補正。
+   役職カラーやステータス表示(占い結果・霊媒結果・注意喚起など)の文字色は、
+   もともと「暗い背景の上に薄いパステルカラーを乗せる」ダークモード前提で選ばれている
+   (例: text-emerald-300, text-amber-300 など)。この配色をそのままライトモードの
+   白系の背景に使うとコントラスト比が不足するため、ライトモードの時だけ
+   同じ色相のより濃い(700番手、黄色のみ視認性のため800番手)シェードに
+   エイリアスして自動的に読みやすくする。半透明の背景色・枠線(/10〜/40)は
+   500番手のままで両モードとも問題ないため対象外。
+   コンポーネント側は今まで通り text-emerald-300 のようなクラス名を書くだけでよく、
+   個々のファイルを書き換える必要がない。 */
+:root:not(.dark) {
+  --color-sky-200: var(--color-sky-700);
+  --color-sky-300: var(--color-sky-700);
+  --color-sky-400: var(--color-sky-700);
+  --color-violet-200: var(--color-violet-700);
+  --color-violet-300: var(--color-violet-700);
+  --color-violet-400: var(--color-violet-700);
+  --color-emerald-200: var(--color-emerald-700);
+  --color-emerald-300: var(--color-emerald-700);
+  --color-emerald-400: var(--color-emerald-700);
+  --color-indigo-200: var(--color-indigo-700);
+  --color-indigo-300: var(--color-indigo-700);
+  --color-indigo-400: var(--color-indigo-700);
+  --color-amber-200: var(--color-amber-700);
+  --color-amber-300: var(--color-amber-700);
+  --color-amber-400: var(--color-amber-700);
+  --color-teal-200: var(--color-teal-700);
+  --color-teal-300: var(--color-teal-700);
+  --color-teal-400: var(--color-teal-700);
+  --color-rose-200: var(--color-rose-700);
+  --color-rose-300: var(--color-rose-700);
+  --color-rose-400: var(--color-rose-700);
+  --color-red-200: var(--color-red-700);
+  --color-red-300: var(--color-red-700);
+  --color-red-400: var(--color-red-700);
+  --color-orange-200: var(--color-orange-700);
+  --color-orange-300: var(--color-orange-700);
+  --color-orange-400: var(--color-orange-700);
+  --color-fuchsia-200: var(--color-fuchsia-700);
+  --color-fuchsia-300: var(--color-fuchsia-700);
+  --color-fuchsia-400: var(--color-fuchsia-700);
+  --color-yellow-200: var(--color-yellow-800);
+  --color-yellow-300: var(--color-yellow-800);
+  --color-yellow-400: var(--color-yellow-800);
+  --color-pink-200: var(--color-pink-700);
+  --color-pink-300: var(--color-pink-700);
+  --color-pink-400: var(--color-pink-700);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -134,6 +183,11 @@
 }
 
 @layer utilities {
+  /* 注意: ルーム参加後は TopBar (app-shell.tsx) が常に画面最上部にあり、それ自体が
+     既に safe-top の余白を確保している。各画面コンポーネント側でさらに safe-top を
+     重ねると、ノッチ付き端末で余白が二重になってしまうため、TopBar配下の画面では
+     safe-top を付けない(safe-bottomのみ)。TopBarがまだ存在しないエントリー画面
+     (entry-screen.tsx)だけが引き続き safe-top を使う。 */
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }

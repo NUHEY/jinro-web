@@ -48,6 +48,10 @@ interface Strings {
     listSeparator: string;
     confirmProceed: string;
     transitioning: string;
+    on: string;
+    off: string;
+    themeToggleToLight: string;
+    themeToggleToDark: string;
   };
   entry: {
     title: string;
@@ -67,6 +71,22 @@ interface Strings {
     customCodeLabel: string;
     customCodePlaceholder: string;
     customCodeHint: string;
+    avatarLabel: string;
+    avatarAddButton: string;
+    avatarChangeButton: string;
+    avatarRemoveButton: string;
+    avatarTooLarge: string;
+    avatarUnsupported: string;
+  };
+  profile: {
+    editButton: string;
+    title: string;
+    desc: string;
+    nameLabel: string;
+    avatarLabel: string;
+    saveButton: string;
+    savedToast: string;
+    closeButton: string;
   };
   lobby: {
     codeLabel: string;
@@ -80,6 +100,9 @@ interface Strings {
     composition: string;
     compositionReadonly: string;
     compositionReadonlyDesc: (wolves: number, total: number) => string;
+    compositionEmpty: string;
+    roomInfoButton: string;
+    roomInfoTitle: string;
     suggest: string;
     seatTotal: string;
     seatTotalOf: (total: number, count: number) => string;
@@ -95,6 +118,15 @@ interface Strings {
     allowFirstVoteExecutionDesc: string;
     seerFirstNightDivine: string;
     seerFirstNightDivineDesc: string;
+    allowSelfVote: string;
+    revealVoteChoices: string;
+    revealVoteChoicesDesc: string;
+    hunterRevengeOnAnyDeath: string;
+    hunterRevengeOnAnyDeathDesc: string;
+    allowBodyguardSelfGuard: string;
+    secondTieExecutesRandomly: string;
+    secondTieExecutesRandomlyDesc: string;
+    dictatorCanTargetSelf: string;
     settingsPacingNote: string;
     kick: string;
     makeHost: string;
@@ -133,6 +165,8 @@ interface Strings {
     wolfSelectionsTitle: string;
     wolfSelectionsEmpty: string;
     wolfSelectionsLine: (name: string, targetName: string | null) => string;
+    wolfConsensusNeeded: string;
+    wolfConsensusReached: string;
   };
   hunterRevenge: {
     title: string;
@@ -175,11 +209,14 @@ interface Strings {
     submittedButton: string;
     progress: (submitted: number, total: number) => string;
     forceAdvanceButton: string;
+    voteChoicesTitle: string;
+    voteChoicesLine: (voterName: string, targetName: string) => string;
   };
   executionResult: {
     tag: (day: number) => string;
     executed: (name: string) => string;
     spared: (name: string) => string;
+    sparedFirstVoteRule: (name: string) => string;
     noExecution: string;
     mediumResult: string;
     mediumResultLine: (name: string, isBlack: boolean) => string;
@@ -294,6 +331,10 @@ const ja: Strings = {
     listSeparator: "、",
     confirmProceed: "進める",
     transitioning: "次の場面へ移ります…",
+    on: "ON",
+    off: "OFF",
+    themeToggleToLight: "ライトモードに切り替え",
+    themeToggleToDark: "ダークモードに切り替え",
   },
   entry: {
     title: "人狼DX オンライン",
@@ -313,6 +354,22 @@ const ja: Strings = {
     customCodeLabel: "ルームコード(任意)",
     customCodePlaceholder: "空欄なら自動生成されます",
     customCodeHint: "半角英数字5〜8文字。指定しない場合は自動で発行されます。",
+    avatarLabel: "プロフィール写真(任意)",
+    avatarAddButton: "写真を追加",
+    avatarChangeButton: "写真を変更",
+    avatarRemoveButton: "写真を削除",
+    avatarTooLarge: "画像のサイズが大きすぎます(8MBまで)",
+    avatarUnsupported: "画像ファイルを選択してください",
+  },
+  profile: {
+    editButton: "プロフィールを編集",
+    title: "プロフィール編集",
+    desc: "表示名とプロフィール写真はいつでも変更できます。",
+    nameLabel: "ニックネーム",
+    avatarLabel: "プロフィール写真",
+    saveButton: "保存する",
+    savedToast: "プロフィールを更新しました",
+    closeButton: "閉じる",
   },
   lobby: {
     codeLabel: "合言葉コード",
@@ -326,6 +383,9 @@ const ja: Strings = {
     composition: "役職構成",
     compositionReadonly: "役職構成(ホストが設定中)",
     compositionReadonlyDesc: (wolves, total) => `人狼 ${wolves}人を含む、合計 ${total}人分の役職が設定されています。`,
+    compositionEmpty: "まだ役職が設定されていません。",
+    roomInfoButton: "配役・設定",
+    roomInfoTitle: "今回の配役・ゲーム設定",
     suggest: "おすすめ配役",
     seatTotal: "役職の合計",
     seatTotalOf: (total, count) => `${total} / ${count} 人`,
@@ -341,6 +401,15 @@ const ja: Strings = {
     allowFirstVoteExecutionDesc: "オフにすると、最初の投票(1日目の投票)で誰が選ばれても実際には追放されず、生かされます。2日目以降の投票は通常通り追放が有効になります。",
     seerFirstNightDivine: "予言者は役職確認のときに1人占える(発展ルール)",
     seerFirstNightDivineDesc: "説明書11ページの発展ルールです。役職確認のタイミングで、予言者が1人を占うことができます(7人以上でのプレイ推奨)。占うかどうかは予言者が自由に選べます。",
+    allowSelfVote: "投票で自分自身に投票できる",
+    revealVoteChoices: "投票内容を全員に公開する",
+    revealVoteChoicesDesc: "ONにすると、投票フェーズ中に「誰が誰に投票しているか」がリアルタイムで全員に見えるようになります。OFFの場合は今まで通り、票数の集計のみが公開されます。",
+    hunterRevengeOnAnyDeath: "ハンターの道連れを、あらゆる死因で発動させる",
+    hunterRevengeOnAnyDeathDesc: "標準ルールでは、ハンターの道連れは襲撃・処刑で死亡した時のみ発動します。ONにすると、呪殺や恋人の後追いなど他の死因でも発動するようになります。",
+    allowBodyguardSelfGuard: "ボディーガードが自分自身を護衛できる",
+    secondTieExecutesRandomly: "決選投票でも同数タイの場合、ランダムに処刑する",
+    secondTieExecutesRandomlyDesc: "OFFにすると、決選投票でも決着がつかなかった場合は誰も処刑されずにその日が終わります。",
+    dictatorCanTargetSelf: "独裁者が自分自身を処刑対象にできる",
     settingsPacingNote: "このアプリに自動タイマーはありません。それぞれの画面はホストの操作、または全員の行動がそろったタイミングで進みます。自分たちのペースでどうぞ。",
     kick: "退出させる",
     makeHost: "ホストにする",
@@ -383,6 +452,8 @@ const ja: Strings = {
     wolfSelectionsTitle: "仲間の人狼が選んでいる相手(相談用)",
     wolfSelectionsEmpty: "まだ誰も選んでいません",
     wolfSelectionsLine: (name, targetName) => `${name}さん: ${targetName ?? "未選択"}`,
+    wolfConsensusNeeded: "人狼全員が同じ相手(または全員「襲撃しない」)を選ぶまで、夜は終わりません。話し合って1人に決めましょう。",
+    wolfConsensusReached: "全員の意見が一致しました。",
   },
   hunterRevenge: {
     title: "ハンターの正体が明らかに！",
@@ -425,11 +496,15 @@ const ja: Strings = {
     submittedButton: "投票済み(変更する)",
     progress: (s, t) => `投票完了: ${s} / ${t} 人`,
     forceAdvanceButton: "全員の投票を待たずに締め切る(ホスト操作)",
+    voteChoicesTitle: "投票状況(公開設定がONのため全員に見えています)",
+    voteChoicesLine: (voter, target) => `${voter} → ${target}`,
   },
   executionResult: {
     tag: (day) => `追放結果 ${day}日目`,
     executed: (name) => `${name}さんが追放されました`,
     spared: (name) => `決選投票の結果、${name}さんは生かされました`,
+    sparedFirstVoteRule: (name) =>
+      `「最初の投票では実際には追放しない」設定のため、${name}さんは決選投票なしで生かされました`,
     noExecution: "投票の結果、誰も追放されませんでした。",
     mediumResult: "霊媒結果",
     mediumResultLine: (name, isBlack) => `${name}さんは${isBlack ? "【黒(人狼)】" : "【白】"}でした`,
@@ -676,6 +751,10 @@ const en: Strings = {
     listSeparator: ", ",
     confirmProceed: "Proceed",
     transitioning: "Moving to the next scene…",
+    on: "ON",
+    off: "OFF",
+    themeToggleToLight: "Switch to light mode",
+    themeToggleToDark: "Switch to dark mode",
   },
   entry: {
     title: "Jinro DX Online",
@@ -695,6 +774,22 @@ const en: Strings = {
     customCodeLabel: "Room code (optional)",
     customCodePlaceholder: "Leave blank to auto-generate",
     customCodeHint: "5-8 letters/numbers. If left blank, one will be generated for you.",
+    avatarLabel: "Profile photo (optional)",
+    avatarAddButton: "Add photo",
+    avatarChangeButton: "Change photo",
+    avatarRemoveButton: "Remove photo",
+    avatarTooLarge: "That image is too large (8MB max)",
+    avatarUnsupported: "Please choose an image file",
+  },
+  profile: {
+    editButton: "Edit profile",
+    title: "Edit profile",
+    desc: "You can change your display name and profile photo at any time.",
+    nameLabel: "Nickname",
+    avatarLabel: "Profile photo",
+    saveButton: "Save",
+    savedToast: "Profile updated",
+    closeButton: "Close",
   },
   lobby: {
     codeLabel: "Room code",
@@ -708,6 +803,9 @@ const en: Strings = {
     composition: "Role setup",
     compositionReadonly: "Role setup (host is configuring)",
     compositionReadonlyDesc: (wolves, total) => `${wolves} werewolves configured, ${total} roles in total.`,
+    compositionEmpty: "No roles have been configured yet.",
+    roomInfoButton: "Setup & rules",
+    roomInfoTitle: "This game's role setup & settings",
     suggest: "Suggest roles",
     seatTotal: "Total roles",
     seatTotalOf: (total, count) => `${total} / ${count}`,
@@ -723,6 +821,15 @@ const en: Strings = {
     allowFirstVoteExecutionDesc: "Turn this off to make the first vote (day 1) execution-proof — whoever is chosen is spared instead of executed. From day 2 onward, votes work normally.",
     seerFirstNightDivine: "Seer can investigate one player during role reveal (advanced rule)",
     seerFirstNightDivineDesc: "An advanced rule from the rulebook (p.11): the Seer may investigate one player right at role reveal. Recommended for 7+ players. Using it is optional.",
+    allowSelfVote: "Allow voting for yourself",
+    revealVoteChoices: "Reveal everyone's votes live",
+    revealVoteChoicesDesc: "When on, everyone can see who's voting for whom in real time during the vote phase. When off (default), only the total counts are shown as before.",
+    hunterRevengeOnAnyDeath: "Let the Hunter's revenge trigger on any death",
+    hunterRevengeOnAnyDeathDesc: "By the standard rules, the Hunter's revenge only triggers on death by attack or execution. Turning this on also triggers it for other causes, like being cursed or following a lover in death.",
+    allowBodyguardSelfGuard: "Allow the Bodyguard to guard themselves",
+    secondTieExecutesRandomly: "Pick randomly if the runoff vote is still tied",
+    secondTieExecutesRandomlyDesc: "Turn this off and a still-tied runoff vote means no one is executed that day.",
+    dictatorCanTargetSelf: "Allow the Dictator to target themselves",
     settingsPacingNote: "There are no automatic timers in this app. Every screen advances only when the host acts, or once everyone has finished their action. Play at your own pace.",
     kick: "Remove",
     makeHost: "Make host",
@@ -765,6 +872,9 @@ const en: Strings = {
     wolfSelectionsTitle: "What your fellow werewolves are picking (for quiet coordination)",
     wolfSelectionsEmpty: "No one has picked yet",
     wolfSelectionsLine: (name, targetName) => `${name}: ${targetName ?? "not chosen yet"}`,
+    wolfConsensusNeeded:
+      "The night won't end until every werewolf picks the same target (or everyone picks \"don't attack\"). Talk it over and agree on one person.",
+    wolfConsensusReached: "Everyone agrees.",
   },
   hunterRevenge: {
     title: "The Hunter's true identity is revealed!",
@@ -807,11 +917,15 @@ const en: Strings = {
     submittedButton: "Voted (tap to change)",
     progress: (s, t) => `Votes cast: ${s} / ${t}`,
     forceAdvanceButton: "Close this vote without waiting for everyone (host)",
+    voteChoicesTitle: "Live votes (visible to everyone because this setting is on)",
+    voteChoicesLine: (voter, target) => `${voter} → ${target}`,
   },
   executionResult: {
     tag: (day) => `Execution result — Day ${day}`,
     executed: (name) => `${name} was executed`,
     spared: (name) => `The appeal vote spared ${name} — they survive`,
+    sparedFirstVoteRule: (name) =>
+      `Because "first vote can't result in a real execution" is on, ${name} was spared with no appeal vote`,
     noExecution: "The vote resulted in no execution.",
     mediumResult: "Medium's reading",
     mediumResultLine: (name, isBlack) => `${name} was ${isBlack ? "【Black - Werewolf】" : "【White】"}`,
@@ -1058,6 +1172,10 @@ const ko: Strings = {
     listSeparator: ", ",
     confirmProceed: "진행",
     transitioning: "다음 장면으로 이동 중…",
+    on: "ON",
+    off: "OFF",
+    themeToggleToLight: "라이트 모드로 전환",
+    themeToggleToDark: "다크 모드로 전환",
   },
   entry: {
     title: "진로DX 온라인",
@@ -1077,6 +1195,22 @@ const ko: Strings = {
     customCodeLabel: "방 코드 (선택)",
     customCodePlaceholder: "비워두면 자동으로 생성됩니다",
     customCodeHint: "영문자·숫자 5~8자. 지정하지 않으면 자동으로 발급됩니다.",
+    avatarLabel: "프로필 사진 (선택)",
+    avatarAddButton: "사진 추가",
+    avatarChangeButton: "사진 변경",
+    avatarRemoveButton: "사진 삭제",
+    avatarTooLarge: "이미지 크기가 너무 큽니다 (최대 8MB)",
+    avatarUnsupported: "이미지 파일을 선택해 주세요",
+  },
+  profile: {
+    editButton: "프로필 편집",
+    title: "프로필 편집",
+    desc: "표시 이름과 프로필 사진은 언제든지 변경할 수 있습니다.",
+    nameLabel: "닉네임",
+    avatarLabel: "프로필 사진",
+    saveButton: "저장",
+    savedToast: "프로필이 업데이트되었습니다",
+    closeButton: "닫기",
   },
   lobby: {
     codeLabel: "방 코드",
@@ -1090,6 +1224,9 @@ const ko: Strings = {
     composition: "역할 구성",
     compositionReadonly: "역할 구성 (호스트가 설정 중)",
     compositionReadonlyDesc: (wolves, total) => `인랑 ${wolves}명을 포함해 총 ${total}명분의 역할이 설정되어 있습니다.`,
+    compositionEmpty: "아직 역할이 설정되지 않았습니다.",
+    roomInfoButton: "배역・설정",
+    roomInfoTitle: "이번 게임의 배역 구성・설정",
     suggest: "추천 구성",
     seatTotal: "역할 합계",
     seatTotalOf: (total, count) => `${total} / ${count}명`,
@@ -1105,6 +1242,15 @@ const ko: Strings = {
     allowFirstVoteExecutionDesc: "꺼두면 첫 투표(1일차 투표)에서 누가 선택되어도 실제로는 추방되지 않고 살아남습니다. 2일차 투표부터는 평소대로 추방이 유효해집니다.",
     seerFirstNightDivine: "예언자는 역할 확인 시 1명을 점칠 수 있다 (발전 규칙)",
     seerFirstNightDivineDesc: "설명서 11페이지의 발전 규칙입니다. 역할 확인 시점에 예언자가 1명을 점칠 수 있습니다 (7명 이상 플레이 권장). 점칠지 여부는 예언자가 자유롭게 선택할 수 있습니다.",
+    allowSelfVote: "투표에서 자기 자신에게 투표할 수 있음",
+    revealVoteChoices: "투표 내용을 전원에게 공개",
+    revealVoteChoicesDesc: "켜면 투표 단계 중에 누가 누구에게 투표하는지 실시간으로 전원에게 보입니다. 끄면(기본값) 기존처럼 집계 수만 공개됩니다.",
+    hunterRevengeOnAnyDeath: "헌터의 동반 사살을 모든 사망 원인에서 발동",
+    hunterRevengeOnAnyDeathDesc: "기본 규칙에서는 헌터의 동반 사살이 습격·처형으로 사망했을 때만 발동합니다. 켜면 저주사, 연인의 뒤따름 등 다른 사망 원인에서도 발동합니다.",
+    allowBodyguardSelfGuard: "보디가드가 자기 자신을 호위할 수 있음",
+    secondTieExecutesRandomly: "결선 투표도 동수일 경우 무작위로 처형",
+    secondTieExecutesRandomlyDesc: "끄면 결선 투표도 동수로 끝났을 때 아무도 처형되지 않고 그 날이 끝납니다.",
+    dictatorCanTargetSelf: "독재자가 자기 자신을 처형 대상으로 지정할 수 있음",
     settingsPacingNote: "이 앱에는 자동 타이머가 없습니다. 각 화면은 호스트의 조작이나 전원의 행동이 모두 끝났을 때만 다음으로 넘어갑니다. 여러분의 속도에 맞춰 진행하세요.",
     kick: "내보내기",
     makeHost: "호스트로 지정",
@@ -1147,6 +1293,8 @@ const ko: Strings = {
     wolfSelectionsTitle: "동료 인랑들이 지금 선택하고 있는 대상 (상의용)",
     wolfSelectionsEmpty: "아직 아무도 선택하지 않았습니다",
     wolfSelectionsLine: (name, targetName) => `${name}님: ${targetName ?? "미선택"}`,
+    wolfConsensusNeeded: "인랑 전원이 같은 대상(또는 전원 「습격하지 않음」)을 선택할 때까지 밤은 끝나지 않습니다. 상의해서 한 명으로 정하세요.",
+    wolfConsensusReached: "전원의 의견이 일치했습니다.",
   },
   hunterRevenge: {
     title: "헌터의 정체가 드러났다!",
@@ -1189,11 +1337,15 @@ const ko: Strings = {
     submittedButton: "투표됨 (변경하기)",
     progress: (s, t) => `투표 완료: ${s} / ${t}명`,
     forceAdvanceButton: "전원의 투표를 기다리지 않고 마감하기 (호스트 조작)",
+    voteChoicesTitle: "실시간 투표 현황 (이 설정이 켜져 있어 전원에게 공개됩니다)",
+    voteChoicesLine: (voter, target) => `${voter} → ${target}`,
   },
   executionResult: {
     tag: (day) => `추방 결과 ${day}일차`,
     executed: (name) => `${name}님이 추방되었습니다`,
     spared: (name) => `결선 투표 결과, ${name}님은 살아남았습니다`,
+    sparedFirstVoteRule: (name) =>
+      `"첫 투표에서는 실제로 추방하지 않음" 설정 때문에, ${name}님은 결선 투표 없이 살아남았습니다`,
     noExecution: "투표 결과, 아무도 추방되지 않았습니다.",
     mediumResult: "영매 결과",
     mediumResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,

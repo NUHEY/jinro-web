@@ -41,3 +41,15 @@ export function loadLastName(): string {
   if (typeof window === "undefined") return "";
   return window.localStorage.getItem("jinro-dx-last-name") ?? "";
 }
+
+// プロフィール写真(リサイズ済みdata URL)。次回以降の入室時に再度プリセットするために保存する。
+export function saveLastAvatar(avatarUrl: string | null) {
+  if (typeof window === "undefined") return;
+  if (avatarUrl) window.localStorage.setItem("jinro-dx-last-avatar", avatarUrl);
+  else window.localStorage.removeItem("jinro-dx-last-avatar");
+}
+
+export function loadLastAvatar(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem("jinro-dx-last-avatar");
+}

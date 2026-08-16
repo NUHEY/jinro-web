@@ -36,7 +36,7 @@ export function DiscussionScreen() {
     .filter((n): n is string => !!n);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30">
           <MessagesSquare className="size-7" />

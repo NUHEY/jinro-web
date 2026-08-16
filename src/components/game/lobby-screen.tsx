@@ -32,6 +32,7 @@ import {
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { RoleCompositionEditor } from "@/components/game/role-composition-editor";
+import { RoleCompositionSummary, RoomSettingsSummary } from "@/components/game/room-config-summary";
 import { PlayerAvatar } from "@/components/game/shared";
 import { suggestComposition, validateComposition, MIN_PLAYERS, MAX_PLAYERS } from "@/lib/game/composition";
 
@@ -75,7 +76,7 @@ export function LobbyScreen() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-6 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-6 safe-bottom">
       <Card className="animate-in fade-in-0 zoom-in-95 border-primary/30 bg-primary/5 duration-500">
         <CardContent className="flex flex-col items-center gap-2 py-4">
           <p className="text-xs text-muted-foreground">{t.lobby.codeLabel}</p>
@@ -175,10 +176,13 @@ export function LobbyScreen() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base">{t.lobby.compositionReadonly}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {t.lobby.compositionReadonlyDesc(publicState.roleCounts.werewolf ?? 0, publicState.totalSeats)}
-            </p>
+          <CardContent className="space-y-4">
+            <RoleCompositionSummary counts={publicState.roleCounts} totalSeats={publicState.totalSeats} playerCount={n} />
+            <Separator />
+            <div>
+              <p className="mb-2 px-1 text-xs font-bold text-muted-foreground">{t.lobby.settingsTitle}</p>
+              <RoomSettingsSummary settings={publicState.settings} />
+            </div>
           </CardContent>
         </Card>
       )}
@@ -280,6 +284,99 @@ function SettingsDialog() {
               />
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.seerFirstNightDivineDesc}</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="allow-self-vote" className="flex-1">
+                {t.lobby.allowSelfVote}
+              </Label>
+              <Switch
+                id="allow-self-vote"
+                checked={s.allowSelfVote}
+                onCheckedChange={(v) => updateSettings({ allowSelfVote: v })}
+              />
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="reveal-vote-choices" className="flex-1">
+                {t.lobby.revealVoteChoices}
+              </Label>
+              <Switch
+                id="reveal-vote-choices"
+                checked={s.revealVoteChoices}
+                onCheckedChange={(v) => updateSettings({ revealVoteChoices: v })}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.revealVoteChoicesDesc}</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="second-tie-random" className="flex-1">
+                {t.lobby.secondTieExecutesRandomly}
+              </Label>
+              <Switch
+                id="second-tie-random"
+                checked={s.secondTieExecutesRandomly}
+                onCheckedChange={(v) => updateSettings({ secondTieExecutesRandomly: v })}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.secondTieExecutesRandomlyDesc}</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="hunter-any-death" className="flex-1">
+                {t.lobby.hunterRevengeOnAnyDeath}
+              </Label>
+              <Switch
+                id="hunter-any-death"
+                checked={s.hunterRevengeOnAnyDeath}
+                onCheckedChange={(v) => updateSettings({ hunterRevengeOnAnyDeath: v })}
+              />
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.hunterRevengeOnAnyDeathDesc}</p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="bodyguard-self-guard" className="flex-1">
+                {t.lobby.allowBodyguardSelfGuard}
+              </Label>
+              <Switch
+                id="bodyguard-self-guard"
+                checked={s.allowBodyguardSelfGuard}
+                onCheckedChange={(v) => updateSettings({ allowBodyguardSelfGuard: v })}
+              />
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="dictator-self-target" className="flex-1">
+                {t.lobby.dictatorCanTargetSelf}
+              </Label>
+              <Switch
+                id="dictator-self-target"
+                checked={s.dictatorCanTargetSelf}
+                onCheckedChange={(v) => updateSettings({ dictatorCanTargetSelf: v })}
+              />
+            </div>
           </div>
 
           <Separator />

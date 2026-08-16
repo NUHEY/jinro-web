@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { loadLastName } from "@/lib/session";
+import { loadLastAvatar, loadLastName } from "@/lib/session";
 import { LanguageSwitcher } from "@/components/game/language-switcher";
 import { HelpDialog } from "@/components/game/help-dialog";
+import { AvatarPicker } from "@/components/game/avatar-picker";
+import { ThemeToggle } from "@/components/game/theme-toggle";
 
 export function EntryScreen() {
   const { createRoom, joinRoom } = useGame();
@@ -21,6 +23,7 @@ export function EntryScreen() {
   const prefillCode = (searchParams.get("code") ?? "").toUpperCase().slice(0, 8);
 
   const [name, setName] = useState(() => loadLastName());
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => loadLastAvatar());
   const [code, setCode] = useState(prefillCode);
   const [customCode, setCustomCode] = useState("");
   const [tab, setTab] = useState(prefillCode ? "join" : "create");
@@ -29,14 +32,14 @@ export function EntryScreen() {
   const handleCreate = async () => {
     if (!name.trim()) return;
     setBusy(true);
-    await createRoom(name.trim(), customCode.trim() || undefined);
+    await createRoom(name.trim(), customCode.trim() || undefined, avatarUrl);
     setBusy(false);
   };
 
   const handleJoin = async () => {
     if (!name.trim() || code.trim().length < 4) return;
     setBusy(true);
-    await joinRoom(code.trim().toUpperCase(), name.trim());
+    await joinRoom(code.trim().toUpperCase(), name.trim(), avatarUrl);
     setBusy(false);
   };
 
@@ -44,7 +47,10 @@ export function EntryScreen() {
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 safe-top safe-bottom">
       <div className="mb-2 flex w-full max-w-sm items-center justify-between">
         <HelpDialog trigger={<Button variant="ghost" size="sm">{t.entry.helpButton}</Button>} />
-        <LanguageSwitcher />
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle />
+          <LanguageSwitcher />
+        </div>
       </div>
 
       <div className="mb-8 flex animate-in fade-in-0 flex-col items-center gap-3 text-center duration-500">
@@ -68,6 +74,10 @@ export function EntryScreen() {
             </TabsList>
 
             <div className="mt-4 space-y-3">
+              <div className="space-y-1.5">
+                <Label>{t.entry.avatarLabel}</Label>
+                <AvatarPicker value={avatarUrl} onChange={setAvatarUrl} name={name} />
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="name">{t.entry.nameLabel}</Label>
                 <Input

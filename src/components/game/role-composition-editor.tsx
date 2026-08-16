@@ -9,7 +9,7 @@ import type { RoleCounts } from "@/lib/game/types";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
 
-const TEAM_GROUPS: Array<{ team: Team | "solo"; roles: RoleId[] }> = [
+export const TEAM_GROUPS: Array<{ team: Team | "solo"; roles: RoleId[] }> = [
   {
     team: "village",
     roles: ROLE_ORDER.filter((r) => ROLES[r].team === "village"),

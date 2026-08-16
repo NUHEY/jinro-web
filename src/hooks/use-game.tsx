@@ -10,7 +10,14 @@ import {
   type ReactNode,
 } from "react";
 import { getSocket } from "@/lib/socket/client";
-import { clearSession, loadSession, saveLastName, saveSession, type StoredSession } from "@/lib/session";
+import {
+  clearSession,
+  loadSession,
+  saveLastAvatar,
+  saveLastName,
+  saveSession,
+  type StoredSession,
+} from "@/lib/session";
 import type {
   AppealChoice,
   PrivateViewState,
@@ -31,8 +38,8 @@ interface GameContextValue {
   privateState: PrivateViewState | null;
   error: string | null;
   clearError: () => void;
-  createRoom: (name: string, code?: string) => Promise<void>;
-  joinRoom: (code: string, name: string) => Promise<void>;
+  createRoom: (name: string, code?: string, avatarUrl?: string | null) => Promise<void>;
+  joinRoom: (code: string, name: string, avatarUrl?: string | null) => Promise<void>;
   leaveRoom: () => void;
   kick: (targetId: string) => void;
   transferHost: (targetId: string) => void;
@@ -54,6 +61,7 @@ interface GameContextValue {
   submitAppeal: (choice: AppealChoice) => void;
   setAllyNote: (text: string) => void;
   newGame: () => void;
+  updateProfile: (profile: { name?: string; avatarUrl?: string | null }) => void;
 }
 
 // app-shell.tsx がフェーズ切り替えの緩衝(一定時間、直前の画面のデータを凍結して表示し続ける)を
@@ -153,11 +161,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const clearError = useCallback(() => setErrorCode(null), []);
 
   const createRoom = useCallback(
-    async (name: string, code?: string) => {
+    async (name: string, code?: string, avatarUrl?: string | null) => {
       saveLastName(name);
       const socket = getSocket();
       await new Promise<void>((resolve) => {
-        socket.emit("room:create", { playerName: name, code }, (res) => {
+        socket.emit("room:create", { playerName: name, code, avatarUrl }, (res) => {
           if (res.ok) {
             const s = { code: res.code, playerId: res.playerId, token: res.token, name };
             saveSession(s);
@@ -173,11 +181,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const joinRoom = useCallback(async (code: string, name: string) => {
+  const joinRoom = useCallback(async (code: string, name: string, avatarUrl?: string | null) => {
     saveLastName(name);
     const socket = getSocket();
     await new Promise<void>((resolve) => {
-      socket.emit("room:join", { code, playerName: name }, (res) => {
+      socket.emit("room:join", { code, playerName: name, avatarUrl }, (res) => {
         if (res.ok) {
           const s = { code: res.code, playerId: res.playerId, token: res.token, name };
           saveSession(s);
@@ -283,6 +291,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     getSocket().emit("host:newGame", {});
   }, []);
 
+  const updateProfile = useCallback((profile: { name?: string; avatarUrl?: string | null }) => {
+    if (typeof profile.name === "string") saveLastName(profile.name);
+    if (profile.avatarUrl !== undefined) saveLastAvatar(profile.avatarUrl);
+    getSocket().emit("player:updateProfile", profile);
+  }, []);
+
   const value: GameContextValue = {
     status,
     connected,
@@ -315,6 +329,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     submitAppeal,
     setAllyNote,
     newGame,
+    updateProfile,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

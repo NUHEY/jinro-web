@@ -27,7 +27,7 @@ export function GameOverScreen() {
   const winner = publicState.winner;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-bottom">
       <div className="flex animate-pop-in flex-col items-center gap-2 text-center">
         <PartyPopper className="size-10 text-primary" />
         <h2 className={cn("font-heading text-3xl font-bold", PRIMARY_COLOR[winner.primary])}>

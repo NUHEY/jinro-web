@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Moon, CheckCircle2, FastForward, Users } from "lucide-react";
+import { Moon, CheckCircle2, FastForward, Users, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGame } from "@/hooks/use-game";
@@ -42,7 +42,7 @@ export function NightScreen() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-6 safe-bottom">
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="flex size-14 items-center justify-center rounded-2xl animate-pop-in bg-indigo-500/15 text-indigo-300 ring-1 ring-indigo-500/30">
           <Moon className="size-7" />
@@ -93,6 +93,16 @@ export function NightScreen() {
                     ))}
                   </ul>
                 )}
+                {pending.wolfSelections.length > 1 &&
+                  (pending.wolfConsensusReached === false ? (
+                    <p className="mt-2 flex items-start gap-1.5 border-t border-red-500/30 pt-2 font-semibold text-amber-300">
+                      <AlertTriangle className="mt-0.5 size-3.5 shrink-0" /> {t.night.wolfConsensusNeeded}
+                    </p>
+                  ) : pending.wolfConsensusReached === true ? (
+                    <p className="mt-2 flex items-center gap-1.5 border-t border-red-500/30 pt-2 font-semibold text-emerald-300">
+                      <CheckCircle2 className="size-3.5 shrink-0" /> {t.night.wolfConsensusReached}
+                    </p>
+                  ) : null)}
               </div>
             )}
             {privateState.seerResult && (

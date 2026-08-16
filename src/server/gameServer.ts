@@ -14,6 +14,7 @@ import {
   submitDivine,
   submitEarlyDivine,
   resolveNight,
+  wolfAttackConsensusReached,
   submitHunterRevenge,
   startDiscussion,
   startVote,
@@ -52,10 +53,22 @@ const rooms = new Map<string, RoomRuntime>();
 
 const MAX_NAME_LENGTH = 16;
 const CUSTOM_CODE_PATTERN = /^[A-Z0-9]{5,8}$/;
+// クライアント側でリサイズ済み(概ね128px角・JPEG圧縮)のdata URLを想定した上限。
+// これを超える入力は不正・悪用目的の可能性が高いため黙って無視する(既存の役職なし相手選択なども同様の方針)。
+const MAX_AVATAR_DATA_URL_LENGTH = 200_000;
 
 function sanitizeName(raw: string): string {
   const trimmed = (raw || "").trim().slice(0, MAX_NAME_LENGTH);
   return trimmed.length > 0 ? trimmed : "Player";
+}
+
+// undefined = 変更なし(そのまま維持), null = 明示的に写真を削除, string = 新しい写真
+function sanitizeAvatarUrl(raw: unknown): string | null | undefined {
+  if (raw === null) return null;
+  if (typeof raw !== "string") return undefined;
+  if (!raw.startsWith("data:image/")) return undefined;
+  if (raw.length > MAX_AVATAR_DATA_URL_LENGTH) return undefined;
+  return raw;
 }
 
 // 進行(司会)は完全に「自分たちのペース」: サーバー側は強制タイマーを一切持たない。
@@ -98,10 +111,12 @@ export function attachGameServer(io: IOServer) {
       ...room.state.guardSubmissions.map((s) => s.actorId),
       ...room.state.divineSubmissions.map((s) => s.actorId),
     ]);
-    if (actors.length > 0 && actors.every((p) => submittedIds.has(p.id))) {
-      resolveNight(room.state);
-      afterResolution(room);
-    }
+    if (actors.length === 0 || !actors.every((p) => submittedIds.has(p.id))) return;
+    // 生存する人狼が2人以上いる場合、全員が同じ相手(または全員「襲撃しない」)を選ぶまでは
+    // 全員提出済みでも夜を自動的に終わらせない(合意が必要)。ホストの強制進行はこれをバイパスする。
+    if (!wolfAttackConsensusReached(room.state)) return;
+    resolveNight(room.state);
+    afterResolution(room);
   }
 
   function maybeAutoResolveVote(room: RoomRuntime) {
@@ -149,7 +164,7 @@ export function attachGameServer(io: IOServer) {
     let currentCode: string | null = null;
     let currentPlayerId: string | null = null;
 
-    socket.on("room:create", ({ playerName, code: requestedCode }, cb) => {
+    socket.on("room:create", ({ playerName, code: requestedCode, avatarUrl }, cb) => {
       let code: string;
       const trimmedRequested = (requestedCode || "").trim().toUpperCase();
       if (trimmedRequested.length > 0) {
@@ -176,6 +191,7 @@ export function attachGameServer(io: IOServer) {
         alive: true,
         role: null,
         joinedAt: Date.now(),
+        avatarUrl: sanitizeAvatarUrl(avatarUrl) ?? null,
       });
 
       const room: RoomRuntime = {
@@ -196,7 +212,7 @@ export function attachGameServer(io: IOServer) {
       broadcast(room);
     });
 
-    socket.on("room:join", ({ code, playerName }, cb) => {
+    socket.on("room:join", ({ code, playerName, avatarUrl }, cb) => {
       const room = findRoom(code);
       if (!room) return cb({ ok: false, errorCode: "ROOM_NOT_FOUND" });
       if (room.state.phase !== "lobby") {
@@ -216,6 +232,7 @@ export function attachGameServer(io: IOServer) {
         alive: true,
         role: null,
         joinedAt: Date.now(),
+        avatarUrl: sanitizeAvatarUrl(avatarUrl) ?? null,
       });
       room.tokens.set(playerId, token);
       room.socketOf.set(playerId, socket.id);
@@ -483,13 +500,18 @@ export function attachGameServer(io: IOServer) {
       if (action === "none") return;
       if (targetId) {
         const target = getPlayer(room.state, targetId);
-        if (!target || !target.alive || target.id === currentPlayerId) return;
+        if (!target || !target.alive) return;
+        const isSelfTarget = target.id === currentPlayerId;
+        if (isSelfTarget) {
+          // 自分自身を対象にできるのは、設定でONの場合のボディーガードの自己護衛のみ
+          if (!(action === "guard" && room.state.settings.allowBodyguardSelfGuard)) return;
+        }
         if (action === "attack" && room.state.wolfIds.includes(target.id)) return;
         if (
           action === "guard" &&
           room.state.previousGuardTargets[currentPlayerId] === target.id
         ) {
-          return; // 二夜続けて同じ人物を守ることはできない
+          return; // 二夜続けて同じ人物を守ることはできない(自己護衛の場合も同様)
         }
       }
       if (action === "attack") submitAttack(room.state, currentPlayerId, targetId);
@@ -517,6 +539,7 @@ export function attachGameServer(io: IOServer) {
       const player = getPlayer(room.state, currentPlayerId);
       const target = getPlayer(room.state, targetId);
       if (!player || !player.alive || !target || !target.alive) return;
+      if (!room.state.settings.allowSelfVote && targetId === currentPlayerId) return;
       if (room.state.runoffCandidateIds && !room.state.runoffCandidateIds.includes(targetId)) return;
       submitVote(room.state, currentPlayerId, targetId);
       touch(room);
@@ -552,6 +575,21 @@ export function attachGameServer(io: IOServer) {
       broadcast(room);
     });
 
+    // ユーザーが任意で表示名・プロフィール写真をいつでも(ロビー中でもゲーム中でも)変更できる。
+    // 名前はUI上どこでも player.id から都度解決して表示されるため、途中で変えても他の状態と矛盾しない。
+    socket.on("player:updateProfile", ({ name, avatarUrl }) => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room) return;
+      const player = getPlayer(room.state, currentPlayerId);
+      if (!player) return;
+      if (typeof name === "string") player.name = sanitizeName(name);
+      const nextAvatar = sanitizeAvatarUrl(avatarUrl);
+      if (nextAvatar !== undefined) player.avatarUrl = nextAvatar;
+      touch(room);
+      broadcast(room);
+    });
+
     socket.on("dictator:act", ({ targetId }) => {
       if (!currentCode || !currentPlayerId) return;
       const room = findRoom(currentCode);
@@ -560,6 +598,7 @@ export function attachGameServer(io: IOServer) {
       if (!player || player.role !== "dictator" || room.state.dictatorUsed) return;
       const target = getPlayer(room.state, targetId);
       if (!target || !target.alive) return;
+      if (!room.state.settings.dictatorCanTargetSelf && targetId === currentPlayerId) return;
       dictatorExecute(room.state, currentPlayerId, targetId);
       touch(room);
       afterResolution(room);

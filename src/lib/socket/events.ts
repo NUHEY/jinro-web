@@ -18,8 +18,14 @@ export type StartResult =
 
 // クライアント -> サーバー
 export interface ClientToServerEvents {
-  "room:create": (payload: { playerName: string; code?: string }, cb: (res: JoinResult) => void) => void;
-  "room:join": (payload: { code: string; playerName: string }, cb: (res: JoinResult) => void) => void;
+  "room:create": (
+    payload: { playerName: string; code?: string; avatarUrl?: string | null },
+    cb: (res: JoinResult) => void
+  ) => void;
+  "room:join": (
+    payload: { code: string; playerName: string; avatarUrl?: string | null },
+    cb: (res: JoinResult) => void
+  ) => void;
   "room:rejoin": (
     payload: { code: string; playerId: string; token: string },
     cb: (res: { ok: true } | { ok: false; errorCode: ErrorCode }) => void
@@ -45,6 +51,9 @@ export interface ClientToServerEvents {
   "appeal:submit": (payload: { choice: AppealChoice }) => void;
   "ally:setNote": (payload: { text: string }) => void;
   "host:newGame": (payload: Record<string, never>) => void;
+  // ユーザーが任意で表示名・プロフィール写真をいつでも変更できるようにするための更新イベント。
+  // どちらか一方だけの更新も可能(未指定のフィールドは変更しない)。avatarUrl に null を渡すと写真を削除する。
+  "player:updateProfile": (payload: { name?: string; avatarUrl?: string | null }) => void;
 }
 
 // サーバー -> クライアント

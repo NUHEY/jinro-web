@@ -19,7 +19,7 @@ export function LastWordsScreen() {
   const canProceed = isHost || isTarget;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-8 safe-top safe-bottom">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-5 px-4 py-8 safe-bottom">
       <div className="flex size-16 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30">
         <MessageCircle className="size-8" />
       </div>

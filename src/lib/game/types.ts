@@ -29,6 +29,8 @@ export interface Player {
   alive: boolean;
   role: RoleId | null;
   joinedAt: number;
+  // プレイヤーが任意で設定できるプロフィール写真(小さくリサイズ済みのdata URL、未設定ならnull)
+  avatarUrl: string | null;
 }
 
 export interface RoleCounts {
@@ -40,6 +42,12 @@ export interface RoomSettings {
   seerFirstNightDivine: boolean; // 予言者が役職確認のタイミングで1人占える発展ルール(デフォルトOFF、説明書11ページ)
   allowFirstNightKill: boolean; // 最初の夜(1日目の夜)に人狼が襲撃できるか(デフォルトON=通常ルール)
   allowFirstVoteExecution: boolean; // 最初の投票(1日目の投票)で実際に追放が発生するか(デフォルトON=通常ルール)
+  allowSelfVote: boolean; // 投票で自分自身を対象に選べるか(デフォルトON=これまでの挙動のまま)
+  revealVoteChoices: boolean; // 投票中、誰が誰に投票しているかを全員に公開するか(デフォルトOFF=集計数のみ)
+  hunterRevengeOnAnyDeath: boolean; // ハンターの道連れを、襲撃・処刑以外(呪殺・後追い)の死亡でも発動させるか(デフォルトOFF)
+  allowBodyguardSelfGuard: boolean; // ボディーガードが自分自身を護衛対象にできるか(デフォルトOFF)
+  secondTieExecutesRandomly: boolean; // 決選投票でも同数タイだった場合、ランダムに1人処刑するか。OFFなら誰も処刑されない(デフォルトON=これまでの挙動のまま)
+  dictatorCanTargetSelf: boolean; // 独裁者が自分自身を強制処刑の対象にできるか(デフォルトON=これまでの挙動のまま)
 }
 
 export interface NightSubmission {
@@ -73,8 +81,17 @@ export interface PublicGameState {
   settings: RoomSettings;
   players: PublicPlayer[];
   lastDeaths: DeathRecord[]; // 直近の発表分
-  lastExecuted: { playerId: string; revealedRole?: RoleId; spared?: boolean } | null;
+  lastExecuted: {
+    playerId: string;
+    revealedRole?: RoleId;
+    spared?: boolean;
+    // spared === true になった理由。生存決選投票(決選投票)の結果によるものか、
+    // 「最初の投票では実際には追放しない」設定によるものかをUI側で正しく出し分けるために持たせる。
+    sparedReason?: "appeal_vote" | "first_vote_rule" | null;
+  } | null;
   voteTally: Record<string, number> | null; // targetId -> count (公開後)
+  // 設定 revealVoteChoices がONの場合のみ、投票フェーズ中に誰が誰に投票したかをリアルタイムで全員に公開する
+  voteChoices: Array<{ voterId: string; voterName: string; targetId: string; targetName: string }> | null;
   runoffCandidateIds: string[] | null; // 決選投票中: 投票できる対象をこのIDに限定
   pendingExecution: { playerId: string; playerName: string } | null; // 最後の一言・生存決選投票の対象
   appealVoteResult: AppealVoteResult | null; // 直近の生存決選投票の結果(結果発表画面用)
@@ -93,6 +110,7 @@ export interface PublicPlayer {
   isHost: boolean;
   connected: boolean;
   alive: boolean;
+  avatarUrl: string | null;
 }
 
 export interface WinnerInfo {
@@ -123,6 +141,9 @@ export interface PrivateViewState {
     submitted: boolean;
     // 人狼の襲撃時のみ: 仲間の人狼それぞれが今どこを選んでいるか(相談用、リアルタイム更新)
     wolfSelections?: Array<{ id: string; name: string; targetId: string | null; targetName: string | null }>;
+    // 人狼の襲撃時のみ: 生存する人狼全員が同じ相手(または全員「襲撃しない」)を選んでいるか。
+    // false の間は、全員提出済みでも夜は自動的に終わらない(合意が必要なため)。
+    wolfConsensusReached?: boolean;
   };
   pendingHunterRevenge?: { candidates: PublicPlayer[] } | null;
   hasVoted?: boolean;
