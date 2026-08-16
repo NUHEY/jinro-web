@@ -591,29 +591,29 @@ const ja: Strings = {
   help: {
     button: "遊び方",
     title: "遊び方・ルール",
-    tldr: "ひとことで言うと: 隠れている「人狼」を、市民たちが話し合いで見つけ出して追放するゲームです。",
+    tldr: "ひとことで言うと: 正体を隠した「人狼」を、市民たちが話し合いで見つけ出し、投票で追放するゲームです。",
     tabFlow: "流れ",
     tabWin: "勝利条件",
     tabRoles: "役職",
     intro:
-      "人狼DXは、正体を隠した「人狼」を「市民」たちが会話と推理で見つけ出す心理ゲームです。このアプリで役職確認・夜の行動・投票を行います。「昼(議論・投票)」と「夜(能力行動)」を繰り返し、どちらかの陣営が条件を満たすと決着します。このアプリに自動タイマーはなく、各画面はホストの操作か全員の行動がそろったタイミングで進みます。自分たちのペースで遊んでください。",
+      "人狼DXは、正体を隠した「人狼」と、それを見つけ出したい「市民」に分かれて遊ぶ心理ゲームです。「昼」(話し合いと投票)と「夜」(役職ごとの秘密の行動)を交互にくり返し、市民が人狼を全員追放するか、人狼が市民と同数まで減れば決着します。役職確認・夜の行動・投票は、すべてこの画面上で行います。自動で進むタイマーはないので、ホストの操作か全員の操作がそろうまで、自分たちのペースで進められます。",
     flowTitle: "ゲームの流れ",
     flowSteps: [
       { title: "役職確認", desc: "全員が自分だけの役職をこっそり確認し、「確認しました」を押します。周りに見られないように注意しましょう。全員が押し終えるまで次には進みません。" },
-      { title: "最初の話し合い", desc: "役職確認の直後に行う、投票なしの話し合いです。まだ誰も襲われていません。自己紹介がてら軽く話したら、ホストの操作で本当の「夜」へ進みます。" },
-      { title: "夜", desc: "人狼・予言者・ボディーガードなど、能力を持つ役職だけがこっそり行動します。能力を持たない人は何もせず待機します。ここで初めて人狼の襲撃が発生する可能性があります(設定でオフにすることもできます)。" },
-      { title: "朝(結果発表)", desc: "夜に何が起きたか(誰が犠牲になったか)が発表されます。" },
-      { title: "議論", desc: "誰が人狼か話し合って推理します。" },
-      { title: "投票", desc: "追放する人をひとり選んで投票します。最多票の人が追放され、同数の場合は決選投票になります。" },
+      { title: "最初の話し合い", desc: "役職確認の直後に行う、まだ誰も襲われていない状態での自己紹介タイムです。投票はありません。軽く話したら、ホストの操作で本当の「夜」に進みます。" },
+      { title: "夜", desc: "人狼・予言者・ボディーガードなど、能力を持つ役職だけがこっそり行動します。能力のない人は何もせず待機するだけでOKです。ここで初めて人狼の襲撃が発生します(1日目の夜だけ襲撃なしにする設定もあります)。" },
+      { title: "朝(結果発表)", desc: "夜の間に何が起きたか(誰が犠牲になったか)が発表されます。" },
+      { title: "議論", desc: "夜の結果をふまえて、誰が人狼か話し合って推理します。時間制限はないので、納得いくまで話しましょう。" },
+      { title: "投票", desc: "追放したい人をひとり選んで投票します。最多票の人が追放され、同数の場合は決選投票になります。全員の投票がそろうと自動的に結果発表に進みます。" },
       { title: "くり返し", desc: "「夜→朝→議論→投票」を、どちらかの陣営が勝利するまでくり返します。" },
     ],
     winTitle: "勝利条件",
-    winIntro: "決着のつき方は陣営によって異なります。複数の陣営が同時に勝利することもあります。",
-    winVillage: "市民陣営: 人狼をすべて追放すると勝利。",
-    winWerewolf: "人狼陣営: 人狼の数が人狼以外の生存者数以上になると勝利。",
-    winFox: "妖狐: ゲーム終了時に生きていれば、単独で勝利(村・人狼の勝敗とは別)。",
-    winGod: "神様: ゲーム終了時に生きていれば、単独で勝利。",
-    winLover: "恋人: ゲーム終了時に2人とも生きていれば、2人で勝利。",
+    winIntro: "決着のつき方は陣営ごとに異なります。複数の陣営が同時に勝利することもあります。",
+    winVillage: "市民陣営: 人狼をひとり残らず追放すると勝利。",
+    winWerewolf: "人狼陣営: 人狼の数が、人狼以外の生存者数以上になると勝利。",
+    winFox: "妖狐: ゲーム終了まで生き延びれば、村・人狼どちらが勝っても関係なく単独で勝利。",
+    winGod: "神様: ゲーム終了まで生き延びれば、村・人狼どちらが勝っても関係なく単独で勝利。",
+    winLover: "恋人: ゲーム終了時に2人とも生き延びていれば、2人そろって勝利。",
     rolesTitle: "役職一覧(13種)",
     rolesIntro: "自分の役職の説明は、画面右上のメニューから「自分の役職」を選べばゲーム中いつでも確認できます。",
     close: "閉じる",
@@ -647,65 +647,65 @@ const ja: Strings = {
     villager: {
       name: "市民",
       short: "特別な能力を持たない村人",
-      detail: "あなたは市民です。特別な能力はありません。会話と推理だけを頼りに、人狼を見つけ出して追放しましょう。",
+      detail: "あなたは市民です。特別な能力はありません。誰かを怪しいと思ったら、話し合いの中でその理由をみんなに伝えて、一緒に推理を進めましょう。",
     },
     seer: {
       name: "予言者",
       short: "毎晩ひとりを占い、人狼かどうかを知る",
       detail:
-        "あなたは予言者です。毎晩、誰かひとりを占うことができます。その人が「人狼」であれば黒、それ以外なら白と分かります。なお、あなたが妖狐を占うと、妖狐はその夜に呪い殺されます。",
+        "あなたは予言者です。毎晩、誰かひとりを占うことができます。占った相手が「人狼」なら黒、それ以外なら白と分かります。この結果は他の人には見えないので、話し合いでどう伝えるかはあなた次第です。なお、妖狐を占うと、妖狐はその夜のうちに呪い殺されます。",
     },
     bodyguard: {
       name: "ボディーガード",
       short: "毎晩ひとりを人狼の襲撃から守る",
       detail:
-        "あなたはボディーガードです。毎晩、誰かひとり(自分以外)を選んで人狼の襲撃から守ることができます。守った相手が襲撃対象だった場合、その人は生き残ります。",
+        "あなたはボディーガードです。毎晩、自分以外の誰かひとりを選んで人狼の襲撃から守ります。守った相手がその夜の襲撃対象だった場合、その人は生き残ります。同じ人を2晩連続では守れません。",
     },
     medium: {
       name: "霊媒師",
       short: "追放された人が人狼だったか分かる",
-      detail: "あなたは霊媒師です。昼に追放されたプレイヤーが「人狼」であったかどうかを、その夜に知ることができます。",
+      detail: "あなたは霊媒師です。昼に追放されたプレイヤーが「人狼」だったかどうかを、その夜のうちに知ることができます。まだ誰も追放されていない1日目の夜は、判定する相手がいません。",
     },
     hunter: {
       name: "ハンター",
       short: "自分が死ぬとき、ひとり道連れにできる",
       detail:
-        "あなたはハンターです。あなたが「追放」または「人狼に襲撃」されて死亡するとき、誰かひとりを道連れに指名して一緒に葬ることができます。",
+        "あなたはハンターです。「追放」されたとき、または「人狼に襲撃」されて死亡したときに、誰かひとりを道連れに指名して一緒に葬ることができます(指名しなくても構いません)。自分から役職を明かす必要はありません。",
     },
     mason: {
       name: "共有者",
       short: "2人以上でお互いを知っている村人",
-      detail: "あなたは共有者です。他の共有者が誰かを知っています。特別な能力はありませんが、互いを信頼して村を導きましょう。",
+      detail: "あなたは共有者です。他の共有者が誰かを知っています。特別な能力はありませんが、お互いを100%信頼できる貴重な仲間です。人狼に怪しまれないよう、正体を明かすタイミングは慎重に選びましょう。",
     },
     dictator: {
       name: "独裁者",
       short: "1度だけ議論を打ち切り、独断で追放者を決められる",
       detail:
-        "あなたは独裁者です。ゲーム中1度だけ、昼の議論中に正体を明かして議論を強制終了させ、投票を行わずに追放者を独断で決定できます。使いどころは慎重に。",
+        "あなたは独裁者です。ゲーム中1度だけ、昼の話し合い中に正体を明かして議論を強制終了させ、投票なしで追放する相手を独断で決められます。強力な能力なので、使うタイミングは慎重に見極めましょう。",
     },
     werewolf: {
       name: "人狼",
       short: "毎晩ひとりを襲撃する。他の人狼が分かる",
       detail:
-        "あなたは人狼です。仲間の人狼が誰か分かります。毎晩、仲間と相談して誰かひとりを襲撃してください。正体を隠し通し、市民を人狼と同数まで減らせば勝利です。",
+        "あなたは人狼です。仲間の人狼が誰かを知っています。毎晩、仲間と相談してひとりを襲撃してください。話し合いでは市民のふりをして正体を隠し通し、人狼の数が市民と同数になれば勝利です。",
     },
     traitor: {
       name: "裏切り者",
-      short: "人狼陣営だが人狼が誰かは分からない村人のふり",
+      short: "人狼陣営の一員だが、人狼の正体は知らされない",
       detail:
-        "あなたは裏切り者です。人狼陣営の勝利があなたの勝利になりますが、誰が人狼かは分かりません。占い・霊媒では「白」と判定されます。市民のふりをして人狼陣営を助けましょう。",
+        "あなたは裏切り者です。人狼陣営が勝利すればあなたも勝利しますが、誰が人狼かは知らされません。占い・霊媒でも「白(人狼ではない)」と判定されるため、疑われにくい立場です。人狼を探すふりをしながら、それとなく人狼陣営に有利な行動をとりましょう(内通者と違い、あなた自身は人狼の顔ぶれを知らない点に注意)。",
     },
     insider: {
       name: "内通者",
-      short: "人狼が誰かを知っている人狼陣営の協力者",
+      short: "人狼の正体を知っている、人狼陣営の協力者",
       detail:
-        "あなたは内通者です。人狼が誰かを知っています。占い・霊媒では「白」と判定されるため、人狼陣営の中でも特に立ち回りやすい存在です。露骨な擁護は避けましょう。",
+        "あなたは内通者です。人狼が誰かを知っています。占い・霊媒でも「白(人狼ではない)」と判定されるため、人狼陣営の中でもとりわけ疑われにくい立場です。人狼を露骨にかばうと怪しまれるので、市民のふりをしながらさりげなく助けましょう(裏切り者と違い、あなたは人狼の顔ぶれを知っています)。",
     },
     fox: {
       name: "妖狐",
       short: "人狼に襲撃されても死なない単独陣営。占われると死ぬ",
       detail:
-        "あなたは妖狐です。村・人狼のどちらにも属さない単独陣営で、人狼に襲撃されても死にません。ただし予言者に占われると、その夜のうちに呪い殺されてしまいます。ゲーム終了時に生存していればあなたの勝利です。",
+        "あなたは妖狐です。村にも人狼にも属さない単独陣営で、人狼に襲撃されても死にません。ただし予言者に占われると、その夜のうちに呪い殺されてしまいます。村・人狼どちらが勝っても関係なく、ゲーム終了時に生き残っていればあなたの勝利です。",
     },
     god: {
       name: "神様",
@@ -717,7 +717,7 @@ const ja: Strings = {
       name: "恋人",
       short: "2人1組。もう片方が死ぬと自分も死ぬ単独陣営",
       detail:
-        "あなたは恋人です。もうひとりの恋人が誰か知っています。どちらか一方が追放や襲撃で死亡すると、もう一方も後を追って死亡します。ゲーム終了時に2人とも生存していれば恋人の勝利です。",
+        "あなたは恋人です。もうひとりの恋人が誰か知っています。どちらか一方が追放や襲撃で死亡すると、もう一方もその後を追って死亡します。ゲーム終了時に2人とも生存していれば、2人そろっての勝利です。",
     },
   },
   errors: {
@@ -1022,28 +1022,28 @@ const en: Strings = {
   help: {
     button: "How to play",
     title: "How to play / Rules",
-    tldr: "In short: the Villagers talk it out to find and vote off the hidden Werewolves.",
+    tldr: "In short: hidden Werewolves try to survive while Villagers talk it out and vote to root them out.",
     tabFlow: "Flow",
     tabWin: "Winning",
     tabRoles: "Roles",
     intro:
-      "Jinro DX is a social deduction game: the hidden 'Werewolves' try to survive while the 'Villagers' try to find them through conversation and deduction. Use this app for role reveals, night actions, and voting. 'Day' (discussion + vote) and 'Night' (secret actions) repeat until one side wins. This app has no automatic timers — every screen advances only when the host acts or everyone has finished, so you always play at your own pace.",
+      "Jinro DX is a social deduction game: hidden 'Werewolves' try to survive while 'Villagers' try to find and eliminate them through conversation and deduction. 'Day' (discussion and voting) and 'Night' (secret role actions) repeat until one side meets its win condition. Use this app for role reveals, night actions, and voting. There are no automatic timers — every screen advances only when the host acts or everyone has finished, so you always play at your own pace.",
     flowTitle: "Game flow",
     flowSteps: [
       { title: "Role reveal", desc: "Everyone privately checks their own role and taps \"I've confirmed my role\". Make sure no one else can see your screen. The game won't move on until everyone has confirmed." },
-      { title: "First discussion", desc: "A discussion-only round right after role reveal. No one has been attacked yet. Chat a little, then the host moves on to the real first night." },
-      { title: "Night", desc: "Only players with night abilities (Werewolf, Seer, Bodyguard, etc.) act in secret. Everyone else just waits. This is where a werewolf attack can first happen (this can be turned off in settings)." },
+      { title: "First discussion", desc: "A quick, vote-free round for introductions right after role reveal — no one has been attacked yet. Chat a little, then the host moves on to the real first night." },
+      { title: "Night", desc: "Only players with night abilities (Werewolf, Seer, Bodyguard, etc.) act in secret; everyone else just waits. This is the first time a werewolf attack can happen (night 1 attacks can be turned off in settings)." },
       { title: "Morning (results)", desc: "The results of the night — who fell victim, if anyone — are announced." },
-      { title: "Discussion", desc: "Talk it over and figure out who the werewolves are." },
-      { title: "Vote", desc: "Everyone votes for one player to execute. The top vote-getter is executed; a tie triggers a runoff vote." },
+      { title: "Discussion", desc: "Talk through what happened and figure out who the werewolves are. There's no time limit, so take as long as you need." },
+      { title: "Vote", desc: "Everyone votes for one player to execute. The top vote-getter is executed; a tie triggers a runoff vote. Once everyone has voted, the result is shown automatically." },
       { title: "Repeat", desc: "Night → morning → discussion → vote repeats until one side wins." },
     ],
     winTitle: "Win conditions",
     winIntro: "How the game ends depends on the faction — more than one faction can win at once.",
-    winVillage: "Village: wins once every Werewolf has been eliminated.",
+    winVillage: "Village: wins once every last Werewolf has been eliminated.",
     winWerewolf: "Werewolves: win once werewolves are at least as many as everyone else still alive.",
-    winFox: "Fox: wins alone if still alive when the game ends (independent of Village/Werewolf outcome).",
-    winGod: "God: wins alone if still alive when the game ends.",
+    winFox: "Fox: wins alone if still alive when the game ends — independent of whether Village or Werewolf wins.",
+    winGod: "God: wins alone if still alive when the game ends — independent of whether Village or Werewolf wins.",
     winLover: "Lovers: win together if both are still alive when the game ends.",
     rolesTitle: "All 13 roles",
     rolesIntro: "You can check your own role's description any time during the game — just open the menu in the top-right corner and tap \"My Role\".",
@@ -1078,65 +1078,65 @@ const en: Strings = {
     villager: {
       name: "Villager",
       short: "No special ability",
-      detail: "You are a Villager. You have no special ability — rely on conversation and deduction to find the werewolves and vote them out.",
+      detail: "You are a Villager. You have no special ability. If you suspect someone, share your reasoning during discussion and help the group figure out who the werewolves are.",
     },
     seer: {
       name: "Seer",
       short: "Each night, investigate one player to learn if they're a werewolf",
       detail:
-        "You are the Seer. Each night, choose one player to investigate. You'll learn whether they are a Werewolf (black) or not (white). If you investigate the Fox, it dies of a curse that same night.",
+        "You are the Seer. Each night, choose one player to investigate. You'll learn whether they are a Werewolf (black) or not (white). No one else sees this result, so it's up to you whether and how to share it. If you investigate the Fox, it dies of a curse that same night.",
     },
     bodyguard: {
       name: "Bodyguard",
       short: "Each night, protect one player from the werewolves",
       detail:
-        "You are the Bodyguard. Each night, choose one player other than yourself to protect from the werewolves' attack. If your chosen player was the target, they survive.",
+        "You are the Bodyguard. Each night, choose one player other than yourself to protect from the werewolves' attack. If your chosen player was the target, they survive. You can't protect the same person two nights in a row.",
     },
     medium: {
       name: "Medium",
       short: "Learn whether the executed player was a werewolf",
-      detail: "You are the Medium. Each night, you learn whether the player executed that day was a Werewolf or not.",
+      detail: "You are the Medium. Each night, you learn whether the player executed that day was a Werewolf or not. There's nothing to learn on the very first night, since no one has been executed yet.",
     },
     hunter: {
       name: "Hunter",
       short: "When you die, you can take one other player with you",
       detail:
-        "You are the Hunter. If you are executed or killed by a werewolf attack, you may name one other player to die alongside you.",
+        "You are the Hunter. If you are executed or killed by a werewolf attack, you may name one other player to die alongside you (this is optional). You don't need to reveal your role in advance.",
     },
     mason: {
       name: "Mason",
       short: "A villager who knows the other Masons",
-      detail: "You are a Mason. You know who the other Masons are. You have no special ability, but you can trust each other completely.",
+      detail: "You are a Mason. You know who the other Masons are. You have no special ability, but you have someone you can trust completely — choose carefully when (or whether) to let the group know.",
     },
     dictator: {
       name: "Dictator",
       short: "Once per game, skip the vote and decide an execution yourself",
       detail:
-        "You are the Dictator. Once per game, during the day's discussion, you may reveal yourself to end discussion early and decide who is executed on your own — skipping the vote entirely. Use it wisely.",
+        "You are the Dictator. Once per game, during the day's discussion, you may reveal yourself to end discussion early and decide who is executed on your own — skipping the vote entirely. It's a powerful move, so time it carefully.",
     },
     werewolf: {
       name: "Werewolf",
       short: "Each night, attack one player. You know the other werewolves",
       detail:
-        "You are a Werewolf. You know who the other werewolves are. Each night, coordinate with them to choose one player to attack. Stay hidden — you win once werewolves equal the rest of the survivors in number.",
+        "You are a Werewolf. You know who the other werewolves are. Each night, coordinate with them to choose one player to attack. Act like an innocent villager during discussion to stay hidden — you win once werewolves equal the rest of the survivors in number.",
     },
     traitor: {
       name: "Traitor",
       short: "On the Werewolf team, but doesn't know who the werewolves are",
       detail:
-        "You are the Traitor. You win with the Werewolf team, but you don't know who the werewolves are. You appear as an innocent villager to the Seer and Medium. Pose as a villager while quietly helping the werewolves.",
+        "You are the Traitor. You win with the Werewolf team, but you don't know who the werewolves are. You appear as an innocent villager to the Seer and Medium, so you're hard to catch. Pretend to help hunt the werewolves while quietly steering things their way. (Unlike the Insider, you don't actually know who the werewolves are.)",
     },
     insider: {
       name: "Insider",
       short: "Knows who the werewolves are, but appears innocent",
       detail:
-        "You are the Insider. You know who the werewolves are. You appear as an innocent villager to the Seer and Medium, making you especially hard to catch. Avoid defending the wolves too obviously.",
+        "You are the Insider. You know who the werewolves are. You appear as an innocent villager to the Seer and Medium, making you especially hard to catch. Avoid defending the wolves too obviously — a subtle nudge works better than an obvious one. (Unlike the Traitor, you do know their identities.)",
     },
     fox: {
       name: "Fox",
       short: "Immune to werewolf attacks, but dies if investigated",
       detail:
-        "You are the Fox, a solo faction belonging to neither the Village nor the Werewolves. You survive werewolf attacks, but if the Seer investigates you, you die of a curse that same night. You win if you're still alive when the game ends.",
+        "You are the Fox, a solo faction belonging to neither the Village nor the Werewolves. You survive werewolf attacks, but if the Seer investigates you, you die of a curse that same night. Whoever else wins, you win on your own if you're still alive when the game ends.",
     },
     god: {
       name: "God",
@@ -1452,29 +1452,29 @@ const ko: Strings = {
   help: {
     button: "게임 방법",
     title: "게임 방법 · 규칙",
-    tldr: "한마디로: 숨어 있는 '마피아'를, 시민들이 대화를 통해 찾아내 추방하는 게임입니다.",
+    tldr: "한마디로: 숨어 있는 '마피아'를 시민들이 대화로 찾아내 투표로 추방하는 게임입니다.",
     tabFlow: "진행 순서",
     tabWin: "승리 조건",
     tabRoles: "역할",
     intro:
-      "진로DX는 정체를 숨긴 '마피아'를 '시민'들이 대화와 추리로 찾아내는 심리 게임입니다. 이 앱으로 역할 확인·밤의 행동·투표를 진행합니다. '낮(토론·투표)'과 '밤(능력 행동)'을 반복하며, 어느 한쪽 진영이 조건을 만족하면 게임이 종료됩니다. 이 앱에는 자동 타이머가 없습니다 — 각 화면은 호스트의 조작이나 전원의 행동이 끝났을 때만 넘어가므로, 항상 여러분의 속도에 맞춰 진행할 수 있습니다.",
+      "마피아DX(진로DX)는 정체를 숨긴 '마피아'와, 그들을 찾아내려는 '시민'으로 나뉘어 즐기는 심리 게임입니다. '낮'(토론과 투표)과 '밤'(역할별 비밀 행동)을 번갈아 반복하며, 시민이 마피아를 전부 추방하거나 마피아가 시민과 같은 수까지 줄어들면 게임이 끝납니다. 역할 확인 · 밤의 행동 · 투표는 모두 이 화면에서 진행합니다. 자동으로 넘어가는 타이머는 없으므로, 호스트의 조작이나 전원의 행동이 끝날 때까지 여러분의 속도에 맞춰 진행할 수 있습니다.",
     flowTitle: "게임 진행 순서",
     flowSteps: [
       { title: "역할 확인", desc: "모든 사람이 각자 자신의 역할을 몰래 확인하고 '확인했습니다'를 누릅니다. 주변 사람에게 보이지 않도록 주의하세요. 전원이 누르기 전에는 다음으로 넘어가지 않습니다." },
-      { title: "첫 번째 토론", desc: "역할 확인 직후에 진행되는, 투표가 없는 토론입니다. 아직 아무도 습격당하지 않았습니다. 가볍게 이야기를 나눈 뒤, 호스트가 진짜 '밤'으로 진행합니다." },
-      { title: "밤", desc: "마피아·점술사·보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 아무것도 하지 않고 대기합니다. 여기서 처음으로 마피아의 습격이 발생할 수 있습니다 (설정에서 끌 수도 있습니다)." },
+      { title: "첫 번째 토론", desc: "역할 확인 직후에 진행되는, 투표가 없는 자기소개 시간입니다. 아직 아무도 습격당하지 않았습니다. 가볍게 이야기를 나눈 뒤, 호스트가 진짜 '밤'으로 진행합니다." },
+      { title: "밤", desc: "마피아 · 점술사 · 보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 그냥 기다리기만 하면 됩니다. 여기서 처음으로 마피아의 습격이 발생합니다 (첫날 밤 습격만 끄는 설정도 있습니다)." },
       { title: "아침 (결과 발표)", desc: "밤사이 무슨 일이 있었는지 (누가 희생되었는지)가 발표됩니다." },
-      { title: "토론", desc: "누가 마피아인지 이야기를 나누며 추리합니다." },
-      { title: "투표", desc: "추방할 사람을 한 명 선택해 투표합니다. 최다 득표자가 추방되며, 동수일 경우 결선 투표가 진행됩니다." },
+      { title: "토론", desc: "밤의 결과를 바탕으로 누가 마피아인지 이야기를 나누며 추리합니다. 시간 제한이 없으니 납득이 갈 때까지 충분히 이야기하세요." },
+      { title: "투표", desc: "추방할 사람을 한 명 선택해 투표합니다. 최다 득표자가 추방되며, 동수일 경우 결선 투표가 진행됩니다. 전원이 투표를 마치면 자동으로 결과가 발표됩니다." },
       { title: "반복", desc: "'밤 → 아침 → 토론 → 투표'를 어느 한쪽 진영이 승리할 때까지 반복합니다." },
     ],
     winTitle: "승리 조건",
     winIntro: "게임이 끝나는 방식은 진영마다 다릅니다. 여러 진영이 동시에 승리하는 경우도 있습니다.",
-    winVillage: "시민 진영: 마피아를 모두 추방하면 승리.",
+    winVillage: "시민 진영: 마피아를 한 명도 남김없이 추방하면 승리.",
     winWerewolf: "마피아 진영: 마피아의 수가 마피아 이외의 생존자 수 이상이 되면 승리.",
-    winFox: "요호: 게임 종료 시 살아 있으면 단독 승리 (시민·마피아의 승패와는 별개).",
-    winGod: "신: 게임 종료 시 살아 있으면 단독 승리.",
-    winLover: "연인: 게임 종료 시 두 사람 모두 살아 있으면 함께 승리.",
+    winFox: "요호: 게임이 끝날 때까지 살아남으면, 시민 · 마피아의 승패와 상관없이 단독 승리.",
+    winGod: "신: 게임이 끝날 때까지 살아남으면, 시민 · 마피아의 승패와 상관없이 단독 승리.",
+    winLover: "연인: 게임 종료 시 두 사람 모두 살아남아 있으면 함께 승리.",
     rolesTitle: "역할 목록 (13종)",
     rolesIntro: "자신의 역할에 대한 설명은 화면 우측 상단 메뉴에서 '나의 역할'을 선택하면 게임 중 언제든지 확인할 수 있습니다.",
     close: "닫기",
@@ -1508,65 +1508,65 @@ const ko: Strings = {
     villager: {
       name: "시민",
       short: "특별한 능력이 없는 마을 사람",
-      detail: "당신은 시민입니다. 특별한 능력은 없습니다. 대화와 추리만으로 마피아를 찾아내 추방합시다.",
+      detail: "당신은 시민입니다. 특별한 능력은 없습니다. 누군가 의심스럽다면 토론 시간에 그 이유를 함께 나누며 다 같이 추리를 이어가세요.",
     },
     seer: {
       name: "점술사",
       short: "매일 밤 한 명을 점쳐 마피아인지 아닌지 알아낸다",
       detail:
-        "당신은 점술사입니다. 매일 밤 한 명을 골라 점칠 수 있습니다. 그 사람이 '마피아'이면 흑, 그 외에는 백으로 판명됩니다. 참고로 요호를 점치면 요호는 그날 밤 저주로 사망합니다.",
+        "당신은 점술사입니다. 매일 밤 한 명을 골라 점칠 수 있습니다. 그 사람이 '마피아'이면 흑, 그 외에는 백으로 판명됩니다. 이 결과는 다른 사람에게는 보이지 않으니, 토론에서 어떻게 알릴지는 당신의 선택입니다. 참고로 요호를 점치면 요호는 그날 밤 저주로 사망합니다.",
     },
     bodyguard: {
       name: "보디가드",
       short: "매일 밤 한 명을 마피아의 습격으로부터 지킨다",
       detail:
-        "당신은 보디가드입니다. 매일 밤 자신을 제외한 한 명을 선택해 마피아의 습격으로부터 지킬 수 있습니다. 지킨 상대가 습격 대상이었다면 그 사람은 살아남습니다.",
+        "당신은 보디가드입니다. 매일 밤 자신을 제외한 한 명을 선택해 마피아의 습격으로부터 지킬 수 있습니다. 지킨 상대가 습격 대상이었다면 그 사람은 살아남습니다. 단, 같은 사람을 이틀 연속으로는 지킬 수 없습니다.",
     },
     medium: {
       name: "영매사",
       short: "추방된 사람이 마피아였는지 알 수 있다",
-      detail: "당신은 영매사입니다. 낮에 추방된 플레이어가 '마피아'였는지 아닌지를 그날 밤 알 수 있습니다.",
+      detail: "당신은 영매사입니다. 낮에 추방된 플레이어가 '마피아'였는지 아닌지를 그날 밤 알 수 있습니다. 아직 아무도 추방되지 않은 첫날 밤에는 알 수 있는 대상이 없습니다.",
     },
     hunter: {
       name: "헌터",
       short: "자신이 죽을 때, 한 명을 함께 데려갈 수 있다",
       detail:
-        "당신은 헌터입니다. '추방'되거나 '마피아에게 습격'당해 사망할 때, 한 명을 지목하여 함께 죽음에 이르게 할 수 있습니다.",
+        "당신은 헌터입니다. '추방'되거나 '마피아에게 습격'당해 사망할 때, 한 명을 지목해 함께 죽음에 이르게 할 수 있습니다 (지목하지 않아도 됩니다). 미리 자신의 역할을 밝힐 필요는 없습니다.",
     },
     mason: {
       name: "공유자",
       short: "2명 이상이 서로를 알고 있는 마을 사람",
-      detail: "당신은 공유자입니다. 다른 공유자가 누구인지 알고 있습니다. 특별한 능력은 없지만, 서로를 완전히 믿을 수 있습니다.",
+      detail: "당신은 공유자입니다. 다른 공유자가 누구인지 알고 있습니다. 특별한 능력은 없지만, 완전히 믿을 수 있는 소중한 동료가 있는 셈입니다. 정체를 언제 밝힐지는 신중하게 판단하세요.",
     },
     dictator: {
       name: "독재자",
       short: "단 한 번, 토론을 중단시키고 독단으로 추방자를 결정할 수 있다",
       detail:
-        "당신은 독재자입니다. 게임 중 단 한 번, 낮의 토론 중에 정체를 밝히고 토론을 강제 종료시켜 투표 없이 추방자를 독단으로 결정할 수 있습니다. 사용할 때는 신중하게.",
+        "당신은 독재자입니다. 게임 중 단 한 번, 낮의 토론 중에 정체를 밝히고 토론을 강제 종료시켜 투표 없이 추방자를 독단으로 결정할 수 있습니다. 강력한 능력이니 사용 시점을 신중하게 고르세요.",
     },
     werewolf: {
       name: "마피아",
       short: "매일 밤 한 명을 습격한다. 다른 마피아를 알 수 있다",
       detail:
-        "당신은 마피아입니다. 동료 마피아가 누구인지 알고 있습니다. 매일 밤 동료와 상의하여 한 명을 습격하세요. 정체를 숨기고 시민을 마피아와 같은 수까지 줄이면 승리입니다.",
+        "당신은 마피아입니다. 동료 마피아가 누구인지 알고 있습니다. 매일 밤 동료와 상의하여 한 명을 습격하세요. 토론 중에는 시민인 척 정체를 숨기고, 마피아의 수가 시민과 같아지면 승리입니다.",
     },
     traitor: {
       name: "배신자",
-      short: "마피아 진영이지만 누가 마피아인지는 모르는 시민인 척하는 사람",
+      short: "마피아 진영이지만 마피아의 정체는 모름",
       detail:
-        "당신은 배신자입니다. 마피아 진영의 승리가 곧 당신의 승리이지만, 누가 마피아인지는 알지 못합니다. 점술·영매에서는 '백'으로 판정됩니다. 시민인 척하며 마피아 진영을 도웁시다.",
+        "당신은 배신자입니다. 마피아 진영이 승리하면 당신도 승리하지만, 누가 마피아인지는 알지 못합니다. 점술 · 영매에서도 '백(마피아 아님)'으로 판정되어 의심받기 어려운 위치입니다. 마피아를 찾는 척하면서 은근히 마피아 진영에 유리하게 행동하세요 (내통자와 달리, 당신은 마피아의 정체를 모릅니다).",
     },
     insider: {
       name: "내통자",
       short: "마피아가 누구인지 알고 있는 마피아 진영의 협력자",
       detail:
-        "당신은 내통자입니다. 마피아가 누구인지 알고 있습니다. 점술·영매에서는 '백'으로 판정되기 때문에, 마피아 진영 중에서도 특히 활동하기 쉬운 존재입니다. 노골적인 옹호는 피하세요.",
+        "당신은 내통자입니다. 마피아가 누구인지 알고 있습니다. 점술 · 영매에서도 '백(마피아 아님)'으로 판정되어, 마피아 진영 중에서도 특히 의심받기 어려운 위치입니다. 노골적으로 마피아를 감싸면 의심을 사니, 티 나지 않게 도와주세요 (배신자와 달리, 당신은 마피아의 정체를 알고 있습니다).",
     },
     fox: {
       name: "요호",
       short: "마피아에게 습격당해도 죽지 않는 단독 진영. 점쳐지면 사망",
       detail:
-        "당신은 요호입니다. 시민·마피아 어느 쪽에도 속하지 않는 단독 진영으로, 마피아에게 습격당해도 죽지 않습니다. 다만 점술사에게 점쳐지면 그날 밤 저주로 사망합니다. 게임 종료 시 생존해 있으면 당신의 승리입니다.",
+        "당신은 요호입니다. 시민 · 마피아 어느 쪽에도 속하지 않는 단독 진영으로, 마피아에게 습격당해도 죽지 않습니다. 다만 점술사에게 점쳐지면 그날 밤 저주로 사망합니다. 시민과 마피아 중 누가 이기든 상관없이, 게임 종료 시 살아남아 있으면 단독으로 승리합니다.",
     },
     god: {
       name: "신",
