@@ -292,6 +292,13 @@ interface Strings {
     intro: string;
     flowTitle: string;
     flowSteps: Array<{ title: string; desc: string }>;
+    diagramTitle: string;
+    diagramIntro: string;
+    diagramDayLabel: (day: number) => string;
+    diagramSameDayNote: string;
+    diagramOutcomeLabel: string;
+    diagramNoRoomNote: string;
+    diagramSettingsHeading: string;
     winTitle: string;
     winIntro: string;
     winVillage: string;
@@ -460,7 +467,8 @@ const ja: Strings = {
     progress: (s, t) => `行動完了: ${s} / ${t} 人`,
     submitButton: "決定する",
     resubmitButton: "送信済み(変更する)",
-    previousSeerResult: (day) => `前回の占い結果(${day}日目)`,
+    previousSeerResult: (day) =>
+      day === 0 ? "前回の占い結果(役職確認時)" : `前回の占い結果(${day}日目)`,
     seerResultLine: (name, isBlack) => `${name}さんは${isBlack ? "【黒(人狼)】" : "【白】"}でした`,
     actions: {
       attack: { title: "誰を襲撃しますか？", desc: "仲間の人狼と相談して、今夜襲う相手を選んでください。", skip: "今夜は襲撃しない" },
@@ -607,6 +615,14 @@ const ja: Strings = {
       { title: "投票", desc: "追放したい人をひとり選んで投票します。最多票の人が追放され、同数の場合は決選投票になります。全員の投票がそろうと自動的に結果発表に進みます。" },
       { title: "くり返し", desc: "「夜→朝→議論→投票」を、どちらかの陣営が勝利するまでくり返します。" },
     ],
+    diagramTitle: "図でみる夜と昼のサイクル",
+    diagramIntro:
+      "「夜」と、その直後に続く「朝→議論→投票」はセットで同じ日数として数えます。たとえば「夜1」の次に来る朝・議論・投票はすべて「1日目」です。",
+    diagramDayLabel: (day) => `${day}日目`,
+    diagramSameDayNote: "🌙 夜と ☀️ 昼(朝・議論・投票)は、同じ番号なら同じひとまとまりです。",
+    diagramOutcomeLabel: "決着",
+    diagramNoRoomNote: "実際の設定は参加した部屋によって異なります。部屋に入ると「配役・設定」タブでも確認できます。",
+    diagramSettingsHeading: "この部屋の設定",
     winTitle: "勝利条件",
     winIntro: "決着のつき方は陣営ごとに異なります。複数の陣営が同時に勝利することもあります。",
     winVillage: "市民陣営: 人狼をひとり残らず追放すると勝利。",
@@ -615,13 +631,13 @@ const ja: Strings = {
     winGod: "神様: ゲーム終了まで生き延びれば、村・人狼どちらが勝っても関係なく単独で勝利。",
     winLover: "恋人: ゲーム終了時に2人とも生き延びていれば、2人そろって勝利。",
     rolesTitle: "役職一覧(13種)",
-    rolesIntro: "自分の役職の説明は、画面右上のメニューから「自分の役職」を選べばゲーム中いつでも確認できます。",
+    rolesIntro: "自分の役職の説明は、画面上部の「自分の役職」ボタンからゲーム中いつでも確認できます。",
     close: "閉じる",
   },
   myRole: {
     button: "自分の役職",
     title: "あなたの役職",
-    dayLabel: (day) => `${day}日目`,
+    dayLabel: (day) => (day === 0 ? "役職確認時" : `${day}日目`),
     seerHistoryTitle: "今まで占った人",
     seerHistoryEmpty: "まだ誰も占っていません。",
     mediumHistoryTitle: "今まで判定した人",
@@ -890,7 +906,8 @@ const en: Strings = {
     progress: (s, t) => `Actions done: ${s} / ${t}`,
     submitButton: "Confirm",
     resubmitButton: "Submitted (tap to change)",
-    previousSeerResult: (day) => `Last investigation (night ${day})`,
+    previousSeerResult: (day) =>
+      day === 0 ? "Last investigation (at role reveal)" : `Last investigation (night ${day})`,
     seerResultLine: (name, isBlack) => `${name} was ${isBlack ? "【Black - Werewolf】" : "【White】"}`,
     actions: {
       attack: { title: "Who will you attack?", desc: "Coordinate with your fellow werewolves and choose tonight's target.", skip: "Don't attack tonight" },
@@ -1038,6 +1055,14 @@ const en: Strings = {
       { title: "Vote", desc: "Everyone votes for one player to execute. The top vote-getter is executed; a tie triggers a runoff vote. Once everyone has voted, the result is shown automatically." },
       { title: "Repeat", desc: "Night → morning → discussion → vote repeats until one side wins." },
     ],
+    diagramTitle: "Night & Day cycle at a glance",
+    diagramIntro:
+      "Each \"Night\" and the \"Morning → Discussion → Vote\" that immediately follows it share the same day number. For example, everything right after \"Night 1\" — morning, discussion, and vote — is all \"Day 1\".",
+    diagramDayLabel: (day) => `Day ${day}`,
+    diagramSameDayNote: "🌙 Night and ☀️ Day (morning, discussion, vote) sharing the same number belong to the same round.",
+    diagramOutcomeLabel: "Game over",
+    diagramNoRoomNote: "The actual settings depend on the room you join — you can check them under the room's \"Setup\" tab once you're in one.",
+    diagramSettingsHeading: "This room's settings",
     winTitle: "Win conditions",
     winIntro: "How the game ends depends on the faction — more than one faction can win at once.",
     winVillage: "Village: wins once every last Werewolf has been eliminated.",
@@ -1046,13 +1071,13 @@ const en: Strings = {
     winGod: "God: wins alone if still alive when the game ends — independent of whether Village or Werewolf wins.",
     winLover: "Lovers: win together if both are still alive when the game ends.",
     rolesTitle: "All 13 roles",
-    rolesIntro: "You can check your own role's description any time during the game — just open the menu in the top-right corner and tap \"My Role\".",
+    rolesIntro: "You can check your own role's description any time during the game — just tap the \"My Role\" button at the top of the screen.",
     close: "Close",
   },
   myRole: {
     button: "My Role",
     title: "Your role",
-    dayLabel: (day) => `Night ${day}`,
+    dayLabel: (day) => (day === 0 ? "At role reveal" : `Night ${day}`),
     seerHistoryTitle: "Everyone you've investigated",
     seerHistoryEmpty: "You haven't investigated anyone yet.",
     mediumHistoryTitle: "Everyone you've read",
@@ -1321,7 +1346,8 @@ const ko: Strings = {
     progress: (s, t) => `행동 완료: ${s} / ${t}명`,
     submitButton: "결정하기",
     resubmitButton: "제출됨 (변경하기)",
-    previousSeerResult: (day) => `이전 점술 결과 (${day}일차)`,
+    previousSeerResult: (day) =>
+      day === 0 ? "이전 점술 결과 (역할 확인 시)" : `이전 점술 결과 (${day}일차)`,
     seerResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(마피아)】" : "【백】"}이었습니다`,
     actions: {
       attack: { title: "누구를 습격하시겠습니까?", desc: "동료 마피아와 상의하여 오늘 밤 습격할 대상을 선택하세요.", skip: "오늘 밤은 습격하지 않는다" },
@@ -1468,6 +1494,14 @@ const ko: Strings = {
       { title: "투표", desc: "추방할 사람을 한 명 선택해 투표합니다. 최다 득표자가 추방되며, 동수일 경우 결선 투표가 진행됩니다. 전원이 투표를 마치면 자동으로 결과가 발표됩니다." },
       { title: "반복", desc: "'밤 → 아침 → 토론 → 투표'를 어느 한쪽 진영이 승리할 때까지 반복합니다." },
     ],
+    diagramTitle: "한눈에 보는 밤과 낮의 순서",
+    diagramIntro:
+      "'밤'과 그 직후에 이어지는 '아침 → 토론 → 투표'는 같은 날짜로 묶입니다. 예를 들어 '밤1' 다음에 오는 아침 · 토론 · 투표는 모두 '1일차'입니다.",
+    diagramDayLabel: (day) => `${day}일차`,
+    diagramSameDayNote: "🌙 밤과 ☀️ 낮(아침 · 토론 · 투표)은 같은 번호라면 같은 묶음입니다.",
+    diagramOutcomeLabel: "결착",
+    diagramNoRoomNote: "실제 설정은 참가한 방마다 다릅니다. 방에 들어가면 '배역 · 설정' 탭에서도 확인할 수 있습니다.",
+    diagramSettingsHeading: "이 방의 설정",
     winTitle: "승리 조건",
     winIntro: "게임이 끝나는 방식은 진영마다 다릅니다. 여러 진영이 동시에 승리하는 경우도 있습니다.",
     winVillage: "시민 진영: 마피아를 한 명도 남김없이 추방하면 승리.",
@@ -1476,13 +1510,13 @@ const ko: Strings = {
     winGod: "신: 게임이 끝날 때까지 살아남으면, 시민 · 마피아의 승패와 상관없이 단독 승리.",
     winLover: "연인: 게임 종료 시 두 사람 모두 살아남아 있으면 함께 승리.",
     rolesTitle: "역할 목록 (13종)",
-    rolesIntro: "자신의 역할에 대한 설명은 화면 우측 상단 메뉴에서 '나의 역할'을 선택하면 게임 중 언제든지 확인할 수 있습니다.",
+    rolesIntro: "자신의 역할에 대한 설명은 화면 상단의 '나의 역할' 버튼을 누르면 게임 중 언제든지 확인할 수 있습니다.",
     close: "닫기",
   },
   myRole: {
     button: "나의 역할",
     title: "당신의 역할",
-    dayLabel: (day) => `${day}일차`,
+    dayLabel: (day) => (day === 0 ? "역할 확인 시" : `${day}일차`),
     seerHistoryTitle: "지금까지 점술한 사람",
     seerHistoryEmpty: "아직 아무도 점술하지 않았습니다.",
     mediumHistoryTitle: "지금까지 판정한 사람",

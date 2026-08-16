@@ -1,42 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, ChevronRight, IdCard, Menu, User } from "lucide-react";
+import { ChevronRight, User } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { HelpDialog } from "@/components/game/help-dialog";
-import { MyRoleDialog } from "@/components/game/my-role-dialog";
 import { ProfileEditDialog } from "@/components/game/profile-edit-dialog";
 import { PlayerAvatar } from "@/components/game/shared";
 import { ThemeToggle } from "@/components/game/theme-toggle";
 import { LanguageSwitcher } from "@/components/game/language-switcher";
 import { cn } from "@/lib/utils";
 
-type DialogKey = "profile" | "role" | "help" | null;
-
-// TopBar に要素を詰め込みすぎると窮屈になるため、自分に関する操作(プロフィール・
-// 自分の役職・遊び方・テーマ・言語)は、画面右上に浮く独立したフローティングボタン
-// 1つにまとめている。ボタン自体は常にニュートラルな見た目で、タップして開いた
-// メニューの中でのみ各機能にアクセスできる。
+// ゲーム中に頻繁に使う「自分の役職」「遊び方」は TopBar(app-shell.tsx)に常時見える
+// 独立ボタンとして移設したため、ここに残るのは低頻度な操作(プロフィール編集・テーマ・
+// 言語)だけ。TopBar の右端に並ぶ、自分のアバターを表示する丸ボタンがトリガーで、
+// タップすると開くポップオーバーの中にそれらをまとめている。
 //
-// メニュー内の「プロフィール」「自分の役職」「遊び方」はそれぞれ独立したダイアログを
-// 開く必要があるため、行をクリックした瞬間にこのポップオーバーを閉じつつ、対応する
-// ダイアログを open/onOpenChange で外部制御して開く(ポップオーバーの中に
-// DialogTrigger を直接ネストすると、閉じるタイミングとダイアログの開閉が競合しうるため)。
+// 「プロフィール編集」は独立したダイアログを開く必要があるため、行をクリックした瞬間に
+// このポップオーバーを閉じつつ、ダイアログを open/onOpenChange で外部制御して開く
+// (ポップオーバーの中に DialogTrigger を直接ネストすると、閉じるタイミングとダイアログの
+// 開閉が競合しうるため)。
 export function FloatingMenu() {
   const { t } = useLocale();
-  const { publicState, privateState, session } = useGame();
+  const { publicState, session } = useGame();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeDialog, setActiveDialog] = useState<DialogKey>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const me = publicState?.players.find((p) => p.id === session?.playerId) ?? null;
-  const hasRole = !!privateState?.self?.role;
 
-  const openDialog = (key: DialogKey) => {
+  const openProfile = () => {
     setMenuOpen(false);
-    setActiveDialog(key);
+    setProfileOpen(true);
   };
 
   return (
@@ -46,22 +41,22 @@ export function FloatingMenu() {
           <button
             type="button"
             aria-label={t.common.menu}
-            className="fixed top-[calc(env(safe-area-inset-top)+3.25rem)] right-3 z-40 flex size-11 items-center justify-center rounded-full border border-border/60 bg-card/95 shadow-lg backdrop-blur transition active:scale-95"
+            title={t.common.menu}
+            className={cn(
+              "flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border transition active:scale-95",
+              menuOpen ? "border-primary/50 bg-primary/15" : "border-border/60 bg-card/80"
+            )}
           >
-            {me ? <PlayerAvatar player={me} size="sm" /> : <Menu className="size-5" />}
+            {me ? <PlayerAvatar player={me} size="sm" /> : <User className="size-4" />}
           </button>
         </PopoverTrigger>
         <PopoverContent align="end" sideOffset={10} className="w-60">
           <div className="flex flex-col">
             {me && (
-              <MenuRow icon={<User className="size-4" />} label={t.profile.editButton} onClick={() => openDialog("profile")} />
+              <MenuRow icon={<User className="size-4" />} label={t.profile.editButton} onClick={openProfile} />
             )}
-            {hasRole && (
-              <MenuRow icon={<IdCard className="size-4" />} label={t.myRole.button} onClick={() => openDialog("role")} />
-            )}
-            <MenuRow icon={<BookOpen className="size-4" />} label={t.help.button} onClick={() => openDialog("help")} />
 
-            <Separator className="my-1.5" />
+            {me && <Separator className="my-1.5" />}
 
             <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5">
               <span className="text-sm font-medium">{t.common.themeLabel}</span>
@@ -75,9 +70,7 @@ export function FloatingMenu() {
         </PopoverContent>
       </Popover>
 
-      {me && <ProfileEditDialog trigger={null} open={activeDialog === "profile"} onOpenChange={(v) => setActiveDialog(v ? "profile" : null)} />}
-      {hasRole && <MyRoleDialog trigger={null} open={activeDialog === "role"} onOpenChange={(v) => setActiveDialog(v ? "role" : null)} />}
-      <HelpDialog trigger={null} open={activeDialog === "help"} onOpenChange={(v) => setActiveDialog(v ? "help" : null)} />
+      {me && <ProfileEditDialog trigger={null} open={profileOpen} onOpenChange={setProfileOpen} />}
     </>
   );
 }

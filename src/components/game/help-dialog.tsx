@@ -19,6 +19,7 @@ import { useGame } from "@/hooks/use-game";
 import { ROLE_ORDER, ROLES, type Team } from "@/lib/game/roles";
 import { ICONS, styleOf } from "@/lib/game/role-style";
 import { RoleCompositionSummary, RoomSettingsSummary } from "@/components/game/room-config-summary";
+import { DayNightDiagram } from "@/components/game/day-night-diagram";
 import { cn } from "@/lib/utils";
 
 const WIN_TEAM_ORDER: Array<{ key: "winVillage" | "winWerewolf" | "winFox" | "winGod" | "winLover"; team: Team }> = [
@@ -92,6 +93,7 @@ export function HelpDialog({
             )}
             <TabsContent value="flow" className="mt-0 space-y-3">
               <p className="text-sm leading-relaxed text-muted-foreground">{t.help.intro}</p>
+              <DayNightDiagram settings={publicState?.settings} />
               <div className="space-y-2">
                 {t.help.flowSteps.map((step, i) => (
                   <div key={i} className="flex gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2.5">

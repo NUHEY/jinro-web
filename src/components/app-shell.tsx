@@ -2,11 +2,14 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Moon, Wifi, WifiOff } from "lucide-react";
+import { BookOpen, IdCard, Loader2, Moon, Wifi, WifiOff } from "lucide-react";
 import { useGame, GameContext } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { PrivateViewState, PublicGameState } from "@/lib/game/types";
 import { FloatingMenu } from "@/components/game/floating-menu";
+import { MyRoleDialog } from "@/components/game/my-role-dialog";
+import { HelpDialog } from "@/components/game/help-dialog";
+import { cn } from "@/lib/utils";
 import { EntryScreen } from "@/components/game/entry-screen";
 import { LobbyScreen } from "@/components/game/lobby-screen";
 import { RoleRevealScreen } from "@/components/game/role-reveal-screen";
@@ -30,28 +33,100 @@ function LoadingScreen() {
   );
 }
 
-// TopBar は「今どの部屋にいるか」だけを示すシンプルな帯にとどめ、プロフィール・
-// 自分の役職・遊び方・テーマ・言語といった自分向けの操作は、右上に浮く
-// FloatingMenu(floating-menu.tsx)に集約している。こうすることで、
-// ゲーム中ずっと目に入る TopBar 自体には要素を詰め込みすぎない。
-function TopBar() {
-  const { status, showReconnecting, publicState } = useGame();
-  const { t } = useLocale();
-  if (status !== "in_room" || !publicState) return null;
+type TopBarDialogKey = "role" | "help" | null;
+
+// 以前はプロフィール・自分の役職・遊び方・テーマ・言語をすべて右上の1つの
+// フローティングメニューに詰め込んでいたが、「わかりにくい」というフィードバックを受けて
+// 見直した。ゲーム中に頻繁に使う「自分の役職」「遊び方」は、TopBar に常時見えるボタンとして
+// 独立させ、開かなくても存在に気づけるようにする。一方、プロフィール編集・テーマ・言語のような
+// 低頻度な操作だけを右端のアバターボタン(FloatingMenu)にまとめ、押した回数を減らす。
+// 「自分の役職」ボタン自体の見た目は常にニュートラルな配色にし、役職の色は開いたダイアログの
+// 中(RoleInfoCard)でのみ見せる(周囲に役職がバレないようにするため)。
+function TopBarIconButton({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-4 py-2 backdrop-blur safe-top">
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={cn(
+        "flex size-9 shrink-0 items-center justify-center rounded-full border transition active:scale-95",
+        active
+          ? "border-primary/50 bg-primary/15 text-primary"
+          : "border-border/60 bg-card/80 text-foreground hover:bg-accent hover:text-accent-foreground"
+      )}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function TopBar() {
+  const { status, showReconnecting, publicState, privateState } = useGame();
+  const { t } = useLocale();
+  const [activeDialog, setActiveDialog] = useState<TopBarDialogKey>(null);
+  const hasRole = !!privateState?.self?.role;
+
+  if (status !== "in_room" || !publicState) return null;
+
+  return (
+    <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-3 py-2 backdrop-blur safe-top">
       <div className="flex min-w-0 items-center gap-1.5 font-heading text-base font-bold">
         <Moon className="size-4 shrink-0 text-primary" />
         <span className="truncate">{t.meta.title}</span>
         <span className="ml-1 shrink-0 font-mono text-xs text-muted-foreground">#{publicState.code}</span>
       </div>
-      {showReconnecting ? (
-        <span className="flex shrink-0 items-center gap-1 text-xs text-destructive">
-          <WifiOff className="size-4 animate-pulse" /> {t.common.reconnecting}
-        </span>
-      ) : (
-        <Wifi className="size-4 shrink-0 text-emerald-400" />
+
+      <div className="flex shrink-0 items-center gap-1.5">
+        {hasRole && (
+          <TopBarIconButton
+            icon={<IdCard className="size-4" />}
+            label={t.myRole.button}
+            active={activeDialog === "role"}
+            onClick={() => setActiveDialog(activeDialog === "role" ? null : "role")}
+          />
+        )}
+        <TopBarIconButton
+          icon={<BookOpen className="size-4" />}
+          label={t.help.button}
+          active={activeDialog === "help"}
+          onClick={() => setActiveDialog(activeDialog === "help" ? null : "help")}
+        />
+
+        <FloatingMenu />
+
+        {showReconnecting ? (
+          <span className="ml-1 flex shrink-0 items-center gap-1 text-xs text-destructive">
+            <WifiOff className="size-4 animate-pulse" />
+            <span className="hidden sm:inline">{t.common.reconnecting}</span>
+          </span>
+        ) : (
+          <Wifi className="ml-1 size-4 shrink-0 text-emerald-400" />
+        )}
+      </div>
+
+      {hasRole && (
+        <MyRoleDialog
+          trigger={null}
+          open={activeDialog === "role"}
+          onOpenChange={(v) => setActiveDialog(v ? "role" : null)}
+        />
       )}
+      <HelpDialog
+        trigger={null}
+        open={activeDialog === "help"}
+        onOpenChange={(v) => setActiveDialog(v ? "help" : null)}
+      />
     </div>
   );
 }
@@ -69,7 +144,6 @@ export function AppShell() {
   return (
     <div className="flex min-h-dvh flex-1 flex-col">
       <TopBar />
-      {status === "in_room" && publicState && <FloatingMenu />}
       <ScreenRouter status={status} publicState={publicState} />
     </div>
   );
