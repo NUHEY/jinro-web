@@ -506,7 +506,7 @@ export function attachGameServer(io: IOServer) {
           // 自分自身を対象にできるのは、設定でONの場合のボディーガードの自己護衛のみ
           if (!(action === "guard" && room.state.settings.allowBodyguardSelfGuard)) return;
         }
-        if (action === "attack" && room.state.wolfIds.includes(target.id)) return;
+        if (action === "attack" && !room.state.settings.allowWolfFriendlyFire && room.state.wolfIds.includes(target.id)) return;
         if (
           action === "guard" &&
           room.state.previousGuardTargets[currentPlayerId] === target.id

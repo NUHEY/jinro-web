@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BookOpen, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,22 +31,32 @@ const WIN_TEAM_ORDER: Array<{ key: "winVillage" | "winWerewolf" | "winFox" | "wi
 
 export function HelpDialog({
   trigger,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
 }: {
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { t } = useLocale();
   const { publicState } = useGame();
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled ? (setControlledOpen ?? (() => {})) : setUncontrolledOpen;
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="outline" size="sm">
-            <BookOpen className="size-3.5" /> {t.help.button}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="flex max-h-[85vh] max-w-md flex-col overflow-hidden">
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button variant="outline" size="sm">
+              <BookOpen className="size-3.5" /> {t.help.button}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+      <DialogContent className="flex max-h-[85dvh] max-w-md flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">{t.help.title}</DialogTitle>
         </DialogHeader>

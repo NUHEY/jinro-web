@@ -449,37 +449,10 @@ async function testExpandedSettings() {
     for (const c of clients) c.socket.disconnect();
   }
 
-  // --- hunterRevengeOnAnyDeath: true は「道連れ」による死亡(cause=hunter)も連鎖トリガーにする ---
-  {
-    const { clients } = await makeRoom(
-      ["Host", "W1", "H1", "H2", "V1", "V2"],
-      { werewolf: 1, hunter: 2, villager: 3 },
-      { hunterRevengeOnAnyDeath: true }
-    );
-    clients[0].socket.emit("host:advance", { to: "night" });
-    await waitFor(clients[0], (s) => s.phase === "night" && s.day === 1, 5000, "night1");
-    const [h1, h2] = byRole(clients, "hunter");
-    byRole(clients, "werewolf")[0].socket.emit("night:submit", { targetId: h1.private.self.id });
-    await waitFor(
-      clients[0],
-      (s) => !!s.awaitingHunterRevenge && s.awaitingHunterRevenge.hunterId === h1.private.self.id,
-      5000,
-      "h1 awaiting revenge"
-    );
-    h1.socket.emit("hunter:revenge", { targetId: h2.private.self.id });
-    await waitFor(
-      clients[0],
-      (s) => !!s.awaitingHunterRevenge && s.awaitingHunterRevenge.hunterId === h2.private.self.id,
-      5000,
-      "h2 chained revenge must trigger"
-    );
-    console.log("PASS: hunterRevengeOnAnyDeath=true chains a second hunter's revenge off a cause='hunter' death");
-    h2.socket.emit("hunter:revenge", { targetId: null });
-    await waitFor(clients[0], (s) => s.phase === "day_result", 5000, "day_result after chain");
-    for (const c of clients) c.socket.disconnect();
-  }
-
-  // --- hunterRevengeOnAnyDeath: false (デフォルト) は連鎖しない ---
+  // --- ハンターの道連れ(cause="hunter")は、設定に関わらず連鎖しない(仕様として固定) ---
+  // hunterRevengeOnAnyDeath 設定は、標準の1人ハンター構成では絶対に効果を持たない
+  // (呪殺は妖狐だけ、後追いは恋人だけが対象になる死因のため)という理由で撤去された。
+  // 撤去後も、道連れによる死亡(cause="hunter")自体は今まで通り連鎖しないことを確認する。
   {
     const { clients } = await makeRoom(["Host", "W1", "H1", "H2", "V1", "V2"], { werewolf: 1, hunter: 2, villager: 3 });
     clients[0].socket.emit("host:advance", { to: "night" });
@@ -494,10 +467,50 @@ async function testExpandedSettings() {
     );
     h1.socket.emit("hunter:revenge", { targetId: h2.private.self.id });
     await waitFor(clients[0], (s) => s.phase === "day_result", 5000, "day_result (no chain)");
-    assert(!clients[0].public.awaitingHunterRevenge, "hunterRevengeOnAnyDeath=false (default) must not chain a second revenge");
+    assert(!clients[0].public.awaitingHunterRevenge, "a cause='hunter' death must never chain a second revenge");
     const h2Alive = clients[0].public.players.find((p) => p.id === h2.private.self.id)?.alive;
     assert(!h2Alive, "h2 must still have died from h1's revenge itself");
-    console.log("PASS: hunterRevengeOnAnyDeath=false (default) does not chain a second hunter's revenge");
+    console.log("PASS: hunter revenge deaths (cause='hunter') never chain into a second revenge");
+    for (const c of clients) c.socket.disconnect();
+  }
+
+  // --- allowWolfFriendlyFire: true は人狼が仲間の人狼を襲撃対象にできるようにする ---
+  // ターゲット自身の人狼は「自分を攻撃対象にする」ことはできない(自己攻撃は別ルールで常に禁止)ため、
+  // 生き残っているもう一方の人狼だけが目標に合意する形になり、厳密な全員一致の合意には至らない。
+  // これは友軍撃ちが絡む場面としては現実的な状況で、ホストの強制進行で解決するのが正しい使い方。
+  {
+    const { clients } = await makeRoom(
+      ["Host", "W1", "W2", "V1", "V2", "V3"],
+      { werewolf: 2, villager: 4 },
+      { allowWolfFriendlyFire: true }
+    );
+    clients[0].socket.emit("host:advance", { to: "night" });
+    await waitFor(clients[0], (s) => s.phase === "night" && s.day === 1, 5000, "night1");
+    const [w1, w2] = byRole(clients, "werewolf");
+    w1.socket.emit("night:submit", { targetId: w2.private.self.id });
+    await sleep(300);
+    assert(w1.private.pendingNightAction?.submitted === true, "allowWolfFriendlyFire=true must accept an attack targeting a fellow werewolf");
+    clients[0].socket.emit("host:forceResolveNight", {});
+    await waitFor(clients[0], (s) => s.phase === "day_result", 5000, "day_result after forced friendly-fire attack");
+    const w2Alive = clients[0].public.players.find((p) => p.id === w2.private.self.id)?.alive;
+    assert(!w2Alive, "allowWolfFriendlyFire=true must let werewolves kill a fellow werewolf");
+    console.log("PASS: allowWolfFriendlyFire=true allows werewolves to attack each other");
+    for (const c of clients) c.socket.disconnect();
+  }
+
+  // --- allowWolfFriendlyFire: false (デフォルト) は仲間の人狼を襲撃対象にできない ---
+  {
+    const { clients } = await makeRoom(["Host", "W1", "W2", "V1", "V2", "V3"], { werewolf: 2, villager: 4 });
+    clients[0].socket.emit("host:advance", { to: "night" });
+    await waitFor(clients[0], (s) => s.phase === "night" && s.day === 1, 5000, "night1");
+    const [w1, w2] = byRole(clients, "werewolf");
+    w1.socket.emit("night:submit", { targetId: w2.private.self.id });
+    await sleep(300);
+    assert(
+      !w1.private.pendingNightAction?.submitted,
+      "allowWolfFriendlyFire=false (default) must reject an attack targeting a fellow werewolf"
+    );
+    console.log("PASS: allowWolfFriendlyFire=false (default) rejects attacking a fellow werewolf");
     for (const c of clients) c.socket.disconnect();
   }
 }

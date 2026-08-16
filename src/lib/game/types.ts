@@ -38,13 +38,16 @@ export interface RoleCounts {
 }
 
 export interface RoomSettings {
-  revealRoleOnDeath: boolean; // 死亡時に役職を公開するか(デフォルトOFF)
-  seerFirstNightDivine: boolean; // 予言者が役職確認のタイミングで1人占える発展ルール(デフォルトOFF、説明書11ページ)
-  allowFirstNightKill: boolean; // 最初の夜(1日目の夜)に人狼が襲撃できるか(デフォルトON=通常ルール)
-  allowFirstVoteExecution: boolean; // 最初の投票(1日目の投票)で実際に追放が発生するか(デフォルトON=通常ルール)
+  // --- 基本ルール(公式ルールとの一致有無をUIで示す設定) ---
+  revealRoleOnDeath: boolean; // 死亡時に役職を公開するか(デフォルトOFF=公式ルール。霊媒師の存在意義が保たれる)
+  allowFirstNightKill: boolean; // 最初の夜(1日目の夜)に人狼が襲撃できるか(デフォルトON=公式ルール)
+  allowFirstVoteExecution: boolean; // 最初の投票(1日目の投票)で実際に追放が発生するか(デフォルトON=公式ルール)
+  allowWolfFriendlyFire: boolean; // 人狼が仲間の人狼を襲撃対象に選べるか(デフォルトOFF=公式ルール)
+  seerFirstNightDivine: boolean; // 予言者が役職確認のタイミングで1人占える、公式の上級ルール(デフォルトOFF)
+
+  // --- 追加ルール(公式ルールには存在しない、このアプリ独自の拡張設定) ---
   allowSelfVote: boolean; // 投票で自分自身を対象に選べるか(デフォルトON=これまでの挙動のまま)
   revealVoteChoices: boolean; // 投票中、誰が誰に投票しているかを全員に公開するか(デフォルトOFF=集計数のみ)
-  hunterRevengeOnAnyDeath: boolean; // ハンターの道連れを、襲撃・処刑以外(呪殺・後追い)の死亡でも発動させるか(デフォルトOFF)
   allowBodyguardSelfGuard: boolean; // ボディーガードが自分自身を護衛対象にできるか(デフォルトOFF)
   secondTieExecutesRandomly: boolean; // 決選投票でも同数タイだった場合、ランダムに1人処刑するか。OFFなら誰も処刑されない(デフォルトON=これまでの挙動のまま)
   dictatorCanTargetSelf: boolean; // 独裁者が自分自身を強制処刑の対象にできるか(デフォルトON=これまでの挙動のまま)

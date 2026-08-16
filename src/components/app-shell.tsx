@@ -2,19 +2,11 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Moon, Wifi, WifiOff, BookOpen, IdCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, Moon, Wifi, WifiOff } from "lucide-react";
 import { useGame, GameContext } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { PrivateViewState, PublicGameState } from "@/lib/game/types";
-import { ROLES } from "@/lib/game/roles";
-import { styleOf } from "@/lib/game/role-style";
-import { cn } from "@/lib/utils";
-import { HelpDialog } from "@/components/game/help-dialog";
-import { MyRoleDialog } from "@/components/game/my-role-dialog";
-import { ProfileEditDialog } from "@/components/game/profile-edit-dialog";
-import { PlayerAvatar } from "@/components/game/shared";
-import { ThemeToggle } from "@/components/game/theme-toggle";
+import { FloatingMenu } from "@/components/game/floating-menu";
 import { EntryScreen } from "@/components/game/entry-screen";
 import { LobbyScreen } from "@/components/game/lobby-screen";
 import { RoleRevealScreen } from "@/components/game/role-reveal-screen";
@@ -27,7 +19,6 @@ import { LastWordsScreen } from "@/components/game/last-words-screen";
 import { AppealVoteScreen } from "@/components/game/appeal-vote-screen";
 import { ExecutionResultScreen } from "@/components/game/execution-result-screen";
 import { GameOverScreen } from "@/components/game/game-over-screen";
-import { LanguageSwitcher } from "@/components/game/language-switcher";
 
 function LoadingScreen() {
   const { t } = useLocale();
@@ -39,13 +30,14 @@ function LoadingScreen() {
   );
 }
 
+// TopBar は「今どの部屋にいるか」だけを示すシンプルな帯にとどめ、プロフィール・
+// 自分の役職・遊び方・テーマ・言語といった自分向けの操作は、右上に浮く
+// FloatingMenu(floating-menu.tsx)に集約している。こうすることで、
+// ゲーム中ずっと目に入る TopBar 自体には要素を詰め込みすぎない。
 function TopBar() {
-  const { status, showReconnecting, publicState, privateState, session } = useGame();
+  const { status, showReconnecting, publicState } = useGame();
   const { t } = useLocale();
   if (status !== "in_room" || !publicState) return null;
-  const myRole = privateState?.self?.role ?? null;
-  const roleStyle = myRole ? styleOf(ROLES[myRole].color) : null;
-  const me = publicState.players.find((p) => p.id === session?.playerId);
   return (
     <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-4 py-2 backdrop-blur safe-top">
       <div className="flex min-w-0 items-center gap-1.5 font-heading text-base font-bold">
@@ -53,48 +45,13 @@ function TopBar() {
         <span className="truncate">{t.meta.title}</span>
         <span className="ml-1 shrink-0 font-mono text-xs text-muted-foreground">#{publicState.code}</span>
       </div>
-      <div className="flex items-center gap-2">
-        {showReconnecting ? (
-          <span className="flex items-center gap-1 text-xs text-destructive">
-            <WifiOff className="size-4 animate-pulse" /> {t.common.reconnecting}
-          </span>
-        ) : (
-          <Wifi className="size-4 text-emerald-400" />
-        )}
-        {me && (
-          <ProfileEditDialog
-            trigger={
-              <button type="button" aria-label={t.profile.editButton} className="rounded-full transition active:scale-95">
-                <PlayerAvatar player={me} size="sm" />
-              </button>
-            }
-          />
-        )}
-        {myRole && roleStyle && (
-          <MyRoleDialog
-            trigger={
-              <Button
-                variant="outline"
-                size="icon"
-                className={cn("relative size-8 border", roleStyle.chip)}
-                aria-label={t.myRole.button}
-              >
-                <span className={cn("absolute inset-0 rounded-md ring-1", roleStyle.ring)} />
-                <IdCard className="size-4" />
-              </Button>
-            }
-          />
-        )}
-        <HelpDialog
-          trigger={
-            <Button variant="ghost" size="icon" className="size-8" aria-label={t.help.button}>
-              <BookOpen className="size-4" />
-            </Button>
-          }
-        />
-        <ThemeToggle />
-        <LanguageSwitcher />
-      </div>
+      {showReconnecting ? (
+        <span className="flex shrink-0 items-center gap-1 text-xs text-destructive">
+          <WifiOff className="size-4 animate-pulse" /> {t.common.reconnecting}
+        </span>
+      ) : (
+        <Wifi className="size-4 shrink-0 text-emerald-400" />
+      )}
     </div>
   );
 }
@@ -112,6 +69,7 @@ export function AppShell() {
   return (
     <div className="flex min-h-dvh flex-1 flex-col">
       <TopBar />
+      {status === "in_room" && publicState && <FloatingMenu />}
       <ScreenRouter status={status} publicState={publicState} />
     </div>
   );

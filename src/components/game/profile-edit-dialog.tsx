@@ -19,14 +19,33 @@ import { useLocale } from "@/lib/i18n/locale-context";
 import { AvatarPicker } from "@/components/game/avatar-picker";
 
 // ユーザーが任意でいつでも(ロビー中でもゲーム中でも)表示名とプロフィール写真を
-// 変更できるようにするための編集ダイアログ。TopBar からいつでも開ける。
-export function ProfileEditDialog({ trigger }: { trigger: React.ReactNode }) {
+// 変更できるようにするための編集ダイアログ。フローティングメニューからいつでも開ける。
+// trigger を渡さず open/onOpenChange で外部から制御することもできる(フローティングメニュー用)。
+export function ProfileEditDialog({
+  trigger,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+}: {
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const { t } = useLocale();
   const { publicState, session, updateProfile } = useGame();
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
   const me = publicState?.players.find((p) => p.id === session?.playerId);
   const [name, setName] = useState(me?.name ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(me?.avatarUrl ?? null);
+
+  const setOpen = (next: boolean) => {
+    if (isControlled) {
+      setControlledOpen?.(next);
+    } else {
+      setUncontrolledOpen(next);
+    }
+  };
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -46,7 +65,7 @@ export function ProfileEditDialog({ trigger }: { trigger: React.ReactNode }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">{t.profile.title}</DialogTitle>

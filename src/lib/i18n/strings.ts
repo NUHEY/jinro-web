@@ -52,6 +52,11 @@ interface Strings {
     off: string;
     themeToggleToLight: string;
     themeToggleToDark: string;
+    menu: string;
+    officialRuleBadge: string;
+    optionalRuleBadge: string;
+    themeLabel: string;
+    languageLabel: string;
   };
   entry: {
     title: string;
@@ -92,6 +97,8 @@ interface Strings {
     codeLabel: string;
     copyCode: string;
     copyLink: string;
+    shareLink: string;
+    shareMessage: (code: string) => string;
     copyCodeToast: string;
     copyLinkToast: string;
     copyErrorToast: string;
@@ -111,18 +118,21 @@ interface Strings {
     waitingHost: string;
     leaveButton: string;
     settingsTitle: string;
+    officialRulesSectionTitle: string;
+    extraRulesSectionTitle: string;
+    extraRulesSectionDesc: string;
     revealOnDeath: string;
     allowFirstNightKill: string;
     allowFirstNightKillDesc: string;
     allowFirstVoteExecution: string;
     allowFirstVoteExecutionDesc: string;
+    allowWolfFriendlyFire: string;
+    allowWolfFriendlyFireDesc: string;
     seerFirstNightDivine: string;
     seerFirstNightDivineDesc: string;
     allowSelfVote: string;
     revealVoteChoices: string;
     revealVoteChoicesDesc: string;
-    hunterRevengeOnAnyDeath: string;
-    hunterRevengeOnAnyDeathDesc: string;
     allowBodyguardSelfGuard: string;
     secondTieExecutesRandomly: string;
     secondTieExecutesRandomlyDesc: string;
@@ -314,7 +324,7 @@ interface Strings {
 const ja: Strings = {
   meta: {
     title: "人狼DX オンライン",
-    description: "会話型心理ゲーム「人狼DX 新装版」のオンライン進行アプリ。集まったメンバーでスマホ片手に遊べます。",
+    description: "隠れた人狼を会話と推理で見つけ出す、13役職対応の会話型心理ゲーム。集まったメンバーでスマホ片手に遊べます。",
   },
   common: {
     host: "ホスト",
@@ -335,10 +345,15 @@ const ja: Strings = {
     off: "OFF",
     themeToggleToLight: "ライトモードに切り替え",
     themeToggleToDark: "ダークモードに切り替え",
+    menu: "メニュー",
+    themeLabel: "テーマ",
+    languageLabel: "言語",
+    officialRuleBadge: "公式ルール",
+    optionalRuleBadge: "選択ルール",
   },
   entry: {
     title: "人狼DX オンライン",
-    subtitle: "「会話型心理ゲーム 人狼DX 新装版」13役職対応。どこからでもスマホ片手に遊べます。",
+    subtitle: "隠れた人狼を会話と推理で見つけ出す、13役職対応の会話型心理ゲーム。どこからでもスマホ片手に遊べます。",
     cardTitle: "はじめる",
     cardDesc: "部屋を作るか、合言葉コードで参加してください。",
     tabCreate: "部屋を作る",
@@ -375,6 +390,8 @@ const ja: Strings = {
     codeLabel: "合言葉コード",
     copyCode: "コードをコピー",
     copyLink: "招待リンクをコピー",
+    shareLink: "招待リンクを送る",
+    shareMessage: (code) => `人狼DXオンラインの部屋に招待されました。合言葉コード: ${code}`,
     copyCodeToast: "コードをコピーしました",
     copyLinkToast: "招待リンクをコピーしました",
     copyErrorToast: "コピーに失敗しました",
@@ -394,18 +411,21 @@ const ja: Strings = {
     waitingHost: "ホストの開始を待っています…",
     leaveButton: "退出する",
     settingsTitle: "ゲーム設定",
+    officialRulesSectionTitle: "基本ルール",
+    extraRulesSectionTitle: "追加ルール",
+    extraRulesSectionDesc: "ここから下は、このアプリ独自の拡張ルールです。基本ルールには存在しない設定なので、遊びやすいように自由にカスタマイズしてください。",
     revealOnDeath: "死亡時に役職を公開する",
     allowFirstNightKill: "最初の夜、人狼は襲撃できる",
-    allowFirstNightKillDesc: "オフにすると、最初の夜(1日目の夜)だけ人狼が誰を襲撃しても死にません。人狼DXに慣れていないメンバーが多い場合におすすめの設定です。2日目以降の夜は通常通り襲撃が有効になります。",
+    allowFirstNightKillDesc: "オフにすると、最初の夜(1日目の夜)だけ人狼が誰を襲撃しても死にません。初めてのメンバーが多い場合におすすめの設定です。2日目以降の夜は通常通り襲撃が有効になります。",
     allowFirstVoteExecution: "最初の投票で、実際に追放できる",
     allowFirstVoteExecutionDesc: "オフにすると、最初の投票(1日目の投票)で誰が選ばれても実際には追放されず、生かされます。2日目以降の投票は通常通り追放が有効になります。",
-    seerFirstNightDivine: "予言者は役職確認のときに1人占える(発展ルール)",
-    seerFirstNightDivineDesc: "説明書11ページの発展ルールです。役職確認のタイミングで、予言者が1人を占うことができます(7人以上でのプレイ推奨)。占うかどうかは予言者が自由に選べます。",
+    allowWolfFriendlyFire: "人狼は仲間の人狼を襲撃対象にできる",
+    allowWolfFriendlyFireDesc: "オンにすると、人狼が仲間の人狼を襲撃対象に選べるようになります(通常はできません)。",
+    seerFirstNightDivine: "予言者は役職確認のときに1人占える",
+    seerFirstNightDivineDesc: "役職確認のタイミングで、予言者が1人を自由に占える遊び方です(7人以上でのプレイ推奨)。占うかどうかは予言者が自由に選べます。オフの場合、占いは最初の夜から始まります。",
     allowSelfVote: "投票で自分自身に投票できる",
     revealVoteChoices: "投票内容を全員に公開する",
     revealVoteChoicesDesc: "ONにすると、投票フェーズ中に「誰が誰に投票しているか」がリアルタイムで全員に見えるようになります。OFFの場合は今まで通り、票数の集計のみが公開されます。",
-    hunterRevengeOnAnyDeath: "ハンターの道連れを、あらゆる死因で発動させる",
-    hunterRevengeOnAnyDeathDesc: "標準ルールでは、ハンターの道連れは襲撃・処刑で死亡した時のみ発動します。ONにすると、呪殺や恋人の後追いなど他の死因でも発動するようになります。",
     allowBodyguardSelfGuard: "ボディーガードが自分自身を護衛できる",
     secondTieExecutesRandomly: "決選投票でも同数タイの場合、ランダムに処刑する",
     secondTieExecutesRandomlyDesc: "OFFにすると、決選投票でも決着がつかなかった場合は誰も処刑されずにその日が終わります。",
@@ -595,7 +615,7 @@ const ja: Strings = {
     winGod: "神様: ゲーム終了時に生きていれば、単独で勝利。",
     winLover: "恋人: ゲーム終了時に2人とも生きていれば、2人で勝利。",
     rolesTitle: "役職一覧(13種)",
-    rolesIntro: "自分の役職の説明は、画面上部の「自分の役職」ボタンからゲーム中いつでも確認できます。",
+    rolesIntro: "自分の役職の説明は、画面右上のメニューから「自分の役職」を選べばゲーム中いつでも確認できます。",
     close: "閉じる",
   },
   myRole: {
@@ -734,7 +754,7 @@ const en: Strings = {
   meta: {
     title: "Jinro DX Online",
     description:
-      "An online companion app for the party game 'Jinro DX' (Werewolf, 13-role deluxe edition). Play together, each on your own phone.",
+      "A social deduction party game for groups: find the hidden Werewolves through conversation and deduction, with 13 roles to play. Everyone plays from their own phone.",
   },
   common: {
     host: "Host",
@@ -755,10 +775,15 @@ const en: Strings = {
     off: "OFF",
     themeToggleToLight: "Switch to light mode",
     themeToggleToDark: "Switch to dark mode",
+    menu: "Menu",
+    themeLabel: "Theme",
+    languageLabel: "Language",
+    officialRuleBadge: "Official Rule",
+    optionalRuleBadge: "Optional Rule",
   },
   entry: {
     title: "Jinro DX Online",
-    subtitle: "An online companion for 'Jinro DX' (Werewolf), 13-role deluxe edition. Play from anywhere, right from your phone.",
+    subtitle: "A 13-role social deduction party game — find the hidden Werewolves through conversation and deduction. Play from anywhere, right from your phone.",
     cardTitle: "Get started",
     cardDesc: "Create a room, or join one with a room code.",
     tabCreate: "Create room",
@@ -795,6 +820,8 @@ const en: Strings = {
     codeLabel: "Room code",
     copyCode: "Copy code",
     copyLink: "Copy invite link",
+    shareLink: "Share invite link",
+    shareMessage: (code) => `You're invited to a Jinro DX Online room. Room code: ${code}`,
     copyCodeToast: "Code copied",
     copyLinkToast: "Invite link copied",
     copyErrorToast: "Copy failed",
@@ -814,18 +841,21 @@ const en: Strings = {
     waitingHost: "Waiting for the host to start…",
     leaveButton: "Leave room",
     settingsTitle: "Game settings",
+    officialRulesSectionTitle: "Base rules",
+    extraRulesSectionTitle: "Extra rules",
+    extraRulesSectionDesc: "Everything below is an extension unique to this app — these options aren't part of the base rules, so feel free to tune them however your group likes.",
     revealOnDeath: "Reveal role on death",
     allowFirstNightKill: "Werewolves can attack on the first night",
-    allowFirstNightKillDesc: "Turn this off to make the first night (night 1) attack-proof — whoever the werewolves attack survives. From night 2 onward, attacks work normally. Recommended if most players are new to Jinro DX.",
+    allowFirstNightKillDesc: "Turn this off to make the first night (night 1) attack-proof — whoever the werewolves attack survives. From night 2 onward, attacks work normally. Recommended if most players are new to the game.",
     allowFirstVoteExecution: "The first vote can result in a real execution",
     allowFirstVoteExecutionDesc: "Turn this off to make the first vote (day 1) execution-proof — whoever is chosen is spared instead of executed. From day 2 onward, votes work normally.",
-    seerFirstNightDivine: "Seer can investigate one player during role reveal (advanced rule)",
-    seerFirstNightDivineDesc: "An advanced rule from the rulebook (p.11): the Seer may investigate one player right at role reveal. Recommended for 7+ players. Using it is optional.",
+    allowWolfFriendlyFire: "Werewolves can attack each other",
+    allowWolfFriendlyFireDesc: "Turn this on to let werewolves target a fellow werewolf with their attack (not allowed by default).",
+    seerFirstNightDivine: "Seer can investigate one player during role reveal",
+    seerFirstNightDivineDesc: "An alternate way to play: the Seer may freely investigate one player right at role reveal. Recommended for 7+ players. Using it is entirely optional. When off, investigating starts on the first night as usual.",
     allowSelfVote: "Allow voting for yourself",
     revealVoteChoices: "Reveal everyone's votes live",
     revealVoteChoicesDesc: "When on, everyone can see who's voting for whom in real time during the vote phase. When off (default), only the total counts are shown as before.",
-    hunterRevengeOnAnyDeath: "Let the Hunter's revenge trigger on any death",
-    hunterRevengeOnAnyDeathDesc: "By the standard rules, the Hunter's revenge only triggers on death by attack or execution. Turning this on also triggers it for other causes, like being cursed or following a lover in death.",
     allowBodyguardSelfGuard: "Allow the Bodyguard to guard themselves",
     secondTieExecutesRandomly: "Pick randomly if the runoff vote is still tied",
     secondTieExecutesRandomlyDesc: "Turn this off and a still-tied runoff vote means no one is executed that day.",
@@ -1016,7 +1046,7 @@ const en: Strings = {
     winGod: "God: wins alone if still alive when the game ends.",
     winLover: "Lovers: win together if both are still alive when the game ends.",
     rolesTitle: "All 13 roles",
-    rolesIntro: "You can check your own role's description any time during the game from the \"My Role\" button at the top of the screen.",
+    rolesIntro: "You can check your own role's description any time during the game — just open the menu in the top-right corner and tap \"My Role\".",
     close: "Close",
   },
   myRole: {
@@ -1153,9 +1183,9 @@ const en: Strings = {
 
 const ko: Strings = {
   meta: {
-    title: "진로DX 온라인",
+    title: "마피아DX 온라인 (진로DX)",
     description:
-      "대화형 심리 게임 「진로DX 신장판(인랑 게임)」의 온라인 진행 앱. 모인 인원끼리 각자 스마트폰으로 즐길 수 있습니다.",
+      "숨어 있는 마피아를 대화와 추리로 찾아내는 13개 역할 마피아 게임. 모인 인원끼리 각자 스마트폰으로 즐길 수 있습니다.",
   },
   common: {
     host: "호스트",
@@ -1176,10 +1206,15 @@ const ko: Strings = {
     off: "OFF",
     themeToggleToLight: "라이트 모드로 전환",
     themeToggleToDark: "다크 모드로 전환",
+    menu: "메뉴",
+    themeLabel: "테마",
+    languageLabel: "언어",
+    officialRuleBadge: "공식 규칙",
+    optionalRuleBadge: "선택 규칙",
   },
   entry: {
-    title: "진로DX 온라인",
-    subtitle: "대화형 심리 게임 「진로DX 신장판」 13개 역할 지원. 어디서든 스마트폰 하나로 즐길 수 있습니다.",
+    title: "마피아DX 온라인 (진로DX)",
+    subtitle: "숨어 있는 마피아를 대화와 추리로 찾아내는 13개 역할 마피아 게임. 어디서든 스마트폰 하나로 즐길 수 있습니다.",
     cardTitle: "시작하기",
     cardDesc: "방을 만들거나, 방 코드로 참가하세요.",
     tabCreate: "방 만들기",
@@ -1216,6 +1251,8 @@ const ko: Strings = {
     codeLabel: "방 코드",
     copyCode: "코드 복사",
     copyLink: "초대 링크 복사",
+    shareLink: "초대 링크 공유하기",
+    shareMessage: (code) => `마피아DX 온라인 방에 초대되었습니다. 방 코드: ${code}`,
     copyCodeToast: "코드를 복사했습니다",
     copyLinkToast: "초대 링크를 복사했습니다",
     copyErrorToast: "복사에 실패했습니다",
@@ -1223,7 +1260,7 @@ const ko: Strings = {
     waitingForMorePlayers: (n) => `${n}명이 더 모이면 게임을 시작할 수 있습니다`,
     composition: "역할 구성",
     compositionReadonly: "역할 구성 (호스트가 설정 중)",
-    compositionReadonlyDesc: (wolves, total) => `인랑 ${wolves}명을 포함해 총 ${total}명분의 역할이 설정되어 있습니다.`,
+    compositionReadonlyDesc: (wolves, total) => `마피아 ${wolves}명을 포함해 총 ${total}명분의 역할이 설정되어 있습니다.`,
     compositionEmpty: "아직 역할이 설정되지 않았습니다.",
     roomInfoButton: "배역・설정",
     roomInfoTitle: "이번 게임의 배역 구성・설정",
@@ -1235,18 +1272,21 @@ const ko: Strings = {
     waitingHost: "호스트가 시작하기를 기다리는 중…",
     leaveButton: "나가기",
     settingsTitle: "게임 설정",
+    officialRulesSectionTitle: "기본 규칙",
+    extraRulesSectionTitle: "추가 규칙",
+    extraRulesSectionDesc: "이 아래는 이 앱만의 확장 규칙입니다. 기본 규칙에는 없는 옵션이니 우리 모임에 맞게 자유롭게 설정하세요.",
     revealOnDeath: "사망 시 역할 공개",
-    allowFirstNightKill: "첫날 밤에 인랑이 습격할 수 있다",
-    allowFirstNightKillDesc: "꺼두면 첫날 밤(1일차 밤)에는 인랑이 누구를 습격해도 죽지 않습니다. 2일차 밤부터는 평소대로 습격이 유효해집니다. 인랑DX에 익숙하지 않은 멤버가 많을 때 추천하는 설정입니다.",
+    allowFirstNightKill: "첫날 밤에 마피아가 습격할 수 있다",
+    allowFirstNightKillDesc: "꺼두면 첫날 밤(1일차 밤)에는 마피아가 누구를 습격해도 죽지 않습니다. 처음 하는 멤버가 많을 때 추천하는 설정입니다. 2일차 밤부터는 평소대로 습격이 유효해집니다.",
     allowFirstVoteExecution: "첫 투표에서 실제로 추방할 수 있다",
     allowFirstVoteExecutionDesc: "꺼두면 첫 투표(1일차 투표)에서 누가 선택되어도 실제로는 추방되지 않고 살아남습니다. 2일차 투표부터는 평소대로 추방이 유효해집니다.",
-    seerFirstNightDivine: "예언자는 역할 확인 시 1명을 점칠 수 있다 (발전 규칙)",
-    seerFirstNightDivineDesc: "설명서 11페이지의 발전 규칙입니다. 역할 확인 시점에 예언자가 1명을 점칠 수 있습니다 (7명 이상 플레이 권장). 점칠지 여부는 예언자가 자유롭게 선택할 수 있습니다.",
+    allowWolfFriendlyFire: "마피아는 동료 마피아를 습격 대상으로 지정할 수 있다",
+    allowWolfFriendlyFireDesc: "켜면 마피아가 동료 마피아를 습격 대상으로 선택할 수 있게 됩니다 (평소에는 불가능합니다).",
+    seerFirstNightDivine: "예언자는 역할 확인 시 1명을 점칠 수 있다",
+    seerFirstNightDivineDesc: "역할 확인 시점에 예언자가 원하는 한 명을 자유롭게 점칠 수 있는 또 다른 플레이 방식입니다 (7명 이상 플레이 권장). 점칠지 여부는 예언자가 자유롭게 선택할 수 있습니다. 꺼두면 점술은 첫날 밤부터 평소대로 시작됩니다.",
     allowSelfVote: "투표에서 자기 자신에게 투표할 수 있음",
     revealVoteChoices: "투표 내용을 전원에게 공개",
     revealVoteChoicesDesc: "켜면 투표 단계 중에 누가 누구에게 투표하는지 실시간으로 전원에게 보입니다. 끄면(기본값) 기존처럼 집계 수만 공개됩니다.",
-    hunterRevengeOnAnyDeath: "헌터의 동반 사살을 모든 사망 원인에서 발동",
-    hunterRevengeOnAnyDeathDesc: "기본 규칙에서는 헌터의 동반 사살이 습격·처형으로 사망했을 때만 발동합니다. 켜면 저주사, 연인의 뒤따름 등 다른 사망 원인에서도 발동합니다.",
     allowBodyguardSelfGuard: "보디가드가 자기 자신을 호위할 수 있음",
     secondTieExecutesRandomly: "결선 투표도 동수일 경우 무작위로 처형",
     secondTieExecutesRandomlyDesc: "끄면 결선 투표도 동수로 끝났을 때 아무도 처형되지 않고 그 날이 끝납니다.",
@@ -1282,18 +1322,18 @@ const ko: Strings = {
     submitButton: "결정하기",
     resubmitButton: "제출됨 (변경하기)",
     previousSeerResult: (day) => `이전 점술 결과 (${day}일차)`,
-    seerResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
+    seerResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(마피아)】" : "【백】"}이었습니다`,
     actions: {
-      attack: { title: "누구를 습격하시겠습니까?", desc: "동료 인랑과 상의하여 오늘 밤 습격할 대상을 선택하세요.", skip: "오늘 밤은 습격하지 않는다" },
-      guard: { title: "누구를 지키시겠습니까?", desc: "인랑의 습격으로부터 지킬 대상을 선택하세요. 자기 자신은 지킬 수 없고, 어젯밤 지킨 대상도 다시 선택할 수 없습니다.", skip: "오늘 밤은 아무도 지키지 않는다" },
-      divine: { title: "누구를 점치시겠습니까?", desc: "상대가 인랑인지 아닌지를 점칩니다.", skip: "오늘 밤은 점치지 않는다" },
+      attack: { title: "누구를 습격하시겠습니까?", desc: "동료 마피아와 상의하여 오늘 밤 습격할 대상을 선택하세요.", skip: "오늘 밤은 습격하지 않는다" },
+      guard: { title: "누구를 지키시겠습니까?", desc: "마피아의 습격으로부터 지킬 대상을 선택하세요. 자기 자신은 지킬 수 없고, 어젯밤 지킨 대상도 다시 선택할 수 없습니다.", skip: "오늘 밤은 아무도 지키지 않는다" },
+      divine: { title: "누구를 점치시겠습니까?", desc: "상대가 마피아인지 아닌지를 점칩니다.", skip: "오늘 밤은 점치지 않는다" },
     },
     firstNightKillDisabledNotice: "설정에 따라 첫날 밤(1일차)에는 누구를 습격해도 죽지 않습니다. 2일차 밤부터는 평소대로 효과가 있습니다.",
     forceAdvanceButton: "전원을 기다리지 않고 진행하기 (호스트 조작)",
-    wolfSelectionsTitle: "동료 인랑들이 지금 선택하고 있는 대상 (상의용)",
+    wolfSelectionsTitle: "동료 마피아들이 지금 선택하고 있는 대상 (상의용)",
     wolfSelectionsEmpty: "아직 아무도 선택하지 않았습니다",
     wolfSelectionsLine: (name, targetName) => `${name}님: ${targetName ?? "미선택"}`,
-    wolfConsensusNeeded: "인랑 전원이 같은 대상(또는 전원 「습격하지 않음」)을 선택할 때까지 밤은 끝나지 않습니다. 상의해서 한 명으로 정하세요.",
+    wolfConsensusNeeded: "마피아 전원이 같은 대상(또는 전원 '습격하지 않음')을 선택할 때까지 밤은 끝나지 않습니다. 상의해서 한 명으로 정하세요.",
     wolfConsensusReached: "전원의 의견이 일치했습니다.",
   },
   hunterRevenge: {
@@ -1315,7 +1355,7 @@ const ko: Strings = {
   discussion: {
     tag: (day) => `토론 시간 ${day}일차`,
     firstRoundTag: "첫 번째 토론",
-    firstRoundNotice: "역할 확인 직후에 진행되는, 투표 없는 첫 번째 토론입니다. 아직 아무도 습격당하지 않았습니다. 이번 라운드에는 추방 투표도 없습니다. 자유롭게 이야기를 나눈 뒤, 호스트가 진짜 「밤」으로 진행합니다.",
+    firstRoundNotice: "역할 확인 직후에 진행되는, 투표 없는 첫 번째 토론입니다. 아직 아무도 습격당하지 않았습니다. 이번 라운드에는 추방 투표도 없습니다. 자유롭게 이야기를 나눈 뒤, 호스트가 진짜 '밤'으로 진행합니다.",
     proceedToNightButton: "토론을 마치고 밤으로 진행",
     survivors: "생존자",
     dictatorButton: "독재자 권한 발동",
@@ -1348,7 +1388,7 @@ const ko: Strings = {
       `"첫 투표에서는 실제로 추방하지 않음" 설정 때문에, ${name}님은 결선 투표 없이 살아남았습니다`,
     noExecution: "투표 결과, 아무도 추방되지 않았습니다.",
     mediumResult: "영매 결과",
-    mediumResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(인랑)】" : "【백】"}이었습니다`,
+    mediumResultLine: (name, isBlack) => `${name}님은 ${isBlack ? "【흑(마피아)】" : "【백】"}이었습니다`,
     continueButton: "다음 밤으로 진행",
     waitingHost: "호스트가 다음 밤으로 진행하기를 기다리는 중…",
   },
@@ -1381,7 +1421,7 @@ const ko: Strings = {
   gameOver: {
     primary: {
       village: "시민 진영의 승리!",
-      werewolf: "인랑 진영의 승리!",
+      werewolf: "마피아 진영의 승리!",
       draw: "무승부",
     },
     extra: {
@@ -1412,31 +1452,31 @@ const ko: Strings = {
   help: {
     button: "게임 방법",
     title: "게임 방법 · 규칙",
-    tldr: "한마디로: 숨어 있는 「인랑」을, 시민들이 대화를 통해 찾아내 추방하는 게임입니다.",
+    tldr: "한마디로: 숨어 있는 '마피아'를, 시민들이 대화를 통해 찾아내 추방하는 게임입니다.",
     tabFlow: "진행 순서",
     tabWin: "승리 조건",
     tabRoles: "역할",
     intro:
-      "진로DX는 정체를 숨긴 「인랑」을 「시민」들이 대화와 추리로 찾아내는 심리 게임입니다. 이 앱으로 역할 확인·밤의 행동·투표를 진행합니다. 「낮(토론·투표)」과 「밤(능력 행동)」을 반복하며, 어느 한쪽 진영이 조건을 만족하면 게임이 종료됩니다. 이 앱에는 자동 타이머가 없습니다 — 각 화면은 호스트의 조작이나 전원의 행동이 끝났을 때만 넘어가므로, 항상 여러분의 속도에 맞춰 진행할 수 있습니다.",
+      "진로DX는 정체를 숨긴 '마피아'를 '시민'들이 대화와 추리로 찾아내는 심리 게임입니다. 이 앱으로 역할 확인·밤의 행동·투표를 진행합니다. '낮(토론·투표)'과 '밤(능력 행동)'을 반복하며, 어느 한쪽 진영이 조건을 만족하면 게임이 종료됩니다. 이 앱에는 자동 타이머가 없습니다 — 각 화면은 호스트의 조작이나 전원의 행동이 끝났을 때만 넘어가므로, 항상 여러분의 속도에 맞춰 진행할 수 있습니다.",
     flowTitle: "게임 진행 순서",
     flowSteps: [
       { title: "역할 확인", desc: "모든 사람이 각자 자신의 역할을 몰래 확인하고 '확인했습니다'를 누릅니다. 주변 사람에게 보이지 않도록 주의하세요. 전원이 누르기 전에는 다음으로 넘어가지 않습니다." },
-      { title: "첫 번째 토론", desc: "역할 확인 직후에 진행되는, 투표가 없는 토론입니다. 아직 아무도 습격당하지 않았습니다. 가볍게 이야기를 나눈 뒤, 호스트가 진짜 「밤」으로 진행합니다." },
-      { title: "밤", desc: "인랑·점술사·보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 아무것도 하지 않고 대기합니다. 여기서 처음으로 인랑의 습격이 발생할 수 있습니다 (설정에서 끌 수도 있습니다)." },
+      { title: "첫 번째 토론", desc: "역할 확인 직후에 진행되는, 투표가 없는 토론입니다. 아직 아무도 습격당하지 않았습니다. 가볍게 이야기를 나눈 뒤, 호스트가 진짜 '밤'으로 진행합니다." },
+      { title: "밤", desc: "마피아·점술사·보디가드 등 능력을 가진 역할만 몰래 행동합니다. 능력이 없는 사람은 아무것도 하지 않고 대기합니다. 여기서 처음으로 마피아의 습격이 발생할 수 있습니다 (설정에서 끌 수도 있습니다)." },
       { title: "아침 (결과 발표)", desc: "밤사이 무슨 일이 있었는지 (누가 희생되었는지)가 발표됩니다." },
-      { title: "토론", desc: "누가 인랑인지 이야기를 나누며 추리합니다." },
+      { title: "토론", desc: "누가 마피아인지 이야기를 나누며 추리합니다." },
       { title: "투표", desc: "추방할 사람을 한 명 선택해 투표합니다. 최다 득표자가 추방되며, 동수일 경우 결선 투표가 진행됩니다." },
-      { title: "반복", desc: "「밤 → 아침 → 토론 → 투표」를 어느 한쪽 진영이 승리할 때까지 반복합니다." },
+      { title: "반복", desc: "'밤 → 아침 → 토론 → 투표'를 어느 한쪽 진영이 승리할 때까지 반복합니다." },
     ],
     winTitle: "승리 조건",
     winIntro: "게임이 끝나는 방식은 진영마다 다릅니다. 여러 진영이 동시에 승리하는 경우도 있습니다.",
-    winVillage: "시민 진영: 인랑을 모두 추방하면 승리.",
-    winWerewolf: "인랑 진영: 인랑의 수가 인랑 이외의 생존자 수 이상이 되면 승리.",
-    winFox: "요호: 게임 종료 시 살아 있으면 단독 승리 (시민·인랑의 승패와는 별개).",
+    winVillage: "시민 진영: 마피아를 모두 추방하면 승리.",
+    winWerewolf: "마피아 진영: 마피아의 수가 마피아 이외의 생존자 수 이상이 되면 승리.",
+    winFox: "요호: 게임 종료 시 살아 있으면 단독 승리 (시민·마피아의 승패와는 별개).",
     winGod: "신: 게임 종료 시 살아 있으면 단독 승리.",
     winLover: "연인: 게임 종료 시 두 사람 모두 살아 있으면 함께 승리.",
     rolesTitle: "역할 목록 (13종)",
-    rolesIntro: "자신의 역할에 대한 설명은 화면 상단의 「나의 역할」 버튼에서 게임 중 언제든지 확인할 수 있습니다.",
+    rolesIntro: "자신의 역할에 대한 설명은 화면 우측 상단 메뉴에서 '나의 역할'을 선택하면 게임 중 언제든지 확인할 수 있습니다.",
     close: "닫기",
   },
   myRole: {
@@ -1452,51 +1492,51 @@ const ko: Strings = {
   },
   team: {
     village: "시민 진영",
-    werewolf: "인랑 진영",
+    werewolf: "마피아 진영",
     fox: "요호 (단독 진영)",
     god: "신 (단독 진영)",
     lover: "연인 (단독 진영)",
   },
   deathCause: {
-    attack: "인랑에게 습격당함",
+    attack: "마피아에게 습격당함",
     execution: "추방됨",
     curse: "점술사에게 점쳐져 저주로 사망",
-    hunter: "헌터에게 함께 죽임을 당함",
+    hunter: "헌터의 복수로 사망",
     lover_grief: "연인의 뒤를 따라감",
   },
   roles: {
     villager: {
       name: "시민",
       short: "특별한 능력이 없는 마을 사람",
-      detail: "당신은 시민입니다. 특별한 능력은 없습니다. 대화와 추리만으로 인랑을 찾아내 추방합시다.",
+      detail: "당신은 시민입니다. 특별한 능력은 없습니다. 대화와 추리만으로 마피아를 찾아내 추방합시다.",
     },
     seer: {
       name: "점술사",
-      short: "매일 밤 한 명을 점쳐 인랑인지 아닌지 알아낸다",
+      short: "매일 밤 한 명을 점쳐 마피아인지 아닌지 알아낸다",
       detail:
-        "당신은 점술사입니다. 매일 밤 한 명을 골라 점칠 수 있습니다. 그 사람이 「인랑」이면 흑, 그 외에는 백으로 판명됩니다. 참고로 요호를 점치면 요호는 그날 밤 저주로 사망합니다.",
+        "당신은 점술사입니다. 매일 밤 한 명을 골라 점칠 수 있습니다. 그 사람이 '마피아'이면 흑, 그 외에는 백으로 판명됩니다. 참고로 요호를 점치면 요호는 그날 밤 저주로 사망합니다.",
     },
     bodyguard: {
       name: "보디가드",
-      short: "매일 밤 한 명을 인랑의 습격으로부터 지킨다",
+      short: "매일 밤 한 명을 마피아의 습격으로부터 지킨다",
       detail:
-        "당신은 보디가드입니다. 매일 밤 자신을 제외한 한 명을 선택해 인랑의 습격으로부터 지킬 수 있습니다. 지킨 상대가 습격 대상이었다면 그 사람은 살아남습니다.",
+        "당신은 보디가드입니다. 매일 밤 자신을 제외한 한 명을 선택해 마피아의 습격으로부터 지킬 수 있습니다. 지킨 상대가 습격 대상이었다면 그 사람은 살아남습니다.",
     },
     medium: {
       name: "영매사",
-      short: "추방된 사람이 인랑이었는지 알 수 있다",
-      detail: "당신은 영매사입니다. 낮에 추방된 플레이어가 「인랑」이었는지 아닌지를 그날 밤 알 수 있습니다.",
+      short: "추방된 사람이 마피아였는지 알 수 있다",
+      detail: "당신은 영매사입니다. 낮에 추방된 플레이어가 '마피아'였는지 아닌지를 그날 밤 알 수 있습니다.",
     },
     hunter: {
       name: "헌터",
       short: "자신이 죽을 때, 한 명을 함께 데려갈 수 있다",
       detail:
-        "당신은 헌터입니다. 「추방」되거나 「인랑에게 습격」당해 사망할 때, 한 명을 지목하여 함께 죽음에 이르게 할 수 있습니다.",
+        "당신은 헌터입니다. '추방'되거나 '마피아에게 습격'당해 사망할 때, 한 명을 지목하여 함께 죽음에 이르게 할 수 있습니다.",
     },
     mason: {
       name: "공유자",
       short: "2명 이상이 서로를 알고 있는 마을 사람",
-      detail: "당신은 공유자입니다. 다른 공유자가 누구인지 알고 있습니다. 특별한 능력은 없지만, 서로를 믿고 마을을 이끌어 갑시다.",
+      detail: "당신은 공유자입니다. 다른 공유자가 누구인지 알고 있습니다. 특별한 능력은 없지만, 서로를 완전히 믿을 수 있습니다.",
     },
     dictator: {
       name: "독재자",
@@ -1505,34 +1545,34 @@ const ko: Strings = {
         "당신은 독재자입니다. 게임 중 단 한 번, 낮의 토론 중에 정체를 밝히고 토론을 강제 종료시켜 투표 없이 추방자를 독단으로 결정할 수 있습니다. 사용할 때는 신중하게.",
     },
     werewolf: {
-      name: "인랑",
-      short: "매일 밤 한 명을 습격한다. 다른 인랑을 알 수 있다",
+      name: "마피아",
+      short: "매일 밤 한 명을 습격한다. 다른 마피아를 알 수 있다",
       detail:
-        "당신은 인랑입니다. 동료 인랑이 누구인지 알고 있습니다. 매일 밤 동료와 상의하여 한 명을 습격하세요. 정체를 숨기고 시민을 인랑과 같은 수까지 줄이면 승리입니다.",
+        "당신은 마피아입니다. 동료 마피아가 누구인지 알고 있습니다. 매일 밤 동료와 상의하여 한 명을 습격하세요. 정체를 숨기고 시민을 마피아와 같은 수까지 줄이면 승리입니다.",
     },
     traitor: {
       name: "배신자",
-      short: "인랑 진영이지만 누가 인랑인지는 모르는 시민인 척하는 사람",
+      short: "마피아 진영이지만 누가 마피아인지는 모르는 시민인 척하는 사람",
       detail:
-        "당신은 배신자입니다. 인랑 진영의 승리가 곧 당신의 승리이지만, 누가 인랑인지는 알지 못합니다. 점술·영매에서는 「백」으로 판정됩니다. 시민인 척하며 인랑 진영을 도웁시다.",
+        "당신은 배신자입니다. 마피아 진영의 승리가 곧 당신의 승리이지만, 누가 마피아인지는 알지 못합니다. 점술·영매에서는 '백'으로 판정됩니다. 시민인 척하며 마피아 진영을 도웁시다.",
     },
     insider: {
       name: "내통자",
-      short: "인랑이 누구인지 알고 있는 인랑 진영의 협력자",
+      short: "마피아가 누구인지 알고 있는 마피아 진영의 협력자",
       detail:
-        "당신은 내통자입니다. 인랑이 누구인지 알고 있습니다. 점술·영매에서는 「백」으로 판정되기 때문에, 인랑 진영 중에서도 특히 활동하기 쉬운 존재입니다. 노골적인 옹호는 피하세요.",
+        "당신은 내통자입니다. 마피아가 누구인지 알고 있습니다. 점술·영매에서는 '백'으로 판정되기 때문에, 마피아 진영 중에서도 특히 활동하기 쉬운 존재입니다. 노골적인 옹호는 피하세요.",
     },
     fox: {
       name: "요호",
-      short: "인랑에게 습격당해도 죽지 않는 단독 진영. 점쳐지면 사망",
+      short: "마피아에게 습격당해도 죽지 않는 단독 진영. 점쳐지면 사망",
       detail:
-        "당신은 요호입니다. 시민·인랑 어느 쪽에도 속하지 않는 단독 진영으로, 인랑에게 습격당해도 죽지 않습니다. 다만 점술사에게 점쳐지면 그날 밤 저주로 사망합니다. 게임 종료 시 생존해 있으면 당신의 승리입니다.",
+        "당신은 요호입니다. 시민·마피아 어느 쪽에도 속하지 않는 단독 진영으로, 마피아에게 습격당해도 죽지 않습니다. 다만 점술사에게 점쳐지면 그날 밤 저주로 사망합니다. 게임 종료 시 생존해 있으면 당신의 승리입니다.",
     },
     god: {
       name: "신",
       short: "모든 사람의 역할을 알고 있는 단독 진영. 살아남으면 승리",
       detail:
-        "당신은 신입니다. 게임 시작 시점부터 모든 플레이어의 역할을 알고 있습니다. 점술·영매에서는 「백」으로 판정됩니다. 시민·인랑 어느 쪽의 승패와도 관계없이, 게임 종료 시 생존해 있으면 당신의 승리입니다.",
+        "당신은 신입니다. 게임 시작 시점부터 모든 플레이어의 역할을 알고 있습니다. 점술·영매에서는 '백'으로 판정됩니다. 시민·마피아 어느 쪽의 승패와도 관계없이, 게임 종료 시 생존해 있으면 당신의 승리입니다.",
     },
     lover: {
       name: "연인",
@@ -1560,13 +1600,13 @@ const ko: Strings = {
       case "SEAT_MISMATCH":
         return `역할 합계 인원(${issue.total}명)이 참가 인원(${issue.playerCount}명)과 일치하지 않습니다.`;
       case "NO_WEREWOLF":
-        return "인랑이 최소 1명은 필요합니다.";
+        return "마피아가 최소 1명은 필요합니다.";
       case "MASON_ODD":
         return "공유자는 2명 1조로 설정해 주세요.";
       case "LOVER_INVALID":
         return "연인은 2명 1조로 설정해 주세요.";
       case "WOLF_TOO_MANY":
-        return "인랑 진영의 인원이 너무 많습니다. 시민 진영이 처음부터 불리해집니다.";
+        return "마피아 진영의 인원이 너무 많습니다. 시민 진영이 처음부터 불리해집니다.";
     }
   },
 };

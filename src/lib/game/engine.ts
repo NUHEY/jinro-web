@@ -100,15 +100,24 @@ export interface GameState {
 
 export const DEFAULT_SETTINGS: RoomSettings = {
   revealRoleOnDeath: false,
-  seerFirstNightDivine: false,
   allowFirstNightKill: true,
   allowFirstVoteExecution: true,
+  allowWolfFriendlyFire: false,
+  seerFirstNightDivine: false,
   allowSelfVote: true,
   revealVoteChoices: false,
-  hunterRevengeOnAnyDeath: false,
   allowBodyguardSelfGuard: false,
   secondTieExecutesRandomly: true,
   dictatorCanTargetSelf: true,
+};
+
+// 「公式ルール」バッジをUIに表示するための基準値。ここに載っている項目だけが
+// 対象で、それ以外(このアプリ独自の追加ルール)には表示しない。
+export const OFFICIAL_SETTINGS: Partial<RoomSettings> = {
+  revealRoleOnDeath: false,
+  allowFirstNightKill: true,
+  allowFirstVoteExecution: true,
+  allowWolfFriendlyFire: false,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -275,7 +284,7 @@ export function allAliveAcked(state: GameState): boolean {
   return alive.every((p) => state.roleAcked.has(p.id));
 }
 
-// 発展ルール: 予言者が「役職確認」のタイミングで1人だけ占える(説明書11ページ、設定でON/OFF可能)。
+// 発展ルール: 予言者が「役職確認」のタイミングで1人だけ占える(公式の上級ルールとして案内されている遊び方。設定でON/OFF可能)。
 // 1ゲームにつき1回のみ。結果は通常の占い結果(seerLogs, day:0)として記録され、
 // 以降の画面でも「前回の占い結果」として自然に表示される。
 export function submitEarlyDivine(state: GameState, seerId: string, targetId: string) {
@@ -392,12 +401,10 @@ function pumpDeathQueue(state: GameState) {
       }
     }
 
-    // ハンターの道連れ(割り込み待ち)。
-    // 標準ルールは襲撃・処刑による死亡時のみだが、設定でONにすると呪殺・後追いなど
-    // それ以外の死因でも発動するようになる(発展ルール)。
-    const hunterRevengeTriggerCauses: DeathCause[] = state.settings.hunterRevengeOnAnyDeath
-      ? ["attack", "execution", "curse", "lover_grief", "hunter"]
-      : ["attack", "execution"];
+    // ハンターの道連れ(割り込み待ち)。公式ルール通り、襲撃・処刑による死亡時のみ発動する。
+    // (呪殺は妖狐だけ、後追いは恋人だけが対象になる死因のため、通常の1人ハンター構成では
+    // ハンター自身がそれらの死因で死ぬことはなく、トリガー対象に含めても意味を持たない)
+    const hunterRevengeTriggerCauses: DeathCause[] = ["attack", "execution"];
     if (
       player.role === "hunter" &&
       hunterRevengeTriggerCauses.includes(next.cause) &&
@@ -662,7 +669,7 @@ export function setGroupNote(state: GameState, playerId: string, text: string) {
 
 export function checkWinConditions(state: GameState) {
   const alive = alivePlayers(state);
-  // 勝敗判定の頭数ルール(説明書8ページ準拠):
+  // 勝敗判定の頭数ルール(公式ルールに準拠):
   // ・「人狼」としてカウントされるのは人狼カードそのものだけ(裏切り者・内通者は含まない)
   // ・裏切り者/内通者/神様/恋人は、勝敗の頭数計算上は「人間」としてカウントされる
   //   (裏切り者・内通者はチームとしては人狼側で勝つが、頭数には入らない)

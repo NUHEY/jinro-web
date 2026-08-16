@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Eye, Sparkles, IdCard, type LucideIcon } from "lucide-react";
 import {
   Dialog,
@@ -14,34 +15,48 @@ import { Button } from "@/components/ui/button";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { RoleInfoCard } from "@/components/game/role-info-card";
-import { ROLES } from "@/lib/game/roles";
-import { styleOf } from "@/lib/game/role-style";
 import { cn } from "@/lib/utils";
 
 // help-dialog(遊び方・役職一覧などの一般情報)とは別に、「自分の役職」だけを
 // わかりやすく独立して確認できるようにした専用ダイアログ。
 // 予言者ならこれまで占った全員の履歴、霊媒師ならこれまで判定した全員の履歴、
 // 神様なら全員の役職、その他の役職なら仲間の情報を、それぞれ役職に応じて表示する。
-export function MyRoleDialog({ trigger }: { trigger?: React.ReactNode }) {
+//
+// 重要: このボタンはゲーム中ずっと画面に見えているため、色を役職ごとに変えてしまうと
+// 一目で自分の役職(陣営)が周りにバレてしまう。そのため、トリガーボタン自体は常に
+// ニュートラルな配色にし、役職の色は開いたダイアログの中(RoleInfoCard)でのみ見せる。
+// trigger を渡さず open/onOpenChange で外部から制御することもできる(フローティングメニュー用)。
+export function MyRoleDialog({
+  trigger,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+}: {
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const { t } = useLocale();
   const { privateState } = useGame();
   const role = privateState?.self?.role ?? null;
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = isControlled ? (setControlledOpen ?? (() => {})) : setUncontrolledOpen;
 
   if (!role) return null; // 役職確認前はエントリーポイント自体を出さない
 
-  const def = ROLES[role];
-  const style = styleOf(def.color);
-
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="outline" size="sm" className={cn("border", style.chip)}>
-            <IdCard className="size-3.5" /> {t.myRole.button}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="flex max-h-[85vh] max-w-md flex-col overflow-hidden">
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button variant="outline" size="sm">
+              <IdCard className="size-3.5" /> {t.myRole.button}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+      <DialogContent className="flex max-h-[85dvh] max-w-md flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">{t.myRole.title}</DialogTitle>
         </DialogHeader>

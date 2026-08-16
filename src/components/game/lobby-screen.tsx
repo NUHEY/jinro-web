@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, Crown, LogOut, Settings2, Sparkles, UserX, Users } from "lucide-react";
+import { Check, Copy, Crown, LogOut, Send, Settings2, Sparkles, UserX, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { OFFICIAL_SETTINGS } from "@/lib/game/engine";
+import type { RoomSettings } from "@/lib/game/types";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -65,14 +67,31 @@ export function LobbyScreen() {
     }
   };
 
+  const inviteUrl = () => `${window.location.origin}/?code=${publicState.code}`;
+
   const copyLink = async () => {
     try {
-      const url = `${window.location.origin}/?code=${publicState.code}`;
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(inviteUrl());
       toast.success(t.lobby.copyLinkToast);
     } catch {
       toast.error(t.lobby.copyErrorToast);
     }
+  };
+
+  // スマホのOS標準の共有シート(LINE・メッセージ・メールなど、端末に入っている好きなアプリを選べる)を開く。
+  // 対応していない環境(主にPCブラウザ)では、これまで通りリンクのコピーにフォールバックする。
+  const shareInvite = async () => {
+    const url = inviteUrl();
+    const text = t.lobby.shareMessage(publicState.code);
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: t.meta.title, text, url });
+      } catch {
+        // ユーザーが共有シートをキャンセルした場合などはエラーを無視する(コピーへのフォールバックもしない)
+      }
+      return;
+    }
+    await copyLink();
   };
 
   return (
@@ -81,6 +100,9 @@ export function LobbyScreen() {
         <CardContent className="flex flex-col items-center gap-2 py-4">
           <p className="text-xs text-muted-foreground">{t.lobby.codeLabel}</p>
           <p className="font-mono text-4xl font-black tracking-[0.25em] text-primary">{publicState.code}</p>
+          <Button className="w-full font-bold" onClick={shareInvite}>
+            <Send className="size-3.5" /> {t.lobby.shareLink}
+          </Button>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={copyCode}>
               <Copy className="size-3.5" /> {t.lobby.copyCode}
@@ -210,6 +232,53 @@ export function LobbyScreen() {
   );
 }
 
+// 現在の値が公式ルールの基準値と一致している設定にだけ、小さな「公式ルール」バッジを表示する。
+// 基準を持たない項目(このアプリ独自の追加ルール)には何も表示しない。
+function OfficialBadge({ settingKey, value }: { settingKey: keyof RoomSettings; value: boolean }) {
+  const { t } = useLocale();
+  const official = OFFICIAL_SETTINGS[settingKey];
+  if (official === undefined || official !== value) return null;
+  return (
+    <Badge
+      variant="outline"
+      className="shrink-0 gap-1 border-emerald-500/40 bg-emerald-500/10 text-[10px] font-bold text-emerald-300"
+    >
+      <Check className="size-2.5" /> {t.common.officialRuleBadge}
+    </Badge>
+  );
+}
+
+function SettingRow({
+  id,
+  label,
+  desc,
+  checked,
+  onCheckedChange,
+  badge,
+}: {
+  id: string;
+  label: string;
+  desc?: string;
+  checked: boolean;
+  onCheckedChange: (v: boolean) => void;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-3">
+        <Label htmlFor={id} className="flex-1">
+          {label}
+        </Label>
+        <div className="flex shrink-0 items-center gap-2">
+          {badge}
+          <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+        </div>
+      </div>
+      {desc && <p className="text-xs leading-relaxed text-muted-foreground">{desc}</p>}
+    </div>
+  );
+}
+
 function SettingsDialog() {
   const { publicState, updateSettings } = useGame();
   const { t } = useLocale();
@@ -222,157 +291,107 @@ function SettingsDialog() {
           <Settings2 className="size-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="flex max-h-[85dvh] max-w-md flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t.lobby.settingsTitle}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-5 py-2">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="reveal-death">{t.lobby.revealOnDeath}</Label>
-              <Switch
+
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto py-2 pr-1">
+          <div>
+            <p className="mb-3 px-0.5 text-xs font-bold text-muted-foreground">{t.lobby.officialRulesSectionTitle}</p>
+            <div className="space-y-5">
+              <SettingRow
                 id="reveal-death"
+                label={t.lobby.revealOnDeath}
                 checked={s.revealRoleOnDeath}
                 onCheckedChange={(v) => updateSettings({ revealRoleOnDeath: v })}
+                badge={<OfficialBadge settingKey="revealRoleOnDeath" value={s.revealRoleOnDeath} />}
               />
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="first-night-kill" className="flex-1">
-                {t.lobby.allowFirstNightKill}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
                 id="first-night-kill"
+                label={t.lobby.allowFirstNightKill}
+                desc={t.lobby.allowFirstNightKillDesc}
                 checked={s.allowFirstNightKill}
                 onCheckedChange={(v) => updateSettings({ allowFirstNightKill: v })}
+                badge={<OfficialBadge settingKey="allowFirstNightKill" value={s.allowFirstNightKill} />}
               />
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.allowFirstNightKillDesc}</p>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="first-vote-execution" className="flex-1">
-                {t.lobby.allowFirstVoteExecution}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
                 id="first-vote-execution"
+                label={t.lobby.allowFirstVoteExecution}
+                desc={t.lobby.allowFirstVoteExecutionDesc}
                 checked={s.allowFirstVoteExecution}
                 onCheckedChange={(v) => updateSettings({ allowFirstVoteExecution: v })}
+                badge={<OfficialBadge settingKey="allowFirstVoteExecution" value={s.allowFirstVoteExecution} />}
               />
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.allowFirstVoteExecutionDesc}</p>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="seer-early-divine" className="flex-1">
-                {t.lobby.seerFirstNightDivine}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
+                id="wolf-friendly-fire"
+                label={t.lobby.allowWolfFriendlyFire}
+                desc={t.lobby.allowWolfFriendlyFireDesc}
+                checked={s.allowWolfFriendlyFire}
+                onCheckedChange={(v) => updateSettings({ allowWolfFriendlyFire: v })}
+                badge={<OfficialBadge settingKey="allowWolfFriendlyFire" value={s.allowWolfFriendlyFire} />}
+              />
+              <Separator />
+              <SettingRow
                 id="seer-early-divine"
+                label={t.lobby.seerFirstNightDivine}
+                desc={t.lobby.seerFirstNightDivineDesc}
                 checked={s.seerFirstNightDivine}
                 onCheckedChange={(v) => updateSettings({ seerFirstNightDivine: v })}
+                badge={
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 gap-1 border-violet-500/40 bg-violet-500/10 text-[10px] font-bold text-violet-300"
+                  >
+                    {t.common.optionalRuleBadge}
+                  </Badge>
+                }
               />
             </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.seerFirstNightDivineDesc}</p>
           </div>
 
-          <Separator />
+          <Separator className="my-1" />
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="allow-self-vote" className="flex-1">
-                {t.lobby.allowSelfVote}
-              </Label>
-              <Switch
+          <div>
+            <p className="mb-1 px-0.5 text-xs font-bold text-muted-foreground">{t.lobby.extraRulesSectionTitle}</p>
+            <p className="mb-3 px-0.5 text-[11px] leading-relaxed text-muted-foreground">{t.lobby.extraRulesSectionDesc}</p>
+            <div className="space-y-5">
+              <SettingRow
                 id="allow-self-vote"
+                label={t.lobby.allowSelfVote}
                 checked={s.allowSelfVote}
                 onCheckedChange={(v) => updateSettings({ allowSelfVote: v })}
               />
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="reveal-vote-choices" className="flex-1">
-                {t.lobby.revealVoteChoices}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
                 id="reveal-vote-choices"
+                label={t.lobby.revealVoteChoices}
+                desc={t.lobby.revealVoteChoicesDesc}
                 checked={s.revealVoteChoices}
                 onCheckedChange={(v) => updateSettings({ revealVoteChoices: v })}
               />
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.revealVoteChoicesDesc}</p>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="second-tie-random" className="flex-1">
-                {t.lobby.secondTieExecutesRandomly}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
                 id="second-tie-random"
+                label={t.lobby.secondTieExecutesRandomly}
+                desc={t.lobby.secondTieExecutesRandomlyDesc}
                 checked={s.secondTieExecutesRandomly}
                 onCheckedChange={(v) => updateSettings({ secondTieExecutesRandomly: v })}
               />
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.secondTieExecutesRandomlyDesc}</p>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="hunter-any-death" className="flex-1">
-                {t.lobby.hunterRevengeOnAnyDeath}
-              </Label>
-              <Switch
-                id="hunter-any-death"
-                checked={s.hunterRevengeOnAnyDeath}
-                onCheckedChange={(v) => updateSettings({ hunterRevengeOnAnyDeath: v })}
-              />
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.hunterRevengeOnAnyDeathDesc}</p>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="bodyguard-self-guard" className="flex-1">
-                {t.lobby.allowBodyguardSelfGuard}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
                 id="bodyguard-self-guard"
+                label={t.lobby.allowBodyguardSelfGuard}
                 checked={s.allowBodyguardSelfGuard}
                 onCheckedChange={(v) => updateSettings({ allowBodyguardSelfGuard: v })}
               />
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="dictator-self-target" className="flex-1">
-                {t.lobby.dictatorCanTargetSelf}
-              </Label>
-              <Switch
+              <Separator />
+              <SettingRow
                 id="dictator-self-target"
+                label={t.lobby.dictatorCanTargetSelf}
                 checked={s.dictatorCanTargetSelf}
                 onCheckedChange={(v) => updateSettings({ dictatorCanTargetSelf: v })}
               />
@@ -383,6 +402,7 @@ function SettingsDialog() {
 
           <p className="text-xs leading-relaxed text-muted-foreground">{t.lobby.settingsPacingNote}</p>
         </div>
+
         <DialogFooter>
           <DialogClose asChild>
             <Button className="w-full">{t.common.close}</Button>

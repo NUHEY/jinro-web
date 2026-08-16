@@ -39,11 +39,13 @@ export function LanguageSwitcher({ className }: { className?: string }) {
           </span>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent align="end" className="min-w-[9.5rem] p-1.5">
         {LOCALES.map((l) => (
-          <SelectItem key={l} value={l}>
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden>{LOCALE_FLAG[l]}</span>
+          <SelectItem key={l} value={l} className="my-0.5 gap-2.5 rounded-md py-2 pr-8 pl-2.5 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden className="text-base leading-none">
+                {LOCALE_FLAG[l]}
+              </span>
               {LOCALE_LABEL[l]}
             </span>
           </SelectItem>
