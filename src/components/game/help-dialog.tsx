@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { useGame } from "@/hooks/use-game";
 import { ROLE_ORDER, ROLES, type Team } from "@/lib/game/roles";
-import { ICONS, styleOf } from "@/lib/game/role-style";
+import { styleOf, roleImageSrc } from "@/lib/game/role-style";
 import { RoleCompositionSummary, RoomSettingsSummary } from "@/components/game/room-config-summary";
 import { DayNightDiagram } from "@/components/game/day-night-diagram";
 import { cn } from "@/lib/utils";
@@ -133,14 +133,18 @@ export function HelpDialog({
                   const def = ROLES[roleId];
                   const text = t.roles[roleId];
                   const style = styleOf(def.color);
-                  const Icon = ICONS[def.icon] ?? ICONS.User;
                   return (
                     <div
                       key={roleId}
                       className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2"
                     >
-                      <div className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border", style.chip)}>
-                        <Icon className="size-3.5" />
+                      <div className={cn("mt-0.5 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border", style.chip)}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={roleImageSrc(roleId)}
+                          alt=""
+                          className="h-full w-full scale-150 object-cover object-top"
+                        />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold">{text.name}</p>

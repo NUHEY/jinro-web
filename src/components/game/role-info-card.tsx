@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { ROLES, type RoleId } from "@/lib/game/roles";
-import { ICONS, styleOf } from "@/lib/game/role-style";
+import { ICONS, styleOf, roleImageSrc } from "@/lib/game/role-style";
 
 // 役職確認画面と「ヘルプ・自分の役職」タブの両方から使う共通カード。
 // 自分の役職の説明に加え、役職に応じて見える追加情報(仲間・神様なら全員の役職)も表示する。
@@ -27,8 +27,19 @@ export function RoleInfoCard({
   return (
     <Card className={`w-full overflow-hidden border-2 bg-gradient-to-b ${style.panel}`}>
       <CardContent className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-        <div className={`flex size-16 items-center justify-center rounded-2xl border ${style.chip}`}>
-          <Icon className="size-8" />
+        <div className="relative flex h-36 items-center justify-center">
+          <div className={`absolute size-28 rounded-full blur-2xl ${style.glow}`} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={roleImageSrc(role)}
+            alt={text.name}
+            className="relative z-10 h-full w-auto max-w-[190px] object-contain drop-shadow-xl"
+          />
+          <div
+            className={`absolute -right-1 -bottom-1 z-20 flex size-9 items-center justify-center rounded-full border-2 border-background ${style.chip}`}
+          >
+            <Icon className="size-4" />
+          </div>
         </div>
         <div>
           <p className="font-heading text-3xl font-bold">{text.name}</p>

@@ -14,6 +14,13 @@ import {
   Heart,
   type LucideIcon,
 } from "lucide-react";
+import type { RoleId } from "@/lib/game/roles";
+
+// 各役職の立ち絵(上半身イラスト)。ファイル名は RoleId と完全に一致させてあるので、
+// マッピング表を持たずにそのまま組み立てられる(public/characters/ 以下に配置)。
+export function roleImageSrc(role: RoleId): string {
+  return `/characters/${role}.webp`;
+}
 
 export const ICONS: Record<string, LucideIcon> = {
   User,
@@ -36,6 +43,7 @@ interface RoleStyle {
   panel: string; // 役職確認画面などの大きいパネル用
   ring: string;
   text: string;
+  glow: string; // 立ち絵の背後に敷く、ぼかした光彩用の背景色
 }
 
 // Tailwindの静的クラス検出のため、キーごとに完全なクラス文字列を書き出す。
@@ -50,6 +58,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-sky-100 via-card to-card border-sky-300 dark:from-sky-950 dark:via-sky-900/40 dark:to-slate-950 dark:border-sky-500/40",
     ring: "ring-sky-400/50",
     text: "text-sky-300",
+    glow: "bg-sky-500/25",
   },
   violet: {
     chip: "bg-violet-500/15 text-violet-300 border-violet-500/30",
@@ -57,6 +66,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-violet-100 via-card to-card border-violet-300 dark:from-violet-950 dark:via-violet-900/40 dark:to-slate-950 dark:border-violet-500/40",
     ring: "ring-violet-400/50",
     text: "text-violet-300",
+    glow: "bg-violet-500/25",
   },
   emerald: {
     chip: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
@@ -64,6 +74,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-emerald-100 via-card to-card border-emerald-300 dark:from-emerald-950 dark:via-emerald-900/40 dark:to-slate-950 dark:border-emerald-500/40",
     ring: "ring-emerald-400/50",
     text: "text-emerald-300",
+    glow: "bg-emerald-500/25",
   },
   indigo: {
     chip: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
@@ -71,6 +82,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-indigo-100 via-card to-card border-indigo-300 dark:from-indigo-950 dark:via-indigo-900/40 dark:to-slate-950 dark:border-indigo-500/40",
     ring: "ring-indigo-400/50",
     text: "text-indigo-300",
+    glow: "bg-indigo-500/25",
   },
   amber: {
     chip: "bg-amber-500/15 text-amber-300 border-amber-500/30",
@@ -78,6 +90,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-amber-100 via-card to-card border-amber-300 dark:from-amber-950 dark:via-amber-900/40 dark:to-slate-950 dark:border-amber-500/40",
     ring: "ring-amber-400/50",
     text: "text-amber-300",
+    glow: "bg-amber-500/25",
   },
   teal: {
     chip: "bg-teal-500/15 text-teal-300 border-teal-500/30",
@@ -85,6 +98,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-teal-100 via-card to-card border-teal-300 dark:from-teal-950 dark:via-teal-900/40 dark:to-slate-950 dark:border-teal-500/40",
     ring: "ring-teal-400/50",
     text: "text-teal-300",
+    glow: "bg-teal-500/25",
   },
   rose: {
     chip: "bg-rose-500/15 text-rose-300 border-rose-500/30",
@@ -92,6 +106,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-rose-100 via-card to-card border-rose-300 dark:from-rose-950 dark:via-rose-900/40 dark:to-slate-950 dark:border-rose-500/40",
     ring: "ring-rose-400/50",
     text: "text-rose-300",
+    glow: "bg-rose-500/25",
   },
   red: {
     chip: "bg-red-500/15 text-red-300 border-red-500/30",
@@ -99,6 +114,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-red-100 via-card to-card border-red-300 dark:from-red-950 dark:via-red-900/40 dark:to-slate-950 dark:border-red-500/40",
     ring: "ring-red-400/50",
     text: "text-red-300",
+    glow: "bg-red-500/25",
   },
   orange: {
     chip: "bg-orange-500/15 text-orange-300 border-orange-500/30",
@@ -106,6 +122,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-orange-100 via-card to-card border-orange-300 dark:from-orange-950 dark:via-orange-900/40 dark:to-slate-950 dark:border-orange-500/40",
     ring: "ring-orange-400/50",
     text: "text-orange-300",
+    glow: "bg-orange-500/25",
   },
   fuchsia: {
     chip: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30",
@@ -113,6 +130,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-fuchsia-100 via-card to-card border-fuchsia-300 dark:from-fuchsia-950 dark:via-fuchsia-900/40 dark:to-slate-950 dark:border-fuchsia-500/40",
     ring: "ring-fuchsia-400/50",
     text: "text-fuchsia-300",
+    glow: "bg-fuchsia-500/25",
   },
   yellow: {
     chip: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
@@ -120,6 +138,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-yellow-100 via-card to-card border-yellow-300 dark:from-yellow-950 dark:via-yellow-900/40 dark:to-slate-950 dark:border-yellow-500/40",
     ring: "ring-yellow-400/50",
     text: "text-yellow-300",
+    glow: "bg-yellow-500/25",
   },
   pink: {
     chip: "bg-pink-500/15 text-pink-300 border-pink-500/30",
@@ -127,6 +146,7 @@ export const ROLE_STYLES: Record<string, RoleStyle> = {
       "from-pink-100 via-card to-card border-pink-300 dark:from-pink-950 dark:via-pink-900/40 dark:to-slate-950 dark:border-pink-500/40",
     ring: "ring-pink-400/50",
     text: "text-pink-300",
+    glow: "bg-pink-500/25",
   },
 };
 
