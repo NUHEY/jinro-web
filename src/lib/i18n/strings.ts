@@ -57,6 +57,7 @@ interface Strings {
     optionalRuleBadge: string;
     themeLabel: string;
     languageLabel: string;
+    endGameButton: string;
   };
   entry: {
     title: string;
@@ -82,6 +83,7 @@ interface Strings {
     avatarRemoveButton: string;
     avatarTooLarge: string;
     avatarUnsupported: string;
+    castLabel: string;
   };
   profile: {
     editButton: string;
@@ -267,6 +269,8 @@ interface Strings {
     newGameButton: string;
     waitingHost: string;
     leaveButton: string;
+    hostEndedTitle: string;
+    hostEndedDesc: string;
   };
   confirm: {
     advanceTitle: string;
@@ -281,6 +285,9 @@ interface Strings {
     skipHunterRevengeTitle: string;
     skipHunterRevengeDesc: string;
     skipHunterRevengeAction: string;
+    endGameTitle: string;
+    endGameDesc: string;
+    endGameAction: string;
   };
   help: {
     button: string;
@@ -355,6 +362,7 @@ const ja: Strings = {
     menu: "メニュー",
     themeLabel: "テーマ",
     languageLabel: "言語",
+    endGameButton: "ゲームを終了する",
     officialRuleBadge: "公式ルール",
     optionalRuleBadge: "選択ルール",
   },
@@ -382,6 +390,7 @@ const ja: Strings = {
     avatarRemoveButton: "写真を削除",
     avatarTooLarge: "画像のサイズが大きすぎます(8MBまで)",
     avatarUnsupported: "画像ファイルを選択してください",
+    castLabel: "登場する13の役職",
   },
   profile: {
     editButton: "プロフィールを編集",
@@ -581,6 +590,8 @@ const ja: Strings = {
     newGameButton: "同じメンバーでもう一度",
     waitingHost: "ホストが次のゲームを開始するのを待っています…",
     leaveButton: "退出する",
+    hostEndedTitle: "ホストがゲームを終了しました",
+    hostEndedDesc: "勝敗はつかず、ここでゲームが終了しました。",
   },
   confirm: {
     advanceTitle: "次へ進みますか?",
@@ -595,6 +606,9 @@ const ja: Strings = {
     skipHunterRevengeTitle: "道連れの機会をスキップしますか?",
     skipHunterRevengeDesc: "スキップすると、狩人は誰も道連れにできません。",
     skipHunterRevengeAction: "スキップする",
+    endGameTitle: "ゲームを終了しますか?",
+    endGameDesc: "現在のゲームがここで終了し、全員に役職が公開されます。この操作は取り消せません。",
+    endGameAction: "終了する",
   },
   help: {
     button: "遊び方",
@@ -794,6 +808,7 @@ const en: Strings = {
     menu: "Menu",
     themeLabel: "Theme",
     languageLabel: "Language",
+    endGameButton: "End game",
     officialRuleBadge: "Official Rule",
     optionalRuleBadge: "Optional Rule",
   },
@@ -821,6 +836,7 @@ const en: Strings = {
     avatarRemoveButton: "Remove photo",
     avatarTooLarge: "That image is too large (8MB max)",
     avatarUnsupported: "Please choose an image file",
+    castLabel: "13 roles to play",
   },
   profile: {
     editButton: "Edit profile",
@@ -1021,6 +1037,8 @@ const en: Strings = {
     newGameButton: "Play again with the same players",
     waitingHost: "Waiting for the host to start a new game…",
     leaveButton: "Leave room",
+    hostEndedTitle: "The host ended the game",
+    hostEndedDesc: "No winner was decided — the game was ended here.",
   },
   confirm: {
     advanceTitle: "Move on to the next step?",
@@ -1035,6 +1053,9 @@ const en: Strings = {
     skipHunterRevengeTitle: "Skip the hunter's revenge?",
     skipHunterRevengeDesc: "If skipped, the hunter won't take anyone down with them.",
     skipHunterRevengeAction: "Skip",
+    endGameTitle: "End the game now?",
+    endGameDesc: "The current game will end right here, and everyone's role will be revealed. This can't be undone.",
+    endGameAction: "End game",
   },
   help: {
     button: "How to play",
@@ -1234,6 +1255,7 @@ const ko: Strings = {
     menu: "메뉴",
     themeLabel: "테마",
     languageLabel: "언어",
+    endGameButton: "게임 종료",
     officialRuleBadge: "공식 규칙",
     optionalRuleBadge: "선택 규칙",
   },
@@ -1261,6 +1283,7 @@ const ko: Strings = {
     avatarRemoveButton: "사진 삭제",
     avatarTooLarge: "이미지 크기가 너무 큽니다 (최대 8MB)",
     avatarUnsupported: "이미지 파일을 선택해 주세요",
+    castLabel: "등장하는 13가지 역할",
   },
   profile: {
     editButton: "프로필 편집",
@@ -1460,6 +1483,8 @@ const ko: Strings = {
     newGameButton: "같은 멤버로 다시 하기",
     waitingHost: "호스트가 다음 게임을 시작하기를 기다리는 중…",
     leaveButton: "나가기",
+    hostEndedTitle: "호스트가 게임을 종료했습니다",
+    hostEndedDesc: "승패가 가려지지 않고, 여기서 게임이 종료되었습니다.",
   },
   confirm: {
     advanceTitle: "다음으로 진행할까요?",
@@ -1474,6 +1499,9 @@ const ko: Strings = {
     skipHunterRevengeTitle: "사냥꾼의 복수를 건너뛸까요?",
     skipHunterRevengeDesc: "건너뛰면 사냥꾼은 아무도 함께 데려가지 못합니다.",
     skipHunterRevengeAction: "건너뛰기",
+    endGameTitle: "게임을 종료할까요?",
+    endGameDesc: "지금 진행 중인 게임이 여기서 종료되고, 전원의 역할이 공개됩니다. 이 작업은 취소할 수 없습니다.",
+    endGameAction: "종료하기",
   },
   help: {
     button: "게임 방법",

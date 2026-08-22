@@ -1,9 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, User } from "lucide-react";
+import { ChevronRight, User, XCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { ProfileEditDialog } from "@/components/game/profile-edit-dialog";
@@ -23,15 +33,26 @@ import { cn } from "@/lib/utils";
 // 開閉が競合しうるため)。
 export function FloatingMenu() {
   const { t } = useLocale();
-  const { publicState, session } = useGame();
+  const { publicState, session, endGame } = useGame();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [confirmEndOpen, setConfirmEndOpen] = useState(false);
 
   const me = publicState?.players.find((p) => p.id === session?.playerId) ?? null;
+  // ホストは、ロビー(まだ始まっていない)・結果画面(もう終わっている)以外の
+  // ゲーム進行中ならいつでもここから途中終了できる。誤操作を防ぐため、実行前に
+  // 必ずポップアップ(AlertDialog)で確認する。
+  const canEndGame =
+    !!me?.isHost && !!publicState && publicState.phase !== "lobby" && publicState.phase !== "game_over";
 
   const openProfile = () => {
     setMenuOpen(false);
     setProfileOpen(true);
+  };
+
+  const openEndGameConfirm = () => {
+    setMenuOpen(false);
+    setConfirmEndOpen(true);
   };
 
   return (
@@ -53,7 +74,11 @@ export function FloatingMenu() {
         <PopoverContent align="end" sideOffset={10} className="w-60">
           <div className="flex flex-col">
             {me && (
-              <MenuRow icon={<User className="size-4" />} label={t.profile.editButton} onClick={openProfile} />
+              <MenuRow
+                icon={<User className="size-4 text-muted-foreground" />}
+                label={t.profile.editButton}
+                onClick={openProfile}
+              />
             )}
 
             {me && <Separator className="my-1.5" />}
@@ -66,11 +91,44 @@ export function FloatingMenu() {
               <span className="text-sm font-medium">{t.common.languageLabel}</span>
               <LanguageSwitcher />
             </div>
+
+            {canEndGame && (
+              <>
+                <Separator className="my-1.5" />
+                <MenuRow
+                  icon={<XCircle className="size-4" />}
+                  label={t.common.endGameButton}
+                  onClick={openEndGameConfirm}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  hideChevron
+                />
+              </>
+            )}
           </div>
         </PopoverContent>
       </Popover>
 
       {me && <ProfileEditDialog trigger={null} open={profileOpen} onOpenChange={setProfileOpen} />}
+
+      {/* Popover の中に直接 AlertDialogTrigger をネストすると、ポップオーバーが閉じる
+          タイミングとダイアログの開閉が競合しうるため、他のダイアログと同様に
+          open/onOpenChange で外部制御し、独立したコンポーネントとして描画する。 */}
+      {canEndGame && (
+        <AlertDialog open={confirmEndOpen} onOpenChange={setConfirmEndOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t.confirm.endGameTitle}</AlertDialogTitle>
+              <AlertDialogDescription>{t.confirm.endGameDesc}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" onClick={endGame}>
+                {t.confirm.endGameAction}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
 }
@@ -80,11 +138,13 @@ function MenuRow({
   label,
   onClick,
   className,
+  hideChevron,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
   className?: string;
+  hideChevron?: boolean;
 }) {
   return (
     <button
@@ -95,9 +155,9 @@ function MenuRow({
         className
       )}
     >
-      <span className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">{icon}</span>
+      <span className="flex size-6 shrink-0 items-center justify-center">{icon}</span>
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground/60" />
+      {!hideChevron && <ChevronRight className="size-4 shrink-0 text-muted-foreground/60" />}
     </button>
   );
 }

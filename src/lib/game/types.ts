@@ -120,6 +120,10 @@ export interface WinnerInfo {
   primary: "village" | "werewolf" | "draw";
   extra: Array<{ team: "fox" | "god" | "lover"; playerIds: string[] }>;
   allRoles: Array<{ playerId: string; name: string; role: RoleId }>;
+  // true の場合、通常の勝敗判定ではなく「ホストがゲームを途中終了した」ことによる game_over。
+  // primary は型の都合上 "draw" を流用しているだけで、実際の勝敗としては扱わない。
+  // 結果画面(game-over-screen.tsx)側でこのフラグを見て表示文言を出し分ける。
+  hostEnded?: boolean;
 }
 
 // クライアントごとに送る「自分専用」情報

@@ -25,6 +25,7 @@ import {
   resolveAppealVote,
   setGroupNote,
   dictatorExecute,
+  endGameEarly,
   ackRole,
   allAliveAcked,
   alivePlayers,
@@ -602,6 +603,18 @@ export function attachGameServer(io: IOServer) {
       dictatorExecute(room.state, currentPlayerId, targetId);
       touch(room);
       afterResolution(room);
+    });
+
+    // ホストがゲームを途中で強制終了する。ロビー(まだ始まっていない)・結果画面(もう終わっている)
+    // 以外の、ゲーム進行中のどのフェーズからでも呼べる。クライアント側で確認ポップアップを挟んでいる。
+    socket.on("host:endGame", () => {
+      if (!currentCode || !currentPlayerId) return;
+      const room = findRoom(currentCode);
+      if (!room || !ensureHost(room, currentPlayerId)) return;
+      if (room.state.phase === "lobby" || room.state.phase === "game_over") return;
+      endGameEarly(room.state);
+      touch(room);
+      broadcast(room);
     });
 
     socket.on("host:newGame", () => {

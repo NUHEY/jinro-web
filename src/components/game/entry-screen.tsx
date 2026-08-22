@@ -15,6 +15,8 @@ import { LanguageSwitcher } from "@/components/game/language-switcher";
 import { HelpDialog } from "@/components/game/help-dialog";
 import { AvatarPicker } from "@/components/game/avatar-picker";
 import { ThemeToggle } from "@/components/game/theme-toggle";
+import { ROLE_ORDER } from "@/lib/game/roles";
+import { roleImageSrc } from "@/lib/game/role-style";
 
 export function EntryScreen() {
   const { createRoom, joinRoom } = useGame();
@@ -59,6 +61,23 @@ export function EntryScreen() {
         </div>
         <h1 className="font-heading text-3xl font-bold tracking-tight">{t.entry.title}</h1>
         <p className="max-w-xs text-sm text-muted-foreground">{t.entry.subtitle}</p>
+      </div>
+
+      <div className="mb-8 w-full max-w-md animate-in fade-in-0 duration-700">
+        <p className="mb-2 text-center text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+          {t.entry.castLabel}
+        </p>
+        <div className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {ROLE_ORDER.map((role) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={role}
+              src={roleImageSrc(role)}
+              alt=""
+              className="h-20 w-auto shrink-0 object-contain drop-shadow-md"
+            />
+          ))}
+        </div>
       </div>
 
       <Card className="w-full max-w-sm animate-in fade-in-0 zoom-in-95 border-border/70 bg-card/80 backdrop-blur duration-500">

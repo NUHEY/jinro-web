@@ -51,6 +51,8 @@ export interface ClientToServerEvents {
   "appeal:submit": (payload: { choice: AppealChoice }) => void;
   "ally:setNote": (payload: { text: string }) => void;
   "host:newGame": (payload: Record<string, never>) => void;
+  // ホストがゲームを途中で強制終了する(ロビー・結果画面以外のいつでも呼べる)。
+  "host:endGame": (payload: Record<string, never>) => void;
   // ユーザーが任意で表示名・プロフィール写真をいつでも変更できるようにするための更新イベント。
   // どちらか一方だけの更新も可能(未指定のフィールドは変更しない)。avatarUrl に null を渡すと写真を削除する。
   "player:updateProfile": (payload: { name?: string; avatarUrl?: string | null }) => void;

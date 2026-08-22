@@ -17,9 +17,10 @@ import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { useGame } from "@/hooks/use-game";
 import { ROLE_ORDER, ROLES, type Team } from "@/lib/game/roles";
-import { styleOf, roleImageSrc } from "@/lib/game/role-style";
+import { styleOf } from "@/lib/game/role-style";
 import { RoleCompositionSummary, RoomSettingsSummary } from "@/components/game/room-config-summary";
 import { DayNightDiagram } from "@/components/game/day-night-diagram";
+import { RoleAvatar } from "@/components/game/role-avatar";
 import { cn } from "@/lib/utils";
 
 const WIN_TEAM_ORDER: Array<{ key: "winVillage" | "winWerewolf" | "winFox" | "winGod" | "winLover"; team: Team }> = [
@@ -138,14 +139,7 @@ export function HelpDialog({
                       key={roleId}
                       className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2"
                     >
-                      <div className={cn("mt-0.5 flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border", style.chip)}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={roleImageSrc(roleId)}
-                          alt=""
-                          className="h-full w-full scale-150 object-cover object-top"
-                        />
-                      </div>
+                      <RoleAvatar role={roleId} size={40} className="mt-0.5" />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold">{text.name}</p>
                         <p className="text-[11px] text-muted-foreground">{text.short}</p>

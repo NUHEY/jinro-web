@@ -61,6 +61,7 @@ interface GameContextValue {
   submitAppeal: (choice: AppealChoice) => void;
   setAllyNote: (text: string) => void;
   newGame: () => void;
+  endGame: () => void;
   updateProfile: (profile: { name?: string; avatarUrl?: string | null }) => void;
 }
 
@@ -291,6 +292,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     getSocket().emit("host:newGame", {});
   }, []);
 
+  const endGame = useCallback(() => {
+    getSocket().emit("host:endGame", {});
+  }, []);
+
   const updateProfile = useCallback((profile: { name?: string; avatarUrl?: string | null }) => {
     if (typeof profile.name === "string") saveLastName(profile.name);
     if (profile.avatarUrl !== undefined) saveLastAvatar(profile.avatarUrl);
@@ -329,6 +334,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     submitAppeal,
     setAllyNote,
     newGame,
+    endGame,
     updateProfile,
   };
 

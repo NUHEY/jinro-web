@@ -2,7 +2,8 @@
 
 import { Check, X } from "lucide-react";
 import { ROLES, type RoleId } from "@/lib/game/roles";
-import { ICONS, styleOf } from "@/lib/game/role-style";
+import { styleOf } from "@/lib/game/role-style";
+import { RoleAvatar } from "@/components/game/role-avatar";
 import { TEAM_GROUPS } from "@/components/game/role-composition-editor";
 import type { RoleCounts, RoomSettings } from "@/lib/game/types";
 import { OFFICIAL_SETTINGS } from "@/lib/game/engine";
@@ -54,18 +55,14 @@ export function RoleCompositionSummary({
             </p>
             <div className="space-y-1.5">
               {group.roles.map((role) => {
-                const def = ROLES[role as RoleId];
                 const text = t.roles[role as RoleId];
-                const style = styleOf(def.color);
-                const Icon = ICONS[def.icon] ?? ICONS.User;
+                const style = styleOf(ROLES[role as RoleId].color);
                 return (
                   <div
                     key={role}
                     className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2"
                   >
-                    <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-full border", style.chip)}>
-                      <Icon className="size-4" />
-                    </div>
+                    <RoleAvatar role={role as RoleId} size={32} />
                     <p className="min-w-0 flex-1 truncate text-sm font-medium">{text.name}</p>
                     <span className={cn("shrink-0 font-mono text-sm font-bold", style.text)}>
                       × {counts[role as RoleId] ?? 0}

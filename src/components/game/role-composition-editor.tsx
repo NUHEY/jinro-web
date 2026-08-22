@@ -4,7 +4,7 @@ import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, ROLE_ORDER, type RoleId, type Team } from "@/lib/game/roles";
 import { ROLE_LIMITS, totalSeats } from "@/lib/game/composition";
-import { ICONS, styleOf } from "@/lib/game/role-style";
+import { RoleAvatar } from "@/components/game/role-avatar";
 import type { RoleCounts } from "@/lib/game/types";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { cn } from "@/lib/utils";
@@ -65,20 +65,15 @@ export function RoleCompositionEditor({
           </p>
           <div className="space-y-1.5">
             {group.roles.map((role) => {
-              const def = ROLES[role];
               const text = t.roles[role];
               const limit = ROLE_LIMITS[role];
               const count = counts[role] ?? 0;
-              const Icon = ICONS[def.icon] ?? ICONS.User;
-              const style = styleOf(def.color);
               return (
                 <div
                   key={role}
                   className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2"
                 >
-                  <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-full border", style.chip)}>
-                    <Icon className="size-4" />
-                  </div>
+                  <RoleAvatar role={role} size={36} />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold">{text.name}</p>
                     <p className="truncate text-[11px] text-muted-foreground">{text.short}</p>

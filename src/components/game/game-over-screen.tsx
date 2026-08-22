@@ -1,13 +1,14 @@
 "use client";
 
-import { PartyPopper, RefreshCcw, LogOut } from "lucide-react";
+import { PartyPopper, OctagonX, RefreshCcw, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGame } from "@/hooks/use-game";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { ROLES } from "@/lib/game/roles";
-import { ICONS, styleOf } from "@/lib/game/role-style";
+import { styleOf } from "@/lib/game/role-style";
+import { RoleAvatar } from "@/components/game/role-avatar";
 import { cn } from "@/lib/utils";
 import { ConfirmButton } from "@/components/game/shared";
 
@@ -29,30 +30,36 @@ export function GameOverScreen() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-8 safe-bottom">
       <div className="flex animate-pop-in flex-col items-center gap-2 text-center">
-        <PartyPopper className="size-10 text-primary" />
-        <h2 className={cn("font-heading text-3xl font-bold", PRIMARY_COLOR[winner.primary])}>
-          {t.gameOver.primary[winner.primary]}
-        </h2>
-        {winner.extra.map((e) => (
-          <p key={e.team} className="text-sm font-semibold text-amber-300">
-            {t.gameOver.extra[e.team]}
-          </p>
-        ))}
+        {winner.hostEnded ? (
+          <>
+            <OctagonX className="size-10 text-muted-foreground" />
+            <h2 className="font-heading text-2xl font-bold text-muted-foreground">{t.gameOver.hostEndedTitle}</h2>
+            <p className="text-sm text-muted-foreground">{t.gameOver.hostEndedDesc}</p>
+          </>
+        ) : (
+          <>
+            <PartyPopper className="size-10 text-primary" />
+            <h2 className={cn("font-heading text-3xl font-bold", PRIMARY_COLOR[winner.primary])}>
+              {t.gameOver.primary[winner.primary]}
+            </h2>
+            {winner.extra.map((e) => (
+              <p key={e.team} className="text-sm font-semibold text-amber-300">
+                {t.gameOver.extra[e.team]}
+              </p>
+            ))}
+          </>
+        )}
       </div>
 
       <Card>
         <CardContent className="space-y-1.5 py-4">
           <p className="mb-2 px-1 text-xs font-bold text-muted-foreground">{t.gameOver.allRoles}</p>
           {winner.allRoles.map((r) => {
-            const def = ROLES[r.role];
-            const style = styleOf(def.color);
-            const Icon = ICONS[def.icon] ?? ICONS.User;
+            const style = styleOf(ROLES[r.role].color);
             const player = publicState.players.find((p) => p.id === r.playerId);
             return (
               <div key={r.playerId} className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2">
-                <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-full border", style.chip)}>
-                  <Icon className="size-4" />
-                </div>
+                <RoleAvatar role={r.role} size={32} />
                 <span className={cn("flex-1 truncate text-sm font-medium", !player?.alive && "text-muted-foreground")}>
                   {r.name}
                 </span>

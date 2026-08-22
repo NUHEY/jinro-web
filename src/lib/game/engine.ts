@@ -715,6 +715,25 @@ export function checkWinConditions(state: GameState) {
   state.phaseEndsAt = null;
 }
 
+// ホストが「ゲームを途中で終了する」を選んだ時に呼ぶ。勝敗条件を満たしていなくても、
+// その時点で強制的に game_over へ遷移させる。全員の役職は(通常の決着時と同様)
+// 結果画面で開示する。hostEnded フラグにより、結果画面は「引き分け」ではなく
+// 「ホストがゲームを終了しました」という専用の文言を表示する。
+export function endGameEarly(state: GameState) {
+  state.winner = {
+    primary: "draw",
+    extra: [],
+    allRoles: state.players.map((p) => ({
+      playerId: p.id,
+      name: p.name,
+      role: (p.role ?? "villager") as RoleId,
+    })),
+    hostEnded: true,
+  };
+  state.phase = "game_over";
+  state.phaseEndsAt = null;
+}
+
 export function newRoomCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 紛らわしい文字を除外
   let code = "";

@@ -515,6 +515,71 @@ async function testExpandedSettings() {
   }
 }
 
+async function testHostEndGame() {
+  console.log("\n=== GROUP: host:endGame (host can force-end the game mid-round, with a confirmation guard) ===");
+
+  // --- ロビー中(まだ始まっていない)は host:endGame を呼んでも何も起きない ---
+  {
+    const sockets = await Promise.all(["Host", "V1", "V2", "V3"].map(() => connect()));
+    const clients = sockets.map((s, i) => makeClient(s, ["Host", "V1", "V2", "V3"][i]));
+    const hostRes = await emit(clients[0].socket, "room:create", { playerName: "Host" });
+    const code = hostRes.code;
+    for (let i = 1; i < clients.length; i++) await emit(clients[i].socket, "room:join", { code, playerName: clients[i].name });
+    await waitFor(clients[0], (s) => s.players.length === 4, 5000, "joined");
+    clients[0].socket.emit("host:endGame", {});
+    await sleep(300);
+    assert(clients[0].public.phase === "lobby", "host:endGame must be a no-op while still in the lobby");
+    console.log("PASS: host:endGame is ignored during lobby (game hasn't started)");
+    for (const c of clients) c.socket.disconnect();
+  }
+
+  // --- 非ホストが呼んでも無視される ---
+  {
+    const { clients } = await makeRoom(["Host", "V1", "V2", "V3"], { werewolf: 1, villager: 3 });
+    clients[0].socket.emit("host:advance", { to: "night" });
+    await waitFor(clients[0], (s) => s.phase === "night" && s.day === 1, 5000, "night1");
+    clients[1].socket.emit("host:endGame", {});
+    await sleep(300);
+    assert(clients[0].public.phase === "night", "a non-host calling host:endGame must be ignored");
+    console.log("PASS: host:endGame is ignored when called by a non-host player");
+    for (const c of clients) c.socket.disconnect();
+  }
+
+  // --- ホストがゲーム進行中(夜)に呼ぶと、勝敗条件を満たしていなくても即座に
+  //     game_over へ遷移し、winner.hostEnded=true・全員の役職が開示される ---
+  {
+    const { clients } = await makeRoom(["Host", "V1", "V2", "V3", "V4"], { werewolf: 1, villager: 4 });
+    clients[0].socket.emit("host:advance", { to: "night" });
+    await waitFor(clients[0], (s) => s.phase === "night" && s.day === 1, 5000, "night1");
+    clients[0].socket.emit("host:endGame", {});
+    await waitFor(clients[0], (s) => s.phase === "game_over", 5000, "game_over after host:endGame");
+    assert(clients[0].public.winner?.hostEnded === true, "winner.hostEnded must be true after a forced end");
+    assert(clients[0].public.winner?.allRoles?.length === 5, "allRoles must still list every player's role");
+    // 全プレイヤーに同じ結果が配信されていることも確認(ブロードキャストの取りこぼしがないか)
+    for (const c of clients) {
+      assert(c.public?.phase === "game_over", `${c.name} must also see phase=game_over`);
+      assert(c.public?.winner?.hostEnded === true, `${c.name} must also see winner.hostEnded=true`);
+    }
+    console.log("PASS: host:endGame from mid-game (night) force-ends with hostEnded=true, broadcast to everyone");
+    for (const c of clients) c.socket.disconnect();
+  }
+
+  // --- すでに game_over の部屋で呼んでも何も起きない(二重発火の防止) ---
+  {
+    const { clients } = await makeRoom(["Host", "V1", "V2", "V3"], { werewolf: 1, villager: 3 });
+    clients[0].socket.emit("host:advance", { to: "night" });
+    await waitFor(clients[0], (s) => s.phase === "night" && s.day === 1, 5000, "night1");
+    clients[0].socket.emit("host:endGame", {});
+    await waitFor(clients[0], (s) => s.phase === "game_over", 5000, "game_over");
+    const firstWinner = clients[0].public.winner;
+    clients[0].socket.emit("host:endGame", {});
+    await sleep(300);
+    assert(clients[0].public.winner === firstWinner, "a second host:endGame call once already game_over must be a no-op");
+    console.log("PASS: host:endGame is ignored once the game is already over");
+    for (const c of clients) c.socket.disconnect();
+  }
+}
+
 async function main() {
   await testWolfConsensus();
   await testAppealVoteSparedReason();
@@ -522,6 +587,7 @@ async function main() {
   await testTieRunoffVote();
   await testProfileUpdate();
   await testExpandedSettings();
+  await testHostEndGame();
   console.log("\n✅ ALL LOGIC REGRESSION TESTS PASSED");
   process.exit(0);
 }
