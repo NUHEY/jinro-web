@@ -45,6 +45,7 @@ interface RoomRuntime {
   playerOf: Map<string, string>; // socketId -> playerId
   manualComposition: boolean;
   lastActivity: number;
+  disconnectTimers: Map<string, ReturnType<typeof setTimeout>>; // playerId -> 切断確定待ちタイマー
 }
 
 type IOServer = Server<ClientToServerEvents, ServerToClientEvents>;
@@ -57,6 +58,10 @@ const CUSTOM_CODE_PATTERN = /^[A-Z0-9]{5,8}$/;
 // クライアント側でリサイズ済み(概ね128px角・JPEG圧縮)のdata URLを想定した上限。
 // これを超える入力は不正・悪用目的の可能性が高いため黙って無視する(既存の役職なし相手選択なども同様の方針)。
 const MAX_AVATAR_DATA_URL_LENGTH = 200_000;
+// ページ更新や瞬間的な回線断で socket が切れてから、実際に「切断」として他プレイヤーへ
+// 表示するまでの猶予期間。この間に同じプレイヤーが room:rejoin で戻ってくれば、
+// 一度も「切断」状態を経由せずに済む。
+const DISCONNECT_GRACE_MS = 8000;
 
 function sanitizeName(raw: string): string {
   const trimmed = (raw || "").trim().slice(0, MAX_NAME_LENGTH);
@@ -202,6 +207,7 @@ export function attachGameServer(io: IOServer) {
         playerOf: new Map([[socket.id, playerId]]),
         manualComposition: false,
         lastActivity: Date.now(),
+        disconnectTimers: new Map(),
       };
       refreshSuggestedComposition(room);
       rooms.set(code, room);
@@ -263,6 +269,14 @@ export function attachGameServer(io: IOServer) {
       room.socketOf.set(playerId, socket.id);
       room.playerOf.set(socket.id, playerId);
       player.connected = true;
+      // 猶予期間中に予定されていた「切断確定」処理があれば取り消す
+      // (この時点で connected は既に true に戻っているので、タイマー発火時の
+      // ソケットID比較チェックだけでも安全だが、不要なタイマーは早めに片付ける)。
+      const pendingDisconnect = room.disconnectTimers.get(playerId);
+      if (pendingDisconnect) {
+        clearTimeout(pendingDisconnect);
+        room.disconnectTimers.delete(playerId);
+      }
       reassignHostIfNeeded(room);
       touch(room);
 
@@ -277,6 +291,13 @@ export function attachGameServer(io: IOServer) {
       if (currentCode && currentPlayerId) {
         const room = findRoom(currentCode);
         if (room) {
+          // 自主的な退出は明示的な意思表示なので、猶予期間中のタイマーがあれば
+          // すぐに片付けて即座に反映する。
+          const pendingDisconnect = room.disconnectTimers.get(currentPlayerId);
+          if (pendingDisconnect) {
+            clearTimeout(pendingDisconnect);
+            room.disconnectTimers.delete(currentPlayerId);
+          }
           if (room.state.phase === "lobby") {
             room.state.players = room.state.players.filter((p) => p.id !== currentPlayerId);
             room.tokens.delete(currentPlayerId);
@@ -312,6 +333,11 @@ export function attachGameServer(io: IOServer) {
       }
       room.tokens.delete(targetId);
       room.socketOf.delete(targetId);
+      const pendingDisconnect = room.disconnectTimers.get(targetId);
+      if (pendingDisconnect) {
+        clearTimeout(pendingDisconnect);
+        room.disconnectTimers.delete(targetId);
+      }
       refreshSuggestedComposition(room);
       touch(room);
       broadcast(room);
@@ -633,12 +659,27 @@ export function attachGameServer(io: IOServer) {
       if (!currentCode || !currentPlayerId) return;
       const room = findRoom(currentCode);
       if (!room) return;
-      const player = getPlayer(room.state, currentPlayerId);
-      if (player) player.connected = false;
-      room.playerOf.delete(socket.id);
-      reassignHostIfNeeded(room);
-      touch(room);
-      broadcast(room);
+      const playerId = currentPlayerId;
+      const disconnectedSocketId = socket.id;
+      room.playerOf.delete(disconnectedSocketId);
+
+      // ページ更新や瞬間的な回線断では、ソケットは切れてもすぐには「切断」扱いにしない。
+      // 猶予期間 (DISCONNECT_GRACE_MS) だけ待ち、その間に room:rejoin で復帰しなければ
+      // ここで初めて connected を false にして他プレイヤーへ通知する。
+      const existingTimer = room.disconnectTimers.get(playerId);
+      if (existingTimer) clearTimeout(existingTimer);
+      const timer = setTimeout(() => {
+        room.disconnectTimers.delete(playerId);
+        // 猶予期間中に別ソケットで room:rejoin 済み(= socketOf が更新済み)なら、
+        // このタイマーはもう無効なので何もしない。
+        if (room.socketOf.get(playerId) !== disconnectedSocketId) return;
+        const player = getPlayer(room.state, playerId);
+        if (player) player.connected = false;
+        reassignHostIfNeeded(room);
+        touch(room);
+        broadcast(room);
+      }, DISCONNECT_GRACE_MS);
+      room.disconnectTimers.set(playerId, timer);
     });
   });
 

@@ -580,6 +580,63 @@ async function testHostEndGame() {
   }
 }
 
+async function testDisconnectGracePeriod() {
+  console.log("\n=== GROUP: disconnect grace period (page refresh must not flash as disconnected) ===");
+
+  // --- 猶予期間内に room:rejoin すれば、他プレイヤーには一度も切断状態が見えない ---
+  {
+    const sockets = await Promise.all(["Host", "V1", "V2"].map(() => connect()));
+    const clients = sockets.map((s, i) => makeClient(s, ["Host", "V1", "V2"][i]));
+    const hostRes = await emit(clients[0].socket, "room:create", { playerName: "Host" });
+    const code = hostRes.code;
+    const joinRes1 = await emit(clients[1].socket, "room:join", { code, playerName: "V1" });
+    await emit(clients[2].socket, "room:join", { code, playerName: "V2" });
+    await waitFor(clients[0], (s) => s.players.length === 3, 5000, "joined");
+
+    // V1 のソケットを切断(ページ更新を模擬)
+    clients[1].socket.disconnect();
+    await sleep(500);
+    // 猶予期間中はまだ connected=true のまま見えているはず
+    const v1DuringGrace = clients[0].public.players.find((p) => p.id === joinRes1.playerId);
+    assert(v1DuringGrace?.connected === true, "within the grace period, other players must still see connected=true");
+
+    // 新しいソケットで room:rejoin(ページ再読み込み後の再接続を模擬)
+    const newSocket = await connect();
+    const rejoinRes = await new Promise((resolve) =>
+      newSocket.emit("room:rejoin", { code, playerId: joinRes1.playerId, token: joinRes1.token }, resolve)
+    );
+    assert(rejoinRes.ok === true, "room:rejoin within the grace period must succeed");
+    await sleep(300);
+    const v1AfterRejoin = clients[0].public.players.find((p) => p.id === joinRes1.playerId);
+    assert(v1AfterRejoin?.connected === true, "after a successful rejoin, connected must remain true throughout");
+    console.log("PASS: a reconnect within the grace period never shows the player as disconnected");
+
+    newSocket.disconnect();
+    for (const c of clients) c.socket.disconnect();
+  }
+
+  // --- 猶予期間を過ぎても復帰しなければ、ちゃんと切断扱いになる(誤検知だけでなく
+  //     本物の切断も見逃さないことの確認) ---
+  {
+    const sockets = await Promise.all(["Host", "V1"].map(() => connect()));
+    const clients = sockets.map((s, i) => makeClient(s, ["Host", "V1"][i]));
+    const hostRes = await emit(clients[0].socket, "room:create", { playerName: "Host" });
+    const code = hostRes.code;
+    const joinRes1 = await emit(clients[1].socket, "room:join", { code, playerName: "V1" });
+    await waitFor(clients[0], (s) => s.players.length === 2, 5000, "joined");
+
+    clients[1].socket.disconnect();
+    await waitFor(
+      clients[0],
+      (s) => s.players.find((p) => p.id === joinRes1.playerId)?.connected === false,
+      12000,
+      "eventually disconnected after grace period"
+    );
+    console.log("PASS: a disconnect that outlasts the grace period is eventually reflected as connected=false");
+    clients[0].socket.disconnect();
+  }
+}
+
 async function main() {
   await testWolfConsensus();
   await testAppealVoteSparedReason();
@@ -588,6 +645,7 @@ async function main() {
   await testProfileUpdate();
   await testExpandedSettings();
   await testHostEndGame();
+  await testDisconnectGracePeriod();
   console.log("\n✅ ALL LOGIC REGRESSION TESTS PASSED");
   process.exit(0);
 }

@@ -112,6 +112,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
     function onDisconnect() {
       setConnected(false);
+      // 再接続時(socket.io の自動再接続を含む)に必ず room:rejoin をやり直せるよう、
+      // 「再接続を試みた」フラグを解除しておく。これをしないと、ページ全体を再読み込み
+      // せずに一度ネットワークが切れて繋がり直した場合、2回目以降は room:rejoin が
+      // 送られず、サーバー側の状態(socketOf など)が更新されないままになってしまう。
+      attemptedRejoin.current = false;
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       reconnectTimer.current = setTimeout(() => {
         setShowReconnecting(true);

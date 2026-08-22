@@ -67,15 +67,36 @@ export function EntryScreen() {
         <p className="mb-2 text-center text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
           {t.entry.castLabel}
         </p>
-        <div className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* overflow-x-auto だけでも指でのスクロールは本来動くはずだが、以下の2点を明示的に
+            潰しておく:
+            (1) 画像は非同期に読み込まれ、サイズを固定していないと読み込み完了のたびに
+                各アイテムの幅が変わってレイアウトが揺れ、ブラウザの scroll anchoring が
+                scrollLeft を勝手に補正してしまう(「勝手にスクロールされる」の主因)。
+                → 各アイテムを固定サイズの箱にして揺れをなくし、念のため
+                  overflowAnchor: "none" でも明示的に無効化する。
+            (2) <img> は既定で draggable なので、指(またはマウス)でドラッグすると
+                ブラウザがスクロールではなく「画像そのもののドラッグ」として処理してしまう
+                ことがある。→ draggable=false と select-none で防止し、touch-pan-x で
+                横スクロール用のジェスチャーであることを明示する。 */}
+        <div
+          className="flex touch-pan-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ overflowAnchor: "none" }}
+        >
           {ROLE_ORDER.map((role) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={role}
-              src={roleImageSrc(role)}
-              alt=""
-              className="h-20 w-auto shrink-0 object-contain drop-shadow-md"
-            />
+            <div key={role} className="flex w-16 shrink-0 flex-col items-center gap-1">
+              <div className="flex h-20 w-16 items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={roleImageSrc(role)}
+                  alt=""
+                  draggable={false}
+                  className="h-20 w-16 select-none object-contain object-top drop-shadow-md"
+                />
+              </div>
+              <span className="max-w-16 truncate text-center text-[10px] leading-tight text-muted-foreground">
+                {t.roles[role].name}
+              </span>
+            </div>
           ))}
         </div>
       </div>
