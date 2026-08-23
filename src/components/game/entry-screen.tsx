@@ -79,18 +79,21 @@ export function EntryScreen() {
                 ことがある。→ draggable=false と select-none で防止し、touch-pan-x で
                 横スクロール用のジェスチャーであることを明示する。 */}
         <div
-          className="flex touch-pan-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex touch-pan-x gap-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ overflowAnchor: "none" }}
         >
           {ROLE_ORDER.map((role) => (
-            <div key={role} className="flex w-16 shrink-0 flex-col items-center gap-1">
-              <div className="flex h-20 w-16 items-center justify-center">
+            <div key={role} className="flex w-16 shrink-0 flex-col items-center gap-2">
+              {/* イラストごとに縦横比が違う(例: 共有者は2人並びで横長)ため、object-contain
+                  だと余白の出方がバラバラになってしまう。object-cover で全員分の枠を
+                  隙間なく統一する。 */}
+              <div className="h-20 w-16 overflow-hidden rounded-xl bg-muted/30">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={roleImageSrc(role)}
                   alt=""
                   draggable={false}
-                  className="h-20 w-16 select-none object-contain object-top drop-shadow-md"
+                  className="h-full w-full select-none object-cover object-top drop-shadow-md"
                 />
               </div>
               <span className="max-w-16 truncate text-center text-[10px] leading-tight text-muted-foreground">
