@@ -11,12 +11,32 @@ const LOCALE_LABEL: Record<Locale, string> = {
   ja: "日本語",
   en: "English",
   ko: "한국어",
+  zh: "简体中文",
+  es: "Español",
+  fr: "Français",
+  de: "Deutsch",
+  pt: "Português",
+  ru: "Русский",
+  vi: "Tiếng Việt",
+  th: "ไทย",
+  id: "Bahasa Indonesia",
+  it: "Italiano",
 };
 
 const LOCALE_FLAG: Record<Locale, string> = {
   ja: "🇯🇵",
   en: "🇺🇸",
   ko: "🇰🇷",
+  zh: "🇨🇳",
+  es: "🇪🇸",
+  fr: "🇫🇷",
+  de: "🇩🇪",
+  pt: "🇧🇷",
+  ru: "🇷🇺",
+  vi: "🇻🇳",
+  th: "🇹🇭",
+  id: "🇮🇩",
+  it: "🇮🇹",
 };
 
 export function LanguageSwitcher({ className }: { className?: string }) {

@@ -9,7 +9,7 @@ function detectInitialLocale(): Locale {
   if (typeof window === "undefined") return "ja";
   try {
     const saved = window.localStorage.getItem(KEY);
-    if (saved === "ja" || saved === "en" || saved === "ko") return saved;
+    if (saved && (LOCALES as string[]).includes(saved)) return saved as Locale;
   } catch {
     // ignore
   }
@@ -17,6 +17,16 @@ function detectInitialLocale(): Locale {
   const lower = nav.toLowerCase();
   if (lower.startsWith("ja")) return "ja";
   if (lower.startsWith("ko")) return "ko";
+  if (lower.startsWith("zh")) return "zh";
+  if (lower.startsWith("es")) return "es";
+  if (lower.startsWith("fr")) return "fr";
+  if (lower.startsWith("de")) return "de";
+  if (lower.startsWith("pt")) return "pt";
+  if (lower.startsWith("ru")) return "ru";
+  if (lower.startsWith("vi")) return "vi";
+  if (lower.startsWith("th")) return "th";
+  if (lower.startsWith("id")) return "id";
+  if (lower.startsWith("it")) return "it";
   return "en";
 }
 
